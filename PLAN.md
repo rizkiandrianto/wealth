@@ -140,10 +140,120 @@ Wealth app saat ini murni client-side — semua data tersimpan di `localStorage`
 
 ---
 
+## Phase 9 — Schema: Asset Prices Table
+
+> Harga terkini saham & crypto tidak disimpan di dalam holding record. Dipisahkan ke tabel `asset_prices` yang nantinya di-populate oleh BE scheduler. Holding hanya menyimpan data beli: qty, averagePrice, tanggal, lokasi.
+
+- [ ] Tambah tabel `asset_prices` di `src/db/schema.ts`:
+  - `ticker` (text, unique) — e.g. `BBCA`, `BTC`
+  - `assetType` (text) — `stock` | `crypto`
+  - `name` (text) — nama lengkap asset
+  - `price` (numeric 20,4) — harga terkini
+  - `currency` (text, default `IDR` untuk saham, `USD` untuk crypto)
+  - `updatedAt` (timestamp)
+  - **No userId** — tabel global, dipakai semua user
+- [ ] Hapus kolom `currentPrice` dari `stockHoldings` dan `cryptoHoldings` di schema
+- [ ] Hapus kolom `name` dari `stockHoldings` (nama saham diambil dari `asset_prices` saat tampil)
+- [ ] Untuk `cryptoHoldings`: tetap simpan `name` (di-populate saat user input, lihat Phase 10b)
+- [ ] Update `src/lib/types.ts`:
+  - Hapus `currentPrice` dari `StockHolding` dan `CryptoHolding`
+  - Hapus `name` dari `StockHolding`
+  - Tambah type `AssetPrice { ticker, assetType, name, price, currency, updatedAt }`
+- [ ] Update Zustand store: tambah `assetPrices: AssetPrice[]` ke state
+- [ ] Update kalkulasi P&L di store: lookup harga dari `assetPrices` by ticker (return 0 / N/A kalau belum ada data)
+- [ ] Tambah API route `GET /api/market/prices` → list semua `asset_prices` (dipakai store untuk load harga)
+- [ ] `pnpm db:push` setelah schema diupdate
+
+## Phase 10 — UX Improvements
+
+### 10a — Transfer: Validasi Saldo
+
+**File:** `src/components/TransactionForm.tsx`
+
+- [ ] Saat type = transfer atau withdrawal, validasi `amount <= getAccountBalance(fromAccountId)`
+- [ ] Tampilkan saldo tersedia di bawah dropdown "From account" setelah account dipilih
+- [ ] Error message: `"Saldo tidak cukup — tersedia: Rp X,xxx"`
+- [ ] `getAccountBalance` sudah ada di Zustand store, tinggal dipanggil di form
+
+### 10b — Tambah Lokasi via Modal (Stocks & Crypto)
+
+**Files:** `src/components/StockForm.tsx`, `src/components/CryptoForm.tsx`
+
+Saat ini: ada form inline di bawah select untuk tambah lokasi (tidak rapi).
+Target: item `"+ Tambah lokasi baru"` di dalam Select dropdown → buka Dialog kecil.
+
+- [ ] Buat komponen reusable `LocationPickerSelect.tsx`:
+  - Props: `locations[]`, `value`, `onChange(id)`, `onAddLocation(name) => void`
+  - `SelectContent`: render semua lokasi + separator + item `"+ Tambah lokasi baru"`
+  - Klik item tambah → buka `Dialog` (shadcn `dialog.tsx` sudah ada)
+  - Dialog: satu input nama + tombol Simpan / Batal
+  - Setelah simpan: `onAddLocation(name)` dipanggil, `value` otomatis berubah ke lokasi baru
+- [ ] Ganti section tambah lokasi di `StockForm.tsx` → pakai `<LocationPickerSelect />`
+- [ ] Ganti section tambah lokasi di `CryptoForm.tsx` → pakai `<LocationPickerSelect />`
+- [ ] Hapus state `showLocationForm` / `newLocationName` dari kedua form
+
+### 10c — Crypto: Auto-complete Nama dari Symbol
+
+**Files:** `src/components/CryptoForm.tsx`, `src/app/api/market/crypto-search/route.ts` (baru)
+
+Saat ini: user harus isi `symbol` dan `name` sendiri.
+Target: ketik symbol → nama auto-isi dari CoinGecko.
+
+- [ ] Buat `GET /api/market/crypto-search?symbol=BTC`:
+  - Fetch ke CoinGecko: `GET https://api.coingecko.com/api/v3/search?query={symbol}`
+  - Return: `{ name: string, id: string }` dari hasil pertama yang match symbol persis
+  - No API key required untuk free tier
+- [ ] Update `CryptoForm.tsx`:
+  - Setelah user selesai ketik symbol (onBlur), call `/api/market/crypto-search`
+  - Auto-isi field `name` jika ditemukan; beri loading indicator kecil
+  - Field name tetap bisa diedit manual (fallback)
+- [ ] Remove input `currentPrice` dari form (field dihapus, Phase 9)
+
+### 10d — History Chart Per Account
+
+**Files:** `src/components/BalanceChart.tsx`, `src/app/(dashboard)/history/page.tsx`
+
+Saat ini: chart hanya tampilkan total balance. `DailyBalance` di store sudah punya `balances: { [accountId]: number }` per account — tinggal divisualisasikan.
+
+- [ ] Update `BalanceChart.tsx`:
+  - Tambah toggle: "Total" vs "Per Account"
+  - Mode "Per Account": satu line per account dengan warna berbeda, legend di bawah
+  - Data: `dailyBalances[].balances[accountId]` sudah ada di store
+- [ ] Update `history/page.tsx`:
+  - Pass `accounts` ke `BalanceChart` (cek apakah sudah ada)
+  - Opsional: tambah checkbox filter untuk pilih account mana yang ditampilkan
+
+---
+
+## Verification Checklist
+
+- [x] `pnpm build` — berhasil tanpa error
+- [x] TypeScript check (`npx tsc --noEmit`) — clean
+- [x] Buka `/crypto`, tambah crypto → langsung muncul di list tanpa refresh (Phase 5)
+- [x] Buka `/stocks`, tambah saham → langsung muncul (Phase 5)
+- [ ] Refresh page → data masih ada (Phase 7)
+- [ ] Login di browser berbeda → data muncul (Phase 7)
+- [x] Sign Out → redirect ke `/login` (Phase 8)
+- [x] Active nav item highlight update saat navigasi (Phase 5/8)
+- [x] Finance dropdown: Accounts & Transactions (Phase 8)
+- [x] Portfolio dropdown: Stocks & Crypto (Phase 8)
+- [x] User dropdown: nama + Sign Out (Phase 8)
+- [x] Mobile bottom nav: 4 item (Phase 8)
+- [ ] Transfer melebihi saldo → error ditampilkan (Phase 10a)
+- [ ] Tambah lokasi via modal di dalam Select (Phase 10b)
+- [ ] Ketik symbol crypto → nama auto-isi (Phase 10c)
+- [ ] Form saham & crypto tidak punya field harga terkini (Phase 9)
+- [ ] History chart bisa toggle Total vs Per Account (Phase 10d)
+
+---
+
 ## Notes
 
 - `pnpm db:push` butuh `DATABASE_URL` valid di `.env.local`
 - Default locations di-seed per-user saat pertama kali fetch (Phase 7)
-- `stockSales` & `cryptoSales` tidak punya FK ke holdings by design (sale record tetap ada walau holding dihapus)
-- PWA dipertahankan: `next-pwa` v5.6.0, build pakai `--webpack` flag (Turbopack tidak kompatibel)
+- `stockSales` & `cryptoSales` tidak punya FK ke holdings by design
+- PWA dipertahankan: `next-pwa` v5.6.0, build pakai `--webpack` flag
 - Google OAuth tidak masuk scope, bisa ditambahkan belakangan
+- `asset_prices` tabel global (bukan per-user): akan di-feed oleh BE scheduler nanti
+- CoinGecko free tier: ~10-30 req/min, cukup untuk auto-complete on blur (tidak setiap keystroke)
+- IDX stock names: tidak ada free API yang reliable, simpan di `asset_prices` secara manual atau via BE scheduler nanti
