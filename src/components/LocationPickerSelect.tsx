@@ -39,13 +39,11 @@ export default function LocationPickerSelect({
   onChange,
   onAddLocation,
 }: LocationPickerSelectProps) {
-  const [selectOpen, setSelectOpen] = useState(false)
   const [dialogOpen, setDialogOpen] = useState(false)
   const [newName, setNewName] = useState('')
 
   const handleValueChange = (val: string) => {
     if (val === ADD_NEW_SENTINEL) {
-      setSelectOpen(false)
       setDialogOpen(true)
       return
     }
@@ -63,7 +61,7 @@ export default function LocationPickerSelect({
 
   return (
     <>
-      <Select open={selectOpen} onOpenChange={setSelectOpen} value={value} onValueChange={handleValueChange}>
+      <Select value={value} onValueChange={handleValueChange}>
         <SelectTrigger className="mt-1">
           <SelectValue />
         </SelectTrigger>
