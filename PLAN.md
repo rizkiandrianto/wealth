@@ -80,24 +80,24 @@ Wealth app saat ini murni client-side — semua data tersimpan di `localStorage`
 - [x] Fix `DashboardLayout.tsx`: ganti `window.location.pathname` dengan `usePathname()`
 - [x] `pnpm build` clean
 
-## Phase 6 — API Routes (CRUD untuk semua entitas)
+## Phase 6 — API Routes (CRUD untuk semua entitas) ✅
 
-- [ ] `src/app/api/accounts/route.ts` — GET list, POST create
-- [ ] `src/app/api/accounts/[id]/route.ts` — PATCH update, DELETE
-- [ ] `src/app/api/transactions/route.ts` — GET list, POST create
-- [ ] `src/app/api/transactions/[id]/route.ts` — DELETE
-- [ ] `src/app/api/stock-locations/route.ts` — GET, POST
-- [ ] `src/app/api/stock-locations/[id]/route.ts` — PATCH, DELETE
-- [ ] `src/app/api/stocks/route.ts` — GET, POST
-- [ ] `src/app/api/stocks/[id]/route.ts` — PATCH, DELETE
-- [ ] `src/app/api/stocks/[id]/sell/route.ts` — POST
-- [ ] `src/app/api/crypto-locations/route.ts` — GET, POST
-- [ ] `src/app/api/crypto-locations/[id]/route.ts` — PATCH, DELETE
-- [ ] `src/app/api/crypto/route.ts` — GET, POST
-- [ ] `src/app/api/crypto/[id]/route.ts` — PATCH, DELETE
-- [ ] `src/app/api/crypto/[id]/sell/route.ts` — POST
-- [ ] Semua route: auth check via `auth()` dari `@/lib/auth`
-- [ ] `pnpm build` clean
+- [x] `src/app/api/accounts/route.ts` — GET list, POST create
+- [x] `src/app/api/accounts/[id]/route.ts` — PATCH update, DELETE
+- [x] `src/app/api/transactions/route.ts` — GET list, POST create
+- [x] `src/app/api/transactions/[id]/route.ts` — DELETE
+- [x] `src/app/api/stock-locations/route.ts` — GET, POST
+- [x] `src/app/api/stock-locations/[id]/route.ts` — PATCH, DELETE
+- [x] `src/app/api/stocks/route.ts` — GET, POST
+- [x] `src/app/api/stocks/[id]/route.ts` — PATCH, DELETE
+- [x] `src/app/api/stocks/[id]/sell/route.ts` — POST (DB transaction: update qty + insert sale)
+- [x] `src/app/api/crypto-locations/route.ts` — GET, POST
+- [x] `src/app/api/crypto-locations/[id]/route.ts` — PATCH, DELETE
+- [x] `src/app/api/crypto/route.ts` — GET, POST
+- [x] `src/app/api/crypto/[id]/route.ts` — PATCH, DELETE
+- [x] `src/app/api/crypto/[id]/sell/route.ts` — POST (DB transaction: update qty + insert sale)
+- [x] Semua route: auth check via `auth()` dari `@/lib/auth`
+- [x] `pnpm build` clean
 
 ## Phase 7 — Connect Store ke Database
 
