@@ -306,7 +306,7 @@ Saat ini: chart hanya tampilkan total balance. `DailyBalance` di store sudah pun
 
 **File:** `src/app/api/market/tickers/route.ts`
 
-- [ ] `GET /api/market/tickers` — return semua unique ticker dari seluruh holdings (cross-user)
+- [x] `GET /api/market/tickers` — return semua unique ticker dari seluruh holdings (cross-user)
   - Query `stock_holdings` → distinct `ticker` values → group as `assetType: "stock"`
   - Query `crypto_holdings` → distinct `symbol` values → group as `assetType: "crypto"`
   - Query `gold_holdings` (Phase 11) → hardcode `XAU` → group as `assetType: "gold"` (skip jika tabel belum ada)
@@ -324,7 +324,7 @@ Saat ini: chart hanya tampilkan total balance. `DailyBalance` di store sudah pun
 
 **File:** `src/app/api/market/prices/update/route.ts`
 
-- [ ] `POST /api/market/prices/update` — trigger price update untuk semua asset type
+- [x] `POST /api/market/prices/update` — trigger price update untuk semua asset type
   - Auth: cek `x-api-key` header vs `INTERNAL_API_KEY` env var
   - Flow internal:
     1. Panggil logic yang sama dengan `GET /api/market/tickers` untuk dapat unique tickers
@@ -349,17 +349,17 @@ Saat ini: chart hanya tampilkan total balance. `DailyBalance` di store sudah pun
 
 **File:** `src/app/api/market/prices/[ticker]/route.ts`
 
-- [ ] `PUT /api/market/prices/[ticker]` — manual override harga satu ticker
+- [x] `PUT /api/market/prices/[ticker]` — manual override harga satu ticker
   - Auth: user session (bisa dipakai dari UI admin sederhana)
   - Body: `{ price: number, currency?: string, name?: string }`
   - Upsert ke `asset_prices`; cocok untuk kasus saham IDX yang tidak punya free API reliabel
 
 ### 12d — Environment Variables
 
-- [ ] Tambah ke `.env.local` template:
+- [x] Tambah ke `.env.local` template:
   - `INTERNAL_API_KEY` — random secret untuk auth scheduler calls
   - `GOLD_API_KEY` — API key dari goldapi.io (free tier: 100 req/month)
-- [ ] Document flow di README atau Notes
+- [x] Document flow di README atau Notes
 
 ---
 
