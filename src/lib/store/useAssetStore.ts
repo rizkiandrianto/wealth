@@ -12,8 +12,6 @@ import {
 } from '@/lib/types'
 
 interface AssetStore extends AppState {
-  mounted: boolean
-
   // Account operations
   addAccount: (account: Omit<Account, 'id' | 'createdAt'>) => void
   updateAccount: (id: string, updates: Partial<Omit<Account, 'id' | 'createdAt'>>) => void
@@ -115,7 +113,6 @@ export const useAssetStore = create<AssetStore>()(
       stockSales: [],
       cryptoSales: [],
       lastUpdated: Date.now(),
-      mounted: false,
 
       // Account operations
       addAccount: (account) =>
@@ -374,9 +371,6 @@ export const useAssetStore = create<AssetStore>()(
     }),
     {
       name: 'asset-tracker-app',
-      onRehydrateStorage: () => () => {
-        useAssetStore.setState({ mounted: true })
-      },
     }
   )
 )
