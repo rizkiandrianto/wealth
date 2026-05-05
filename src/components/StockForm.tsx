@@ -169,7 +169,6 @@ export default function StockForm({ editingId, onClose }: StockFormProps) {
                   value={newLocationName}
                   onChange={(e) => setNewLocationName(e.target.value)}
                   className="flex-1"
-                  size="sm"
                 />
                 <Button type="submit" size="sm" className="whitespace-nowrap">
                   Simpan

@@ -506,8 +506,8 @@ function calculateDailyBalances(accounts: Account[], transactions: Transaction[]
     const dateStr = new Date(tx.date).toISOString().split('T')[0]
 
     // Update balances for each account on this date and forward
-    const fromMap = balancesByDate.get(tx.fromAccountId) || new Map()
-    const toMap = balancesByDate.get(tx.toAccountId) || new Map()
+    const fromMap = (tx.fromAccountId ? balancesByDate.get(tx.fromAccountId) : undefined) || new Map()
+    const toMap = (tx.toAccountId ? balancesByDate.get(tx.toAccountId) : undefined) || new Map()
 
     const fromCurrentBalance = fromMap.get(dateStr) ?? 0
     const toCurrentBalance = toMap.get(dateStr) ?? 0
@@ -515,8 +515,8 @@ function calculateDailyBalances(accounts: Account[], transactions: Transaction[]
     fromMap.set(dateStr, fromCurrentBalance - tx.amount)
     toMap.set(dateStr, toCurrentBalance + tx.amount)
 
-    balancesByDate.set(tx.fromAccountId, fromMap)
-    balancesByDate.set(tx.toAccountId, toMap)
+    if (tx.fromAccountId) balancesByDate.set(tx.fromAccountId, fromMap)
+    if (tx.toAccountId) balancesByDate.set(tx.toAccountId, toMap)
   }
 
   // Convert to array format

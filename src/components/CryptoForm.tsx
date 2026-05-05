@@ -165,7 +165,6 @@ export default function CryptoForm({ editingId, onClose }: CryptoFormProps) {
                   value={newLocationName}
                   onChange={(e) => setNewLocationName(e.target.value)}
                   className="flex-1"
-                  size="sm"
                 />
                 <Button type="submit" size="sm" className="whitespace-nowrap">
                   Simpan

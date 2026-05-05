@@ -53,7 +53,7 @@ export default function RecentTransactions({ transactions }: RecentTransactionsP
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
                     <p className="font-medium text-foreground">
-                      {getAccountName(tx.fromAccountId)} → {getAccountName(tx.toAccountId)}
+                      {getAccountName(tx.fromAccountId ?? "")} → {getAccountName(tx.toAccountId ?? "")}
                     </p>
                     {tx.description && (
                       <span className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded">

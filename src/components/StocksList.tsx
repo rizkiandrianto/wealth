@@ -15,7 +15,9 @@ interface StocksListProps {
 }
 
 export default function StocksList({ stocks, onEdit }: StocksListProps) {
-  const { deleteStock, getStockProfitLoss, sellStock } = useAssetStore()
+  const { deleteStock, getStockProfitLoss, sellStock, stockLocations } = useAssetStore()
+  const getLocationName = (locationId: string) =>
+    stockLocations.find((l) => l.id === locationId)?.name ?? locationId
   const [sellingStockId, setSellingStockId] = useState<string | null>(null)
   const sellingStock = sellingStockId ? stocks.find(s => s.id === sellingStockId && stocks.some(x => x.id === sellingStockId)) : null
 
@@ -98,7 +100,7 @@ export default function StocksList({ stocks, onEdit }: StocksListProps) {
                       >
                         <div className="flex-1">
                           <p className="text-muted-foreground capitalize">
-                            {stock.location} • {stock.quantity} lot
+                            {getLocationName(stock.locationId)} • {stock.quantity} lot
                           </p>
                         </div>
                         <div className="flex gap-2">
