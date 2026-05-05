@@ -18,6 +18,8 @@ Copy `.env.local.example` to `.env.local` and fill in the values:
 | `AUTH_SECRET` | Yes | NextAuth secret |
 | `INTERNAL_API_KEY` | Yes | Random secret for scheduler/internal API calls (`x-api-key` header) |
 | `GOLD_API_KEY` | Optional | goldapi.io key for XAU/IDR price (free tier: 100 req/month). Falls back to CoinGecko + open exchange rate if absent. |
+| `GOOGLE_CLIENT_ID` | Optional | Google OAuth client ID (Google Cloud Console → APIs & Services → Credentials) |
+| `GOOGLE_CLIENT_SECRET` | Optional | Google OAuth client secret |
 
 ### Market Price Update Flow
 

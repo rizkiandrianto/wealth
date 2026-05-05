@@ -381,9 +381,9 @@ Saat ini: chart hanya tampilkan total balance. `DailyBalance` di store sudah pun
 
 **File:** `src/lib/auth.ts`
 
-- [ ] Import `Google` dari `next-auth/providers/google`
-- [ ] Tambah `Google({ clientId, clientSecret, allowDangerousEmailAccountLinking: true })` ke `providers[]`
-- [ ] Tambah `signIn` callback:
+- [x] Import `Google` dari `next-auth/providers/google`
+- [x] Tambah `Google({ clientId, clientSecret, allowDangerousEmailAccountLinking: true })` ke `providers[]`
+- [x] Tambah `signIn` callback:
   ```ts
   async signIn({ user, account }) {
     if (account?.provider === 'google') {
@@ -402,29 +402,29 @@ Saat ini: chart hanya tampilkan total balance. `DailyBalance` di store sudah pun
 
 **File:** `src/app/(auth)/login/page.tsx`
 
-- [ ] Tambah state `googleLoading`
-- [ ] Tambah handler `handleGoogle`: `signIn('google', { callbackUrl: '/' })`
-- [ ] Tambah tombol "Masuk dengan Google" di atas form (dengan Google SVG icon)
-- [ ] Tambah divider "atau" antara tombol Google dan form email/password
+- [x] Tambah state `googleLoading`
+- [x] Tambah handler `handleGoogle`: `signIn('google', { callbackUrl: '/' })`
+- [x] Tambah tombol "Masuk dengan Google" di atas form (dengan Google SVG icon)
+- [x] Tambah divider "atau" antara tombol Google dan form email/password
 
 ### 13c — Register Page
 
 **File:** `src/app/(auth)/register/page.tsx`
 
-- [ ] Wrap form dalam `<Suspense>` (diperlukan untuk `useSearchParams()`)
-- [ ] Baca search params: `from`, `email`, `name`
-- [ ] Jika `from=google`:
+- [x] Wrap form dalam `<Suspense>` (diperlukan untuk `useSearchParams()`)
+- [x] Baca search params: `from`, `email`, `name`
+- [x] Jika `from=google`:
   - Tampilkan badge "Mendaftar via Google"
   - Pre-fill & lock field email (readOnly, disabled styling)
   - Pre-fill field nama
   - Label password: "Password (untuk aktifkan login email juga)"
   - Setelah register berhasil: langsung `signIn('credentials', { email, password })` → redirect ke `/`
   - Sembunyikan link "Sudah punya akun?"
-- [ ] Jika `from` tidak ada: flow register biasa (tidak ada perubahan)
+- [x] Jika `from` tidak ada: flow register biasa (tidak ada perubahan)
 
 ### 13d — Environment Variables
 
-- [ ] Tambah ke `.env.local`:
+- [x] Tambah ke `.env.local`:
   - `GOOGLE_CLIENT_ID` — dari Google Cloud Console → APIs & Services → Credentials
   - `GOOGLE_CLIENT_SECRET` — dari Google Cloud Console
 
