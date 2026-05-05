@@ -22,7 +22,7 @@ interface AssetStore extends AppState {
   deleteTransaction: (id: string) => void
 
   // Stock Location operations
-  addStockLocation: (location: Omit<StockLocation, 'id' | 'createdAt'>) => void
+  addStockLocation: (location: Omit<StockLocation, 'id' | 'createdAt'>) => string
   updateStockLocation: (id: string, updates: Partial<Omit<StockLocation, 'id' | 'createdAt'>>) => void
   deleteStockLocation: (id: string) => void
 
@@ -33,7 +33,7 @@ interface AssetStore extends AppState {
   sellStock: (stockId: string, quantity: number, salePrice: number) => void
 
   // Crypto Location operations
-  addCryptoLocation: (location: Omit<CryptoLocation, 'id' | 'createdAt'>) => void
+  addCryptoLocation: (location: Omit<CryptoLocation, 'id' | 'createdAt'>) => string
   updateCryptoLocation: (id: string, updates: Partial<Omit<CryptoLocation, 'id' | 'createdAt'>>) => void
   deleteCryptoLocation: (id: string) => void
 
@@ -157,11 +157,14 @@ export const useAssetStore = create<AssetStore>()(
         }),
 
       // Stock Location operations
-      addStockLocation: (location) =>
+      addStockLocation: (location) => {
+        const id = Date.now().toString()
         set((s) => ({
-          stockLocations: [...s.stockLocations, { ...location, id: Date.now().toString(), createdAt: Date.now() }],
+          stockLocations: [...s.stockLocations, { ...location, id, createdAt: Date.now() }],
           lastUpdated: Date.now(),
-        })),
+        }))
+        return id
+      },
 
       updateStockLocation: (id, updates) =>
         set((s) => ({
@@ -228,11 +231,14 @@ export const useAssetStore = create<AssetStore>()(
         }),
 
       // Crypto Location operations
-      addCryptoLocation: (location) =>
+      addCryptoLocation: (location) => {
+        const id = Date.now().toString()
         set((s) => ({
-          cryptoLocations: [...s.cryptoLocations, { ...location, id: Date.now().toString(), createdAt: Date.now() }],
+          cryptoLocations: [...s.cryptoLocations, { ...location, id, createdAt: Date.now() }],
           lastUpdated: Date.now(),
-        })),
+        }))
+        return id
+      },
 
       updateCryptoLocation: (id, updates) =>
         set((s) => ({

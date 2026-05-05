@@ -4,15 +4,9 @@ import { useState, useEffect } from 'react'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { X, Plus } from 'lucide-react'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
+import { X } from 'lucide-react'
 import { useAssetStore } from '@/lib/useAssetStore'
+import LocationPickerSelect from '@/components/LocationPickerSelect'
 
 interface CryptoFormProps {
   editingId: string | null
@@ -22,8 +16,6 @@ interface CryptoFormProps {
 export default function CryptoForm({ editingId, onClose }: CryptoFormProps) {
   const { cryptos, cryptoLocations, addCrypto, updateCrypto, addCryptoLocation } = useAssetStore()
   const editingCrypto = editingId ? cryptos.find((c) => c.id === editingId) : null
-  const [showLocationForm, setShowLocationForm] = useState(false)
-  const [newLocationName, setNewLocationName] = useState('')
 
   const [formData, setFormData] = useState({
     symbol: '',
@@ -52,15 +44,6 @@ export default function CryptoForm({ editingId, onClose }: CryptoFormProps) {
       }))
     }
   }, [editingCrypto, cryptoLocations])
-
-  const handleAddLocation = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!newLocationName.trim()) return
-    
-    addCryptoLocation({ name: newLocationName })
-    setNewLocationName('')
-    setShowLocationForm(false)
-  }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -142,51 +125,13 @@ export default function CryptoForm({ editingId, onClose }: CryptoFormProps) {
         </div>
 
         <div>
-          <div className="flex items-center justify-between mb-2">
-            <label className="text-sm font-medium">Lokasi Penyimpanan</label>
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              onClick={() => setShowLocationForm(!showLocationForm)}
-              className="h-6 gap-1 px-2 text-xs"
-            >
-              <Plus className="w-3 h-3" />
-              Tambah
-            </Button>
-          </div>
-          
-          {showLocationForm && (
-            <div className="mb-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
-              <form onSubmit={handleAddLocation} className="flex gap-2">
-                <Input
-                  type="text"
-                  placeholder="Nama lokasi baru"
-                  value={newLocationName}
-                  onChange={(e) => setNewLocationName(e.target.value)}
-                  className="flex-1"
-                />
-                <Button type="submit" size="sm" className="whitespace-nowrap">
-                  Simpan
-                </Button>
-              </form>
-            </div>
-          )}
-
-          <Select value={formData.locationId} onValueChange={(value) =>
-            setFormData({ ...formData, locationId: value })
-          }>
-            <SelectTrigger className="mt-1">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {cryptoLocations.map((location) => (
-                <SelectItem key={location.id} value={location.id}>
-                  {location.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <label className="text-sm font-medium">Lokasi Penyimpanan</label>
+          <LocationPickerSelect
+            locations={cryptoLocations}
+            value={formData.locationId}
+            onChange={(id) => setFormData({ ...formData, locationId: id })}
+            onAddLocation={(name) => addCryptoLocation({ name })}
+          />
         </div>
 
         <div className="grid grid-cols-3 gap-4">
