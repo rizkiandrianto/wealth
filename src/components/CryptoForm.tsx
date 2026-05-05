@@ -43,7 +43,7 @@ export default function CryptoForm({ editingId, onClose }: CryptoFormProps) {
         locationId: cryptoLocations[0]?.id || '',
       }))
     }
-  }, [editingCrypto, cryptoLocations])
+  }, [editingCrypto]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()

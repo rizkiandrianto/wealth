@@ -43,7 +43,7 @@ export default function StockForm({ editingId, onClose }: StockFormProps) {
         locationId: stockLocations[0]?.id || '',
       }))
     }
-  }, [editingStock, stockLocations])
+  }, [editingStock]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
