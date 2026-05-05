@@ -69,46 +69,72 @@ export default function TransactionList({
           </h3>
           <Card className="overflow-hidden">
             <div className="divide-y divide-border">
-              {groupedByDate[date].map((tx) => (
-                <div
-                  key={tx.id}
-                  className="p-4 hover:bg-muted/50 transition-colors flex items-center justify-between group"
-                >
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center">
-                        <ArrowRight className="w-5 h-5 text-blue-600" />
-                      </div>
-                      <div className="flex-1">
-                        <p className="font-medium text-foreground">
-                          {getAccountName(tx.fromAccountId)} → {getAccountName(tx.toAccountId)}
-                        </p>
-                        <p className="text-sm text-muted-foreground">
-                          {formatDateTime(tx.date)}
-                          {tx.description && ` • ${tx.description}`}
-                        </p>
+              {groupedByDate[date].map((tx) => {
+                const isTopup = !tx.fromAccountId && tx.toAccountId
+                const isWithdrawal = tx.fromAccountId && !tx.toAccountId
+                const isTransfer = tx.fromAccountId && tx.toAccountId
+                
+                let label = ''
+                let bgColor = 'from-blue-50 to-blue-100'
+                let iconColor = 'text-blue-600'
+                let amountColor = 'text-green-600'
+                let amountPrefix = '+'
+                
+                if (isTopup) {
+                  label = `Topup → ${getAccountName(tx.toAccountId!)}`
+                  bgColor = 'from-green-50 to-green-100'
+                  iconColor = 'text-green-600'
+                } else if (isWithdrawal) {
+                  label = `${getAccountName(tx.fromAccountId!)} → Withdrawal`
+                  bgColor = 'from-orange-50 to-orange-100'
+                  iconColor = 'text-orange-600'
+                  amountColor = 'text-orange-600'
+                  amountPrefix = '-'
+                } else {
+                  label = `${getAccountName(tx.fromAccountId!)} → ${getAccountName(tx.toAccountId!)}`
+                }
+
+                return (
+                  <div
+                    key={tx.id}
+                    className="p-4 hover:bg-muted/50 transition-colors flex items-center justify-between group"
+                  >
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3">
+                        <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${bgColor} flex items-center justify-center`}>
+                          <ArrowRight className={`w-5 h-5 ${iconColor}`} />
+                        </div>
+                        <div className="flex-1">
+                          <p className="font-medium text-foreground">
+                            {label}
+                          </p>
+                          <p className="text-sm text-muted-foreground">
+                            {formatDateTime(tx.date)}
+                            {tx.description && ` • ${tx.description}`}
+                          </p>
+                        </div>
                       </div>
                     </div>
+                    <div className="flex items-center gap-4">
+                      <p className={`text-lg font-bold ${amountColor}`}>
+                        {amountPrefix}{formatCurrency(tx.amount)}
+                      </p>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          if (confirm('Delete this transaction?')) {
+                            onDelete(tx.id)
+                          }
+                        }}
+                        className="opacity-0 group-hover:opacity-100 transition-opacity text-red-600 hover:text-red-700 hover:bg-red-50"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-4">
-                    <p className="text-lg font-bold text-green-600">
-                      +{formatCurrency(tx.amount, getAccountCurrency(tx.toAccountId))}
-                    </p>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => {
-                        if (confirm('Delete this transaction?')) {
-                          onDelete(tx.id)
-                        }
-                      }}
-                      className="opacity-0 group-hover:opacity-100 transition-opacity text-red-600 hover:text-red-700 hover:bg-red-50"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </div>
-                </div>
-              ))}
+                )
+              })}
             </div>
           </Card>
         </div>

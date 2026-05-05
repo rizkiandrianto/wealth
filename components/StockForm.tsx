@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { X } from 'lucide-react'
+import { X, Plus } from 'lucide-react'
 import {
   Select,
   SelectContent,
@@ -13,7 +13,6 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { useAssetStore } from '@/lib/useAssetStore'
-import { StockLocation, StockHolding } from '@/lib/types'
 
 interface StockFormProps {
   editingId: string | null
@@ -21,13 +20,15 @@ interface StockFormProps {
 }
 
 export default function StockForm({ editingId, onClose }: StockFormProps) {
-  const { stocks, addStock, updateStock } = useAssetStore()
+  const { stocks, stockLocations, addStock, updateStock, addStockLocation } = useAssetStore()
   const editingStock = editingId ? stocks.find((s) => s.id === editingId) : null
+  const [showLocationForm, setShowLocationForm] = useState(false)
+  const [newLocationName, setNewLocationName] = useState('')
 
   const [formData, setFormData] = useState({
     ticker: '',
     name: '',
-    location: 'nanovest' as StockLocation,
+    locationId: stockLocations[0]?.id || '',
     quantity: '',
     averagePrice: '',
     currentPrice: '',
@@ -38,13 +39,28 @@ export default function StockForm({ editingId, onClose }: StockFormProps) {
       setFormData({
         ticker: editingStock.ticker,
         name: editingStock.name,
-        location: editingStock.location,
+        locationId: editingStock.locationId,
         quantity: editingStock.quantity.toString(),
         averagePrice: editingStock.averagePrice.toString(),
         currentPrice: editingStock.currentPrice.toString(),
       })
+    } else {
+      // Reset locationId when not editing
+      setFormData(prev => ({
+        ...prev,
+        locationId: stockLocations[0]?.id || '',
+      }))
     }
-  }, [editingStock])
+  }, [editingStock, stockLocations])
+
+  const handleAddLocation = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!newLocationName.trim()) return
+    
+    addStockLocation({ name: newLocationName })
+    setNewLocationName('')
+    setShowLocationForm(false)
+  }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -52,6 +68,7 @@ export default function StockForm({ editingId, onClose }: StockFormProps) {
     if (
       !formData.ticker ||
       !formData.name ||
+      !formData.locationId ||
       !formData.quantity ||
       !formData.averagePrice ||
       !formData.currentPrice
@@ -63,7 +80,7 @@ export default function StockForm({ editingId, onClose }: StockFormProps) {
     const stockData = {
       ticker: formData.ticker.toUpperCase(),
       name: formData.name,
-      location: formData.location,
+      locationId: formData.locationId,
       quantity: parseFloat(formData.quantity),
       averagePrice: parseFloat(formData.averagePrice),
       currentPrice: parseFloat(formData.currentPrice),
@@ -79,7 +96,7 @@ export default function StockForm({ editingId, onClose }: StockFormProps) {
     setFormData({
       ticker: '',
       name: '',
-      location: 'nanovest',
+      locationId: stockLocations[0]?.id || '',
       quantity: '',
       averagePrice: '',
       currentPrice: '',
@@ -129,17 +146,50 @@ export default function StockForm({ editingId, onClose }: StockFormProps) {
         </div>
 
         <div>
-          <label className="text-sm font-medium">Lokasi Pembelian</label>
-          <Select value={formData.location} onValueChange={(value) =>
-            setFormData({ ...formData, location: value as StockLocation })
+          <div className="flex items-center justify-between mb-2">
+            <label className="text-sm font-medium">Lokasi Pembelian</label>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowLocationForm(!showLocationForm)}
+              className="h-6 gap-1 px-2 text-xs"
+            >
+              <Plus className="w-3 h-3" />
+              Tambah
+            </Button>
+          </div>
+          
+          {showLocationForm && (
+            <div className="mb-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
+              <form onSubmit={handleAddLocation} className="flex gap-2">
+                <Input
+                  type="text"
+                  placeholder="Nama lokasi baru"
+                  value={newLocationName}
+                  onChange={(e) => setNewLocationName(e.target.value)}
+                  className="flex-1"
+                  size="sm"
+                />
+                <Button type="submit" size="sm" className="whitespace-nowrap">
+                  Simpan
+                </Button>
+              </form>
+            </div>
+          )}
+
+          <Select value={formData.locationId} onValueChange={(value) =>
+            setFormData({ ...formData, locationId: value })
           }>
             <SelectTrigger className="mt-1">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="nanovest">Nanovest</SelectItem>
-              <SelectItem value="ajaib">Ajaib</SelectItem>
-              <SelectItem value="crypto">Crypto</SelectItem>
+              {stockLocations.map((location) => (
+                <SelectItem key={location.id} value={location.id}>
+                  {location.name}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>

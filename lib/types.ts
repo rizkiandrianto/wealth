@@ -1,5 +1,4 @@
 export type AccountType = 'bank' | 'deposit' | 'cash';
-export type StockLocation = 'nanovest' | 'ajaib' | 'crypto';
 
 export interface Account {
   id: string;
@@ -9,10 +8,16 @@ export interface Account {
   createdAt: number;
 }
 
+export interface StockLocation {
+  id: string;
+  name: string;
+  createdAt: number;
+}
+
 export interface Transaction {
   id: string;
-  fromAccountId: string;
-  toAccountId: string;
+  fromAccountId?: string; // Optional: if empty, it's a topup
+  toAccountId?: string; // Optional: if empty, it's a withdrawal
   amount: number;
   description?: string;
   date: number; // timestamp
@@ -30,16 +35,17 @@ export interface StockHolding {
   id: string;
   ticker: string;
   name: string;
-  location: StockLocation;
+  locationId: string; // reference to StockLocation.id
   quantity: number;
   averagePrice: number; // in IDR
-  currentPrice: number; // in IDR
+  currentPrice: number; // in IDR (will be fetched from API later)
   purchaseDate: number; // timestamp
   createdAt: number;
 }
 
 export interface AppState {
   accounts: Account[];
+  stockLocations: StockLocation[];
   transactions: Transaction[];
   dailyBalances: DailyBalance[];
   stocks: StockHolding[];

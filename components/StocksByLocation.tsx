@@ -1,6 +1,6 @@
 'use client'
 
-import { StockHolding } from '@/lib/types'
+import { StockHolding, StockLocation } from '@/lib/types'
 import { formatCurrency } from '@/lib/format'
 import { useAssetStore } from '@/lib/useAssetStore'
 import { Card } from '@/components/ui/card'
@@ -9,37 +9,30 @@ import { Trash2, Edit2, TrendingUp, TrendingDown } from 'lucide-react'
 
 interface StocksByLocationProps {
   stocks: StockHolding[]
+  locations: StockLocation[]
   onEdit: (id: string) => void
 }
 
-const LOCATION_NAMES: Record<string, string> = {
-  nanovest: '🏦 Nanovest',
-  ajaib: '📊 Ajaib',
-  crypto: '₿ Crypto',
-}
-
-export default function StocksByLocation({ stocks, onEdit }: StocksByLocationProps) {
+export default function StocksByLocation({ stocks, locations, onEdit }: StocksByLocationProps) {
   const { deleteStock } = useAssetStore()
 
-  // Group stocks by location
+  // Group stocks by locationId
   const groupedByLocation = stocks.reduce(
     (acc, stock) => {
-      const location = stock.location
-      if (!acc[location]) {
-        acc[location] = []
+      const locationId = stock.locationId
+      if (!acc[locationId]) {
+        acc[locationId] = []
       }
-      acc[location].push(stock)
+      acc[locationId].push(stock)
       return acc
     },
     {} as Record<string, StockHolding[]>
   )
 
-  const locations = ['nanovest', 'ajaib', 'crypto'] as const
-
   return (
     <div className="space-y-6">
       {locations.map((location) => {
-        const locationStocks = groupedByLocation[location] || []
+        const locationStocks = groupedByLocation[location.id] || []
         if (locationStocks.length === 0) return null
 
         const totalValue = locationStocks.reduce((sum, s) => sum + s.quantity * s.currentPrice, 0)
@@ -49,9 +42,9 @@ export default function StocksByLocation({ stocks, onEdit }: StocksByLocationPro
         const isPositive = profitLoss >= 0
 
         return (
-          <div key={location} className="space-y-3">
+          <div key={location.id} className="space-y-3">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold">{LOCATION_NAMES[location]}</h3>
+              <h3 className="text-lg font-semibold">{location.name}</h3>
               <div className="text-right">
                 <p className="text-sm text-muted-foreground">{locationStocks.length} saham</p>
                 <p className={`text-sm font-semibold ${isPositive ? 'text-green-600' : 'text-red-600'}`}>

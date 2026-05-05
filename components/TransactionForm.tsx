@@ -16,10 +16,9 @@ export default function TransactionForm({
   onSubmit,
   onCancel,
 }: TransactionFormProps) {
-  const [fromAccountId, setFromAccountId] = useState(accounts[0]?.id || '')
-  const [toAccountId, setToAccountId] = useState(
-    accounts.length > 1 ? accounts[1].id : accounts[0]?.id || ''
-  )
+  const [fromAccountId, setFromAccountId] = useState('')
+  const [toAccountId, setToAccountId] = useState('')
+  const [transactionType, setTransactionType] = useState<'transfer' | 'topup' | 'withdrawal'>('transfer')
   const [amount, setAmount] = useState('')
   const [description, setDescription] = useState('')
   const [date, setDate] = useState(new Date().toISOString().split('T')[0])
@@ -28,16 +27,24 @@ export default function TransactionForm({
   const validate = () => {
     const newErrors: Record<string, string> = {}
 
-    if (!fromAccountId) {
-      newErrors.fromAccountId = 'From account is required'
-    }
-
-    if (!toAccountId) {
-      newErrors.toAccountId = 'To account is required'
-    }
-
-    if (fromAccountId === toAccountId) {
-      newErrors.accountMatch = 'Cannot transfer to the same account'
+    if (transactionType === 'transfer') {
+      if (!fromAccountId) {
+        newErrors.fromAccountId = 'From account is required'
+      }
+      if (!toAccountId) {
+        newErrors.toAccountId = 'To account is required'
+      }
+      if (fromAccountId === toAccountId) {
+        newErrors.accountMatch = 'Cannot transfer to the same account'
+      }
+    } else if (transactionType === 'topup') {
+      if (!toAccountId) {
+        newErrors.toAccountId = 'To account is required'
+      }
+    } else if (transactionType === 'withdrawal') {
+      if (!fromAccountId) {
+        newErrors.fromAccountId = 'From account is required'
+      }
     }
 
     if (!amount || parseFloat(amount) <= 0) {
@@ -60,18 +67,32 @@ export default function TransactionForm({
     const selectedDate = new Date(date)
     selectedDate.setHours(12, 0, 0, 0) // Set to noon to avoid timezone issues
 
-    onSubmit({
-      fromAccountId,
-      toAccountId,
+    const txData: any = {
       amount: parseFloat(amount),
       description: description.trim() || undefined,
       date: selectedDate.getTime(),
-    })
+    }
+
+    if (transactionType === 'transfer') {
+      txData.fromAccountId = fromAccountId
+      txData.toAccountId = toAccountId
+    } else if (transactionType === 'topup') {
+      txData.toAccountId = toAccountId
+      // fromAccountId is undefined
+    } else if (transactionType === 'withdrawal') {
+      txData.fromAccountId = fromAccountId
+      // toAccountId is undefined
+    }
+
+    onSubmit(txData)
 
     // Reset form
     setAmount('')
     setDescription('')
     setDate(new Date().toISOString().split('T')[0])
+    setTransactionType('transfer')
+    setFromAccountId('')
+    setToAccountId('')
   }
 
   const fromAccount = accounts.find((a) => a.id === fromAccountId)
@@ -86,51 +107,99 @@ export default function TransactionForm({
       )}
 
       <div>
-        <label className="block text-sm font-medium mb-2">From Account</label>
-        <select
-          value={fromAccountId}
-          onChange={(e) => setFromAccountId(e.target.value)}
-          className="w-full px-3 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-blue-500"
-        >
-          <option value="">Select account</option>
-          {accounts.map((account) => (
-            <option key={account.id} value={account.id}>
-              {account.name}
-            </option>
-          ))}
-        </select>
-        {errors.fromAccountId && (
-          <p className="text-red-500 text-sm mt-1">{errors.fromAccountId}</p>
-        )}
+        <label className="block text-sm font-medium mb-2">Jenis Transaksi</label>
+        <div className="flex gap-2">
+          <button
+            type="button"
+            onClick={() => setTransactionType('transfer')}
+            className={`flex-1 px-3 py-2 rounded-lg border transition-colors ${
+              transactionType === 'transfer'
+                ? 'bg-blue-100 border-blue-500 text-blue-700'
+                : 'border-border bg-background'
+            }`}
+          >
+            Transfer
+          </button>
+          <button
+            type="button"
+            onClick={() => setTransactionType('topup')}
+            className={`flex-1 px-3 py-2 rounded-lg border transition-colors ${
+              transactionType === 'topup'
+                ? 'bg-green-100 border-green-500 text-green-700'
+                : 'border-border bg-background'
+            }`}
+          >
+            Topup
+          </button>
+          <button
+            type="button"
+            onClick={() => setTransactionType('withdrawal')}
+            className={`flex-1 px-3 py-2 rounded-lg border transition-colors ${
+              transactionType === 'withdrawal'
+                ? 'bg-orange-100 border-orange-500 text-orange-700'
+                : 'border-border bg-background'
+            }`}
+          >
+            Withdrawal
+          </button>
+        </div>
       </div>
 
-      <div>
-        <label className="block text-sm font-medium mb-2">To Account</label>
-        <select
-          value={toAccountId}
-          onChange={(e) => setToAccountId(e.target.value)}
-          className="w-full px-3 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-blue-500"
-        >
-          <option value="">Select account</option>
-          {accounts.map((account) => (
-            <option key={account.id} value={account.id}>
-              {account.name}
-            </option>
-          ))}
-        </select>
-        {errors.toAccountId && (
-          <p className="text-red-500 text-sm mt-1">{errors.toAccountId}</p>
-        )}
-      </div>
+      {(transactionType === 'transfer' || transactionType === 'withdrawal') && (
+        <div>
+          <label className="block text-sm font-medium mb-2">From Account</label>
+          <select
+            value={fromAccountId}
+            onChange={(e) => setFromAccountId(e.target.value)}
+            className="w-full px-3 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="">Select account</option>
+            {accounts.map((account) => (
+              <option key={account.id} value={account.id}>
+                {account.name}
+              </option>
+            ))}
+          </select>
+          {errors.fromAccountId && (
+            <p className="text-red-500 text-sm mt-1">{errors.fromAccountId}</p>
+          )}
+        </div>
+      )}
+
+      {(transactionType === 'transfer' || transactionType === 'topup') && (
+        <div>
+          <label className="block text-sm font-medium mb-2">To Account</label>
+          <select
+            value={toAccountId}
+            onChange={(e) => setToAccountId(e.target.value)}
+            className="w-full px-3 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="">Select account</option>
+            {accounts.map((account) => (
+              <option key={account.id} value={account.id}>
+                {account.name}
+              </option>
+            ))}
+          </select>
+          {errors.toAccountId && (
+            <p className="text-red-500 text-sm mt-1">{errors.toAccountId}</p>
+          )}
+        </div>
+      )}
 
       <div>
         <label className="block text-sm font-medium mb-2">Amount</label>
         <div className="flex gap-2">
-          {toAccount && (
-            <span className="px-3 py-2 bg-muted border border-border rounded-lg text-sm font-medium">
-              {toAccount.currency}
-            </span>
-          )}
+          {(() => {
+            const relevantAccount = transactionType === 'topup' 
+              ? accounts.find((a) => a.id === toAccountId)
+              : accounts.find((a) => a.id === fromAccountId)
+            return relevantAccount ? (
+              <span className="px-3 py-2 bg-muted border border-border rounded-lg text-sm font-medium">
+                {relevantAccount.currency}
+              </span>
+            ) : null
+          })()}
           <Input
             type="number"
             step="0.01"

@@ -1,12 +1,17 @@
 'use client'
 
 import { useCallback, useEffect, useState } from 'react'
-import { Account, AppState, DailyBalance, StockHolding, Transaction } from './types'
+import { Account, AppState, DailyBalance, StockHolding, StockLocation, Transaction } from './types'
 
 const STORAGE_KEY = 'asset-tracker-app'
 
 const defaultState: AppState = {
   accounts: [],
+  stockLocations: [
+    { id: 'stock-loc-1', name: 'Nanovest', createdAt: Date.now() },
+    { id: 'stock-loc-2', name: 'Ajaib', createdAt: Date.now() },
+    { id: 'stock-loc-3', name: 'Crypto', createdAt: Date.now() },
+  ],
   transactions: [],
   dailyBalances: [],
   stocks: [],
@@ -120,7 +125,16 @@ export function useAssetStore() {
         .filter((tx) => tx.toAccountId === accountId)
         .reduce((sum, tx) => sum + tx.amount, 0)
 
-      return incoming - outgoing
+      // Handle topup (no from account) and withdrawal (no to account)
+      const topups = state.transactions
+        .filter((tx) => !tx.fromAccountId && tx.toAccountId === accountId)
+        .reduce((sum, tx) => sum + tx.amount, 0)
+
+      const withdrawals = state.transactions
+        .filter((tx) => !tx.toAccountId && tx.fromAccountId === accountId)
+        .reduce((sum, tx) => sum + tx.amount, 0)
+
+      return incoming + topups - outgoing - withdrawals
     },
     [state.accounts, state.transactions]
   )
@@ -197,9 +211,42 @@ export function useAssetStore() {
     return state.stocks.reduce((sum, stock) => sum + getStockValue(stock.id), 0)
   }, [state.stocks, getStockValue])
 
+  const addStockLocation = useCallback((location: Omit<StockLocation, 'id' | 'createdAt'>) => {
+    setState((prev) => ({
+      ...prev,
+      stockLocations: [
+        ...prev.stockLocations,
+        {
+          ...location,
+          id: Date.now().toString(),
+          createdAt: Date.now(),
+        },
+      ],
+      lastUpdated: Date.now(),
+    }))
+  }, [])
+
+  const updateStockLocation = useCallback((id: string, updates: Partial<Omit<StockLocation, 'id' | 'createdAt'>>) => {
+    setState((prev) => ({
+      ...prev,
+      stockLocations: prev.stockLocations.map((loc) => (loc.id === id ? { ...loc, ...updates } : loc)),
+      lastUpdated: Date.now(),
+    }))
+  }, [])
+
+  const deleteStockLocation = useCallback((id: string) => {
+    setState((prev) => ({
+      ...prev,
+      stockLocations: prev.stockLocations.filter((loc) => loc.id !== id),
+      stocks: prev.stocks.filter((stock) => stock.locationId !== id),
+      lastUpdated: Date.now(),
+    }))
+  }, [])
+
   return {
     // State
     accounts: state.accounts,
+    stockLocations: state.stockLocations,
     transactions: state.transactions,
     dailyBalances: state.dailyBalances,
     stocks: state.stocks,
@@ -209,6 +256,11 @@ export function useAssetStore() {
     addAccount,
     updateAccount,
     deleteAccount,
+
+    // Stock Location operations
+    addStockLocation,
+    updateStockLocation,
+    deleteStockLocation,
 
     // Transaction operations
     addTransaction,

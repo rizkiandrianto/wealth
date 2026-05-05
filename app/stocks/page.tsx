@@ -12,7 +12,7 @@ import StocksSummary from '@/components/StocksSummary'
 import { useAssetStore } from '@/lib/useAssetStore'
 
 export default function StocksPage() {
-  const { stocks, mounted } = useAssetStore()
+  const { stocks, stockLocations, mounted } = useAssetStore()
   const [showForm, setShowForm] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
 
@@ -74,6 +74,7 @@ export default function StocksPage() {
             <TabsContent value="by-location" className="space-y-4">
               <StocksByLocation
                 stocks={stocks}
+                locations={stockLocations}
                 onEdit={(id) => {
                   setEditingId(id)
                   setShowForm(true)
