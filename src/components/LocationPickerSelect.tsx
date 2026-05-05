@@ -7,7 +7,6 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-  SelectSeparator,
 } from '@/components/ui/select'
 import {
   Dialog,
@@ -31,24 +30,15 @@ interface LocationPickerSelectProps {
   onAddLocation: (name: string) => string
 }
 
-const ADD_NEW_SENTINEL = '__add_new__'
-
 export default function LocationPickerSelect({
   locations,
   value,
   onChange,
   onAddLocation,
 }: LocationPickerSelectProps) {
+  const [selectOpen, setSelectOpen] = useState(false)
   const [dialogOpen, setDialogOpen] = useState(false)
   const [newName, setNewName] = useState('')
-
-  const handleValueChange = (val: string) => {
-    if (val === ADD_NEW_SENTINEL) {
-      setDialogOpen(true)
-      return
-    }
-    onChange(val)
-  }
 
   const handleSave = () => {
     const trimmed = newName.trim()
@@ -61,7 +51,7 @@ export default function LocationPickerSelect({
 
   return (
     <>
-      <Select value={value} onValueChange={handleValueChange}>
+      <Select open={selectOpen} onOpenChange={setSelectOpen} value={value} onValueChange={onChange}>
         <SelectTrigger className="mt-1">
           <SelectValue />
         </SelectTrigger>
@@ -71,10 +61,17 @@ export default function LocationPickerSelect({
               {loc.name}
             </SelectItem>
           ))}
-          <SelectSeparator />
-          <SelectItem value={ADD_NEW_SENTINEL} className="text-blue-600">
+          <hr className="my-1 border-border" />
+          <button
+            type="button"
+            className="relative flex w-full cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm text-blue-600 outline-none hover:bg-accent hover:text-blue-700"
+            onClick={() => {
+              setSelectOpen(false)
+              setDialogOpen(true)
+            }}
+          >
             + Tambah lokasi baru
-          </SelectItem>
+          </button>
         </SelectContent>
       </Select>
 
