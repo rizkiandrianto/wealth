@@ -4,6 +4,8 @@ import { useState } from 'react'
 import { Account, Transaction } from '@/lib/types'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { useAssetStore } from '@/lib/useAssetStore'
+import { formatCurrency } from '@/lib/format'
 
 interface TransactionFormProps {
   accounts: Account[]
@@ -16,6 +18,7 @@ export default function TransactionForm({
   onSubmit,
   onCancel,
 }: TransactionFormProps) {
+  const { getAccountBalance } = useAssetStore()
   const [fromAccountId, setFromAccountId] = useState('')
   const [toAccountId, setToAccountId] = useState('')
   const [transactionType, setTransactionType] = useState<'transfer' | 'topup' | 'withdrawal'>('transfer')
@@ -23,6 +26,8 @@ export default function TransactionForm({
   const [description, setDescription] = useState('')
   const [date, setDate] = useState(new Date().toISOString().split('T')[0])
   const [errors, setErrors] = useState<Record<string, string>>({})
+
+  const fromBalance = fromAccountId ? getAccountBalance(fromAccountId) : null
 
   const validate = () => {
     const newErrors: Record<string, string> = {}
@@ -49,6 +54,13 @@ export default function TransactionForm({
 
     if (!amount || parseFloat(amount) <= 0) {
       newErrors.amount = 'Amount must be greater than 0'
+    } else if (
+      (transactionType === 'transfer' || transactionType === 'withdrawal') &&
+      fromAccountId &&
+      fromBalance !== null &&
+      parseFloat(amount) > fromBalance
+    ) {
+      newErrors.amount = `Saldo tidak cukup — tersedia: ${formatCurrency(fromBalance)}`
     }
 
     if (!date) {
@@ -160,6 +172,11 @@ export default function TransactionForm({
               </option>
             ))}
           </select>
+          {fromBalance !== null && (
+            <p className="text-muted-foreground text-sm mt-1">
+              Saldo tersedia: {formatCurrency(fromBalance)}
+            </p>
+          )}
           {errors.fromAccountId && (
             <p className="text-red-500 text-sm mt-1">{errors.fromAccountId}</p>
           )}
