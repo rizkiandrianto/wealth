@@ -247,6 +247,53 @@ Saat ini: chart hanya tampilkan total balance. `DailyBalance` di store sudah pun
 
 ---
 
+## Phase 11 — Gold Tracking
+
+> Pencatatan kepemilikan emas fisik/digital. Mirip saham & crypto: ada lokasi penyimpanan, pembelian (weight + harga/gram), jual sebagian/full, P&L unrealized. Harga terkini disuplai via `asset_prices` (ticker: `XAU`, assetType: `gold`, currency: `IDR`).
+
+### 11a — Schema & Types
+
+- [ ] Tambah tabel di `src/db/schema.ts`:
+  - `gold_locations` — id, userId (fk), name, createdAt
+  - `gold_holdings` — id, userId (fk), locationId (fk), weight numeric(20,4) (gram), purchasePrice numeric(20,4) (IDR/gram), purchaseDate, createdAt
+  - `gold_sales` — id, userId (fk), goldId, weight, salePrice (IDR/gram), averageCostPrice, realizedPnl, realizedPnlPercent, saleDate, createdAt
+- [ ] Tambah ke `src/lib/types.ts`:
+  - `GoldLocation { id, name, createdAt }`
+  - `GoldHolding { id, locationId, weight, purchasePrice, purchaseDate, createdAt }`
+  - `GoldSale { id, goldId, weight, salePrice, averageCostPrice, realizedPnL, realizedPnLPercent, saleDate, createdAt }`
+  - Tambah `goldLocations`, `golds`, `goldSales` ke `AppState`
+- [ ] `pnpm db:push`
+
+### 11b — Store
+
+- [ ] Tambah ke Zustand store:
+  - State: `goldLocations: GoldLocation[]`, `golds: GoldHolding[]`, `goldSales: GoldSale[]`
+  - Actions: `addGoldLocation`, `updateGoldLocation`, `deleteGoldLocation`
+  - Actions: `addGold`, `updateGold`, `deleteGold`, `sellGold`
+  - Queries: `getGoldValue(goldId)`, `getGoldProfitLoss(goldId)`, `getTotalGoldValue()`
+  - Harga dari `assetPrices.find(p => p.ticker === 'XAU')?.price ?? 0`
+
+### 11c — API Routes
+
+- [ ] `GET/POST /api/gold-locations`
+- [ ] `PATCH/DELETE /api/gold-locations/[id]`
+- [ ] `GET/POST /api/gold`
+- [ ] `PATCH/DELETE /api/gold/[id]`
+- [ ] `POST /api/gold/[id]/sell` — update weight + insert sale record (DB transaction)
+
+### 11d — UI Components & Page
+
+- [ ] `GoldForm.tsx` — fields: lokasi, berat (gram), harga beli (IDR/gram), tanggal beli
+  - Gunakan `LocationPickerSelect` (reuse dari stocks/crypto)
+- [ ] `GoldList.tsx` — group by lokasi, tampilkan weight + value + P&L
+  - "Harga Terkini" dari `asset_prices` (XAU), tampilkan '—' bila belum ada
+- [ ] `GoldSummary.tsx` — total weight, total value, total P&L
+- [ ] `GoldSellDialog.tsx` — weight to sell, sale price/gram, preview realized P&L
+- [ ] `src/app/(dashboard)/gold/page.tsx` — full page: summary + form + list
+- [ ] Update `DashboardLayout.tsx`: tambah "Gold" ke Portfolio dropdown & mobile nav
+
+---
+
 ## Notes
 
 - `pnpm db:push` butuh `DATABASE_URL` valid di `.env.local`
