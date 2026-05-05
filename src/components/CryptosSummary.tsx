@@ -6,9 +6,11 @@ import { Card } from '@/components/ui/card'
 import { TrendingUp, TrendingDown } from 'lucide-react'
 
 export default function CryptosSummary() {
-  const { cryptos } = useAssetStore()
+  const { cryptos, assetPrices } = useAssetStore()
+  const getPrice = (symbol: string) =>
+    assetPrices.find((p) => p.ticker === symbol)?.price ?? 0
 
-  const totalValue = cryptos.reduce((sum, c) => sum + c.quantity * c.currentPrice, 0)
+  const totalValue = cryptos.reduce((sum, c) => sum + c.quantity * getPrice(c.symbol), 0)
   const totalCost = cryptos.reduce((sum, c) => sum + c.quantity * c.averagePrice, 0)
   const profitLoss = totalValue - totalCost
   const profitLossPercent = totalCost > 0 ? (profitLoss / totalCost) * 100 : 0

@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { CryptoHolding } from '@/lib/types'
 import { formatCurrency } from '@/lib/format'
+import { useAssetStore } from '@/lib/useAssetStore'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card } from '@/components/ui/card'
@@ -15,8 +16,10 @@ interface CryptoSellDialogProps {
 }
 
 export default function CryptoSellDialog({ crypto, onSell, onClose }: CryptoSellDialogProps) {
+  const { assetPrices } = useAssetStore()
+  const currentPrice = assetPrices.find((p) => p.ticker === crypto.symbol)?.price ?? 0
   const [quantity, setQuantity] = useState('')
-  const [salePrice, setSalePrice] = useState(crypto.currentPrice.toString())
+  const [salePrice, setSalePrice] = useState(currentPrice > 0 ? currentPrice.toString() : '')
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -52,7 +55,7 @@ export default function CryptoSellDialog({ crypto, onSell, onClose }: CryptoSell
           <div className="bg-muted/50 p-3 rounded-lg text-sm space-y-1">
             <p><span className="text-muted-foreground">Available:</span> <span className="font-semibold">{crypto.quantity.toFixed(8)}</span></p>
             <p><span className="text-muted-foreground">Average Cost:</span> <span className="font-semibold">{formatCurrency(crypto.averagePrice)}</span></p>
-            <p><span className="text-muted-foreground">Current Price:</span> <span className="font-semibold">{formatCurrency(crypto.currentPrice)}</span></p>
+            <p><span className="text-muted-foreground">Current Price:</span> <span className="font-semibold">{currentPrice > 0 ? formatCurrency(currentPrice) : '—'}</span></p>
           </div>
 
           <div>

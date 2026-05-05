@@ -3,6 +3,7 @@ import { persist } from 'zustand/middleware'
 import {
   Account,
   AppState,
+  AssetPrice,
   CryptoHolding,
   CryptoLocation,
   DailyBalance,
@@ -54,6 +55,9 @@ interface AssetStore extends AppState {
   getCryptoProfitLoss: (cryptoId: string) => { amount: number; percentage: number }
   getTotalCryptoValue: () => number
   getTotalRealizedPnL: () => { stocks: number; cryptos: number; total: number }
+
+  // Asset price operations
+  setAssetPrices: (prices: AssetPrice[]) => void
 }
 
 function calculateDailyBalances(accounts: Account[], transactions: Transaction[]): DailyBalance[] {
@@ -112,6 +116,7 @@ export const useAssetStore = create<AssetStore>()(
       cryptos: [],
       stockSales: [],
       cryptoSales: [],
+      assetPrices: [],
       lastUpdated: Date.now(),
 
       // Account operations
@@ -329,16 +334,20 @@ export const useAssetStore = create<AssetStore>()(
       },
 
       getStockValue: (stockId) => {
-        const stock = get().stocks.find((s) => s.id === stockId)
+        const { stocks, assetPrices } = get()
+        const stock = stocks.find((s) => s.id === stockId)
         if (!stock) return 0
-        return stock.quantity * stock.currentPrice
+        const price = assetPrices.find((p) => p.ticker === stock.ticker)?.price ?? 0
+        return stock.quantity * price
       },
 
       getStockProfitLoss: (stockId) => {
-        const stock = get().stocks.find((s) => s.id === stockId)
+        const { stocks, assetPrices } = get()
+        const stock = stocks.find((s) => s.id === stockId)
         if (!stock) return { amount: 0, percentage: 0 }
+        const price = assetPrices.find((p) => p.ticker === stock.ticker)?.price ?? 0
         const totalCost = stock.quantity * stock.averagePrice
-        const currentValue = stock.quantity * stock.currentPrice
+        const currentValue = stock.quantity * price
         const amount = currentValue - totalCost
         return { amount, percentage: totalCost > 0 ? (amount / totalCost) * 100 : 0 }
       },
@@ -349,16 +358,20 @@ export const useAssetStore = create<AssetStore>()(
       },
 
       getCryptoValue: (cryptoId) => {
-        const crypto = get().cryptos.find((c) => c.id === cryptoId)
+        const { cryptos, assetPrices } = get()
+        const crypto = cryptos.find((c) => c.id === cryptoId)
         if (!crypto) return 0
-        return crypto.quantity * crypto.currentPrice
+        const price = assetPrices.find((p) => p.ticker === crypto.symbol)?.price ?? 0
+        return crypto.quantity * price
       },
 
       getCryptoProfitLoss: (cryptoId) => {
-        const crypto = get().cryptos.find((c) => c.id === cryptoId)
+        const { cryptos, assetPrices } = get()
+        const crypto = cryptos.find((c) => c.id === cryptoId)
         if (!crypto) return { amount: 0, percentage: 0 }
+        const price = assetPrices.find((p) => p.ticker === crypto.symbol)?.price ?? 0
         const totalCost = crypto.quantity * crypto.averagePrice
-        const currentValue = crypto.quantity * crypto.currentPrice
+        const currentValue = crypto.quantity * price
         const amount = currentValue - totalCost
         return { amount, percentage: totalCost > 0 ? (amount / totalCost) * 100 : 0 }
       },
@@ -374,6 +387,9 @@ export const useAssetStore = create<AssetStore>()(
         const cryptos = cryptoSales.reduce((sum, s) => sum + s.realizedPnL, 0)
         return { stocks, cryptos, total: stocks + cryptos }
       },
+
+      setAssetPrices: (prices) =>
+        set({ assetPrices: prices, lastUpdated: Date.now() }),
     }),
     {
       name: 'asset-tracker-app',

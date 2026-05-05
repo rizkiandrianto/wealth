@@ -144,7 +144,7 @@ Wealth app saat ini murni client-side — semua data tersimpan di `localStorage`
 
 > Harga terkini saham & crypto tidak disimpan di dalam holding record. Dipisahkan ke tabel `asset_prices` yang nantinya di-populate oleh BE scheduler. Holding hanya menyimpan data beli: qty, averagePrice, tanggal, lokasi.
 
-- [ ] Tambah tabel `asset_prices` di `src/db/schema.ts`:
+- [x] Tambah tabel `asset_prices` di `src/db/schema.ts`:
   - `ticker` (text, unique) — e.g. `BBCA`, `BTC`
   - `assetType` (text) — `stock` | `crypto`
   - `name` (text) — nama lengkap asset
@@ -152,17 +152,17 @@ Wealth app saat ini murni client-side — semua data tersimpan di `localStorage`
   - `currency` (text, default `IDR` untuk saham, `USD` untuk crypto)
   - `updatedAt` (timestamp)
   - **No userId** — tabel global, dipakai semua user
-- [ ] Hapus kolom `currentPrice` dari `stockHoldings` dan `cryptoHoldings` di schema
-- [ ] Hapus kolom `name` dari `stockHoldings` (nama saham diambil dari `asset_prices` saat tampil)
-- [ ] Untuk `cryptoHoldings`: tetap simpan `name` (di-populate saat user input, lihat Phase 10b)
-- [ ] Update `src/lib/types.ts`:
+- [x] Hapus kolom `currentPrice` dari `stockHoldings` dan `cryptoHoldings` di schema
+- [x] Hapus kolom `name` dari `stockHoldings` (nama saham diambil dari `asset_prices` saat tampil)
+- [x] Untuk `cryptoHoldings`: tetap simpan `name` (di-populate saat user input, lihat Phase 10b)
+- [x] Update `src/lib/types.ts`:
   - Hapus `currentPrice` dari `StockHolding` dan `CryptoHolding`
   - Hapus `name` dari `StockHolding`
   - Tambah type `AssetPrice { ticker, assetType, name, price, currency, updatedAt }`
-- [ ] Update Zustand store: tambah `assetPrices: AssetPrice[]` ke state
-- [ ] Update kalkulasi P&L di store: lookup harga dari `assetPrices` by ticker (return 0 / N/A kalau belum ada data)
-- [ ] Tambah API route `GET /api/market/prices` → list semua `asset_prices` (dipakai store untuk load harga)
-- [ ] `pnpm db:push` setelah schema diupdate
+- [x] Update Zustand store: tambah `assetPrices: AssetPrice[]` ke state
+- [x] Update kalkulasi P&L di store: lookup harga dari `assetPrices` by ticker (return 0 / N/A kalau belum ada data)
+- [x] Tambah API route `GET /api/market/prices` → list semua `asset_prices` (dipakai store untuk load harga)
+- [ ] `pnpm db:push` setelah schema diupdate ← **jalankan manual**
 
 ## Phase 10 — UX Improvements
 
@@ -242,7 +242,7 @@ Saat ini: chart hanya tampilkan total balance. `DailyBalance` di store sudah pun
 - [x] Transfer melebihi saldo → error ditampilkan (Phase 10a)
 - [x] Tambah lokasi via modal di dalam Select (Phase 10b)
 - [x] Ketik symbol crypto → nama auto-isi (Phase 10c)
-- [ ] Form saham & crypto tidak punya field harga terkini (Phase 9)
+- [x] Form saham & crypto tidak punya field harga terkini (Phase 9)
 - [x] History chart bisa toggle Total vs Per Account (Phase 10d)
 
 ---

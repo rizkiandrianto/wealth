@@ -19,22 +19,18 @@ export default function StockForm({ editingId, onClose }: StockFormProps) {
 
   const [formData, setFormData] = useState({
     ticker: '',
-    name: '',
     locationId: stockLocations[0]?.id || '',
     quantity: '',
     averagePrice: '',
-    currentPrice: '',
   })
 
   useEffect(() => {
     if (editingStock) {
       setFormData({
         ticker: editingStock.ticker,
-        name: editingStock.name,
         locationId: editingStock.locationId,
         quantity: editingStock.quantity.toString(),
         averagePrice: editingStock.averagePrice.toString(),
-        currentPrice: editingStock.currentPrice.toString(),
       })
     } else {
       setFormData(prev => ({
@@ -49,25 +45,16 @@ export default function StockForm({ editingId, onClose }: StockFormProps) {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (
-      !formData.ticker ||
-      !formData.name ||
-      !formData.locationId ||
-      !formData.quantity ||
-      !formData.averagePrice ||
-      !formData.currentPrice
-    ) {
+    if (!formData.ticker || !formData.locationId || !formData.quantity || !formData.averagePrice) {
       alert('Semua field harus diisi')
       return
     }
 
     const stockData = {
       ticker: formData.ticker.toUpperCase(),
-      name: formData.name,
       locationId: formData.locationId,
       quantity: parseFloat(formData.quantity),
       averagePrice: parseFloat(formData.averagePrice),
-      currentPrice: parseFloat(formData.currentPrice),
       purchaseDate: editingStock?.purchaseDate || Date.now(),
     }
 
@@ -79,11 +66,9 @@ export default function StockForm({ editingId, onClose }: StockFormProps) {
 
     setFormData({
       ticker: '',
-      name: '',
       locationId: stockLocations[0]?.id || '',
       quantity: '',
       averagePrice: '',
-      currentPrice: '',
     })
     onClose()
   }
@@ -105,28 +90,14 @@ export default function StockForm({ editingId, onClose }: StockFormProps) {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="text-sm font-medium">Ticker</label>
-            <Input
-              placeholder="BBRI"
-              value={formData.ticker}
-              onChange={(e) =>
-                setFormData({ ...formData, ticker: e.target.value })
-              }
-              className="mt-1"
-            />
-          </div>
-
-          <div>
-            <label className="text-sm font-medium">Nama Saham</label>
-            <Input
-              placeholder="Bank Rakyat Indonesia"
-              value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              className="mt-1"
-            />
-          </div>
+        <div>
+          <label className="text-sm font-medium">Ticker</label>
+          <Input
+            placeholder="BBRI"
+            value={formData.ticker}
+            onChange={(e) => setFormData({ ...formData, ticker: e.target.value })}
+            className="mt-1"
+          />
         </div>
 
         <div>
@@ -139,16 +110,14 @@ export default function StockForm({ editingId, onClose }: StockFormProps) {
           />
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="text-sm font-medium">Quantity (lot)</label>
             <Input
               type="number"
               placeholder="100"
               value={formData.quantity}
-              onChange={(e) =>
-                setFormData({ ...formData, quantity: e.target.value })
-              }
+              onChange={(e) => setFormData({ ...formData, quantity: e.target.value })}
               className="mt-1"
               step="0.01"
               min="0"
@@ -161,24 +130,7 @@ export default function StockForm({ editingId, onClose }: StockFormProps) {
               type="number"
               placeholder="15000"
               value={formData.averagePrice}
-              onChange={(e) =>
-                setFormData({ ...formData, averagePrice: e.target.value })
-              }
-              className="mt-1"
-              step="0.01"
-              min="0"
-            />
-          </div>
-
-          <div>
-            <label className="text-sm font-medium">Harga Terkini (IDR)</label>
-            <Input
-              type="number"
-              placeholder="16500"
-              value={formData.currentPrice}
-              onChange={(e) =>
-                setFormData({ ...formData, currentPrice: e.target.value })
-              }
+              onChange={(e) => setFormData({ ...formData, averagePrice: e.target.value })}
               className="mt-1"
               step="0.01"
               min="0"

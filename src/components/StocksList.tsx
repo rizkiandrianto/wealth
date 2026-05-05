@@ -15,9 +15,13 @@ interface StocksListProps {
 }
 
 export default function StocksList({ stocks, onEdit }: StocksListProps) {
-  const { deleteStock, getStockProfitLoss, sellStock, stockLocations } = useAssetStore()
+  const { deleteStock, getStockProfitLoss, sellStock, stockLocations, assetPrices } = useAssetStore()
   const getLocationName = (locationId: string) =>
     stockLocations.find((l) => l.id === locationId)?.name ?? locationId
+  const getPrice = (ticker: string) =>
+    assetPrices.find((p) => p.ticker === ticker)?.price ?? 0
+  const getName = (ticker: string) =>
+    assetPrices.find((p) => p.ticker === ticker)?.name ?? ticker
   const [sellingStockId, setSellingStockId] = useState<string | null>(null)
   const sellingStock = sellingStockId ? stocks.find(s => s.id === sellingStockId && stocks.some(x => x.id === sellingStockId)) : null
 
@@ -39,9 +43,10 @@ export default function StocksList({ stocks, onEdit }: StocksListProps) {
       {Object.entries(groupedByTicker)
         .sort((a, b) => a[0].localeCompare(b[0]))
         .map(([ticker, tickerStocks]) => {
+          const price = getPrice(ticker)
           const totalQuantity = tickerStocks.reduce((sum, s) => sum + s.quantity, 0)
           const totalCost = tickerStocks.reduce((sum, s) => sum + s.quantity * s.averagePrice, 0)
-          const totalValue = tickerStocks.reduce((sum, s) => sum + s.quantity * s.currentPrice, 0)
+          const totalValue = totalQuantity * price
           const profitLoss = totalValue - totalCost
           const profitLossPercent = totalCost > 0 ? (profitLoss / totalCost) * 100 : 0
           const isPositive = profitLoss >= 0
@@ -54,7 +59,7 @@ export default function StocksList({ stocks, onEdit }: StocksListProps) {
                   <div>
                     <h3 className="font-bold text-lg">{ticker}</h3>
                     <p className="text-sm text-muted-foreground">
-                      {tickerStocks[0].name}
+                      {getName(ticker)}
                     </p>
                   </div>
                   <div className="text-right">
@@ -82,7 +87,7 @@ export default function StocksList({ stocks, onEdit }: StocksListProps) {
                   </div>
                   <div>
                     <p className="text-muted-foreground text-xs">Harga Terkini</p>
-                    <p className="font-semibold">{formatCurrency(totalValue / totalQuantity)}</p>
+                    <p className="font-semibold">{price > 0 ? formatCurrency(price) : '—'}</p>
                   </div>
                   <div>
                     <p className="text-muted-foreground text-xs">Total Cost</p>

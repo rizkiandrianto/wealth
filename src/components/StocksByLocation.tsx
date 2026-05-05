@@ -14,7 +14,11 @@ interface StocksByLocationProps {
 }
 
 export default function StocksByLocation({ stocks, locations, onEdit }: StocksByLocationProps) {
-  const { deleteStock } = useAssetStore()
+  const { deleteStock, assetPrices } = useAssetStore()
+  const getPrice = (ticker: string) =>
+    assetPrices.find((p) => p.ticker === ticker)?.price ?? 0
+  const getName = (ticker: string) =>
+    assetPrices.find((p) => p.ticker === ticker)?.name ?? ticker
 
   // Group stocks by locationId
   const groupedByLocation = stocks.reduce(
@@ -35,7 +39,7 @@ export default function StocksByLocation({ stocks, locations, onEdit }: StocksBy
         const locationStocks = groupedByLocation[location.id] || []
         if (locationStocks.length === 0) return null
 
-        const totalValue = locationStocks.reduce((sum, s) => sum + s.quantity * s.currentPrice, 0)
+        const totalValue = locationStocks.reduce((sum, s) => sum + s.quantity * getPrice(s.ticker), 0)
         const totalCost = locationStocks.reduce((sum, s) => sum + s.quantity * s.averagePrice, 0)
         const profitLoss = totalValue - totalCost
         const profitLossPercent = totalCost > 0 ? (profitLoss / totalCost) * 100 : 0
@@ -55,7 +59,8 @@ export default function StocksByLocation({ stocks, locations, onEdit }: StocksBy
 
             <div className="space-y-2">
               {locationStocks.map((stock) => {
-                const value = stock.quantity * stock.currentPrice
+                const price = getPrice(stock.ticker)
+                const value = stock.quantity * price
                 const cost = stock.quantity * stock.averagePrice
                 const profit = value - cost
                 const profitPercent = cost > 0 ? (profit / cost) * 100 : 0
@@ -66,7 +71,7 @@ export default function StocksByLocation({ stocks, locations, onEdit }: StocksBy
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
                         <h4 className="font-semibold">{stock.ticker}</h4>
-                        <p className="text-sm text-muted-foreground">{stock.name}</p>
+                        <p className="text-sm text-muted-foreground">{getName(stock.ticker)}</p>
                         <div className="mt-2 grid grid-cols-2 gap-2 text-xs">
                           <div>
                             <p className="text-muted-foreground">Qty</p>
@@ -78,7 +83,7 @@ export default function StocksByLocation({ stocks, locations, onEdit }: StocksBy
                           </div>
                           <div>
                             <p className="text-muted-foreground">Harga Terkini</p>
-                            <p className="font-medium">{formatCurrency(stock.currentPrice)}</p>
+                            <p className="font-medium">{price > 0 ? formatCurrency(price) : '—'}</p>
                           </div>
                           <div>
                             <p className="text-muted-foreground">Total Value</p>

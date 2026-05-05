@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { StockHolding } from '@/lib/types'
 import { formatCurrency } from '@/lib/format'
+import { useAssetStore } from '@/lib/useAssetStore'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card } from '@/components/ui/card'
@@ -15,8 +16,10 @@ interface StockSellDialogProps {
 }
 
 export default function StockSellDialog({ stock, onSell, onClose }: StockSellDialogProps) {
+  const { assetPrices } = useAssetStore()
+  const currentPrice = assetPrices.find((p) => p.ticker === stock.ticker)?.price ?? 0
   const [quantity, setQuantity] = useState('')
-  const [salePrice, setSalePrice] = useState(stock.currentPrice.toString())
+  const [salePrice, setSalePrice] = useState(currentPrice > 0 ? currentPrice.toString() : '')
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -52,7 +55,7 @@ export default function StockSellDialog({ stock, onSell, onClose }: StockSellDia
           <div className="bg-muted/50 p-3 rounded-lg text-sm space-y-1">
             <p><span className="text-muted-foreground">Available:</span> <span className="font-semibold">{stock.quantity.toFixed(8)}</span></p>
             <p><span className="text-muted-foreground">Average Cost:</span> <span className="font-semibold">{formatCurrency(stock.averagePrice)}</span></p>
-            <p><span className="text-muted-foreground">Current Price:</span> <span className="font-semibold">{formatCurrency(stock.currentPrice)}</span></p>
+            <p><span className="text-muted-foreground">Current Price:</span> <span className="font-semibold">{currentPrice > 0 ? formatCurrency(currentPrice) : '—'}</span></p>
           </div>
 
           <div>

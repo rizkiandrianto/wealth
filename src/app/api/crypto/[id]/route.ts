@@ -18,7 +18,6 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   if (body.locationId !== undefined) updates.locationId = body.locationId
   if (body.quantity !== undefined) updates.quantity = String(body.quantity)
   if (body.averagePrice !== undefined) updates.averagePrice = String(body.averagePrice)
-  if (body.currentPrice !== undefined) updates.currentPrice = String(body.currentPrice)
   if (body.purchaseDate !== undefined) updates.purchaseDate = new Date(body.purchaseDate)
 
   const [row] = await db

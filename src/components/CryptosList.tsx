@@ -15,7 +15,9 @@ interface CryptosListProps {
 }
 
 export default function CryptosList({ cryptos, onEdit }: CryptosListProps) {
-  const { deleteCrypto, getCryptoProfitLoss, sellCrypto } = useAssetStore()
+  const { deleteCrypto, getCryptoProfitLoss, sellCrypto, assetPrices } = useAssetStore()
+  const getPrice = (symbol: string) =>
+    assetPrices.find((p) => p.ticker === symbol)?.price ?? 0
   const [sellingCryptoId, setSellingCryptoId] = useState<string | null>(null)
   const sellingCrypto = sellingCryptoId ? cryptos.find(c => c.id === sellingCryptoId) : null
 
@@ -35,14 +37,14 @@ export default function CryptosList({ cryptos, onEdit }: CryptosListProps) {
   return (
     <div className="space-y-4">
       {Object.entries(groupedBySymbol).map(([symbol, symbolCryptos]) => {
+        const price = getPrice(symbol)
         const totalQuantity = symbolCryptos.reduce((sum, c) => sum + c.quantity, 0)
-        const totalValue = symbolCryptos.reduce((sum, c) => sum + c.quantity * c.currentPrice, 0)
+        const totalValue = totalQuantity * price
         const totalCost = symbolCryptos.reduce((sum, c) => sum + c.quantity * c.averagePrice, 0)
         const profitLoss = totalValue - totalCost
         const profitLossPercent = totalCost > 0 ? (profitLoss / totalCost) * 100 : 0
         const isPositive = profitLoss >= 0
         const averagePrice = totalQuantity > 0 ? totalCost / totalQuantity : 0
-        const currentPrice = totalQuantity > 0 ? totalValue / totalQuantity : 0
 
         return (
           <Card key={symbol} className="p-4 border-l-4 border-l-purple-500">
@@ -78,7 +80,7 @@ export default function CryptosList({ cryptos, onEdit }: CryptosListProps) {
                 </div>
                 <div>
                   <p className="text-muted-foreground text-xs">Current Price</p>
-                  <p className="font-semibold">{formatCurrency(currentPrice)}</p>
+                  <p className="font-semibold">{price > 0 ? formatCurrency(price) : '—'}</p>
                 </div>
                 <div>
                   <p className="text-muted-foreground text-xs">Total Cost</p>

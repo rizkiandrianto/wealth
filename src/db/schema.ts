@@ -104,10 +104,8 @@ export const stockHoldings = pgTable("stock_holdings", {
     .notNull()
     .references(() => stockLocations.id, { onDelete: "cascade" }),
   ticker: text("ticker").notNull(),
-  name: text("name").notNull(),
   quantity: numeric("quantity", { precision: 20, scale: 8 }).notNull(),
   averagePrice: numeric("average_price", { precision: 20, scale: 4 }).notNull(),
-  currentPrice: numeric("current_price", { precision: 20, scale: 4 }).notNull().default("0"),
   purchaseDate: timestamp("purchase_date", { mode: "date" }).notNull(),
   createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
 });
@@ -149,9 +147,17 @@ export const cryptoHoldings = pgTable("crypto_holdings", {
   name: text("name").notNull(),
   quantity: numeric("quantity", { precision: 30, scale: 12 }).notNull(),
   averagePrice: numeric("average_price", { precision: 20, scale: 4 }).notNull(),
-  currentPrice: numeric("current_price", { precision: 20, scale: 4 }).notNull().default("0"),
   purchaseDate: timestamp("purchase_date", { mode: "date" }).notNull(),
   createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+});
+
+export const assetPrices = pgTable("asset_prices", {
+  ticker: text("ticker").primaryKey(),
+  assetType: text("asset_type").notNull(), // stock | crypto
+  name: text("name").notNull(),
+  price: numeric("price", { precision: 20, scale: 4 }).notNull().default("0"),
+  currency: text("currency").notNull().default("IDR"),
+  updatedAt: timestamp("updated_at", { mode: "date" }).defaultNow().notNull(),
 });
 
 export const cryptoSales = pgTable("crypto_sales", {

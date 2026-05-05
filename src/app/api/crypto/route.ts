@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
   if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const body = await req.json()
-  const { locationId, symbol, name, quantity, averagePrice, currentPrice, purchaseDate } = body
+  const { locationId, symbol, name, quantity, averagePrice, purchaseDate } = body
 
   if (!locationId || !symbol || !name || !quantity || !averagePrice || !purchaseDate) {
     return NextResponse.json({ error: 'Missing fields' }, { status: 400 })
@@ -34,7 +34,6 @@ export async function POST(req: NextRequest) {
       name,
       quantity: String(quantity),
       averagePrice: String(averagePrice),
-      currentPrice: String(currentPrice ?? 0),
       purchaseDate: new Date(purchaseDate),
     })
     .returning()

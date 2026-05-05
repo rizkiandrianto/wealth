@@ -81,7 +81,6 @@ export default function CryptoForm({ editingId, onClose }: CryptoFormProps) {
       locationId: formData.locationId,
       quantity: parseFloat(formData.quantity),
       averagePrice: parseFloat(formData.averagePrice),
-      currentPrice: editingCrypto?.currentPrice ?? 0,
       purchaseDate: editingCrypto?.purchaseDate || Date.now(),
     }
 

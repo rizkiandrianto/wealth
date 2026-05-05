@@ -31,14 +31,21 @@ export interface DailyBalance {
   };
 }
 
+export interface AssetPrice {
+  ticker: string;
+  assetType: 'stock' | 'crypto';
+  name: string;
+  price: number;
+  currency: string;
+  updatedAt: number;
+}
+
 export interface StockHolding {
   id: string;
   ticker: string;
-  name: string;
   locationId: string; // reference to StockLocation.id
   quantity: number;
   averagePrice: number; // in IDR
-  currentPrice: number; // in IDR (will be fetched from API later)
   purchaseDate: number; // timestamp
   createdAt: number;
 }
@@ -56,7 +63,6 @@ export interface CryptoHolding {
   locationId: string; // reference to CryptoLocation.id
   quantity: number;
   averagePrice: number; // in IDR
-  currentPrice: number; // in IDR (will be fetched from API later)
   purchaseDate: number; // timestamp
   createdAt: number;
 }
@@ -97,5 +103,6 @@ export interface AppState {
   cryptos: CryptoHolding[];
   stockSales: StockSale[];
   cryptoSales: CryptoSale[];
+  assetPrices: AssetPrice[];
   lastUpdated: number;
 }

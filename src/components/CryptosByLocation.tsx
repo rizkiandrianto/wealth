@@ -14,7 +14,9 @@ interface CryptosByLocationProps {
 }
 
 export default function CryptosByLocation({ cryptos, locations, onEdit }: CryptosByLocationProps) {
-  const { deleteCrypto } = useAssetStore()
+  const { deleteCrypto, assetPrices } = useAssetStore()
+  const getPrice = (symbol: string) =>
+    assetPrices.find((p) => p.ticker === symbol)?.price ?? 0
 
   // Group cryptos by locationId
   const groupedByLocation = cryptos.reduce(
@@ -35,7 +37,7 @@ export default function CryptosByLocation({ cryptos, locations, onEdit }: Crypto
         const locationCryptos = groupedByLocation[location.id] || []
         if (locationCryptos.length === 0) return null
 
-        const totalValue = locationCryptos.reduce((sum, c) => sum + c.quantity * c.currentPrice, 0)
+        const totalValue = locationCryptos.reduce((sum, c) => sum + c.quantity * getPrice(c.symbol), 0)
         const totalCost = locationCryptos.reduce((sum, c) => sum + c.quantity * c.averagePrice, 0)
         const profitLoss = totalValue - totalCost
         const profitLossPercent = totalCost > 0 ? (profitLoss / totalCost) * 100 : 0
@@ -58,7 +60,9 @@ export default function CryptosByLocation({ cryptos, locations, onEdit }: Crypto
               </div>
             </div>
 
-            {locationCryptos.map((crypto) => (
+            {locationCryptos.map((crypto) => {
+              const price = getPrice(crypto.symbol)
+              return (
               <Card key={crypto.id} className="p-4 border-l-4 border-l-purple-500">
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
@@ -75,17 +79,17 @@ export default function CryptosByLocation({ cryptos, locations, onEdit }: Crypto
                       </div>
                       <div>
                         <p className="text-muted-foreground text-xs">Current Price</p>
-                        <p className="font-semibold">{formatCurrency(crypto.currentPrice)}</p>
+                        <p className="font-semibold">{price > 0 ? formatCurrency(price) : '—'}</p>
                       </div>
                     </div>
                   </div>
 
                   <div className="text-right ml-4">
-                    <p className="text-xl font-bold">{formatCurrency(crypto.quantity * crypto.currentPrice)}</p>
+                    <p className="text-xl font-bold">{formatCurrency(crypto.quantity * price)}</p>
                     {(() => {
                       const pl = (() => {
                         const totalCost = crypto.quantity * crypto.averagePrice
-                        const currentValue = crypto.quantity * crypto.currentPrice
+                        const currentValue = crypto.quantity * price
                         const amount = currentValue - totalCost
                         const percentage = totalCost > 0 ? (amount / totalCost) * 100 : 0
                         return { amount, percentage }
@@ -129,7 +133,8 @@ export default function CryptosByLocation({ cryptos, locations, onEdit }: Crypto
                   </Button>
                 </div>
               </Card>
-            ))}
+              )
+            })}
           </div>
         )
       })}
