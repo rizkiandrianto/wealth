@@ -199,15 +199,15 @@ Target: item `"+ Tambah lokasi baru"` di dalam Select dropdown → buka Dialog k
 Saat ini: user harus isi `symbol` dan `name` sendiri.
 Target: ketik symbol → nama auto-isi dari CoinGecko.
 
-- [ ] Buat `GET /api/market/crypto-search?symbol=BTC`:
+- [x] Buat `GET /api/market/crypto-search?symbol=BTC`:
   - Fetch ke CoinGecko: `GET https://api.coingecko.com/api/v3/search?query={symbol}`
   - Return: `{ name: string, id: string }` dari hasil pertama yang match symbol persis
   - No API key required untuk free tier
-- [ ] Update `CryptoForm.tsx`:
+- [x] Update `CryptoForm.tsx`:
   - Setelah user selesai ketik symbol (onBlur), call `/api/market/crypto-search`
   - Auto-isi field `name` jika ditemukan; beri loading indicator kecil
   - Field name tetap bisa diedit manual (fallback)
-- [ ] Remove input `currentPrice` dari form (field dihapus, Phase 9)
+- [x] Remove input `currentPrice` dari form (field dihapus, Phase 9)
 
 ### 10d — History Chart Per Account
 
@@ -241,7 +241,7 @@ Saat ini: chart hanya tampilkan total balance. `DailyBalance` di store sudah pun
 - [x] Mobile bottom nav: 4 item (Phase 8)
 - [x] Transfer melebihi saldo → error ditampilkan (Phase 10a)
 - [x] Tambah lokasi via modal di dalam Select (Phase 10b)
-- [ ] Ketik symbol crypto → nama auto-isi (Phase 10c)
+- [x] Ketik symbol crypto → nama auto-isi (Phase 10c)
 - [ ] Form saham & crypto tidak punya field harga terkini (Phase 9)
 - [x] History chart bisa toggle Total vs Per Account (Phase 10d)
 

@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { X } from 'lucide-react'
+import { Loader2, X } from 'lucide-react'
 import { useAssetStore } from '@/lib/useAssetStore'
 import LocationPickerSelect from '@/components/LocationPickerSelect'
 
@@ -23,8 +23,8 @@ export default function CryptoForm({ editingId, onClose }: CryptoFormProps) {
     locationId: cryptoLocations[0]?.id || '',
     quantity: '',
     averagePrice: '',
-    currentPrice: '',
   })
+  const [nameLookupLoading, setNameLookupLoading] = useState(false)
 
   useEffect(() => {
     if (editingCrypto) {
@@ -34,7 +34,6 @@ export default function CryptoForm({ editingId, onClose }: CryptoFormProps) {
         locationId: editingCrypto.locationId,
         quantity: editingCrypto.quantity.toString(),
         averagePrice: editingCrypto.averagePrice.toString(),
-        currentPrice: editingCrypto.currentPrice.toString(),
       })
     } else {
       setFormData(prev => ({
@@ -46,6 +45,22 @@ export default function CryptoForm({ editingId, onClose }: CryptoFormProps) {
     }
   }, [editingCrypto, cryptoLocations])
 
+  const handleSymbolBlur = async () => {
+    const symbol = formData.symbol.trim()
+    if (!symbol || formData.name) return
+
+    setNameLookupLoading(true)
+    try {
+      const res = await fetch(`/api/market/crypto-search?symbol=${encodeURIComponent(symbol)}`)
+      if (res.ok) {
+        const data = await res.json()
+        setFormData(prev => ({ ...prev, name: data.name }))
+      }
+    } finally {
+      setNameLookupLoading(false)
+    }
+  }
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
 
@@ -54,8 +69,7 @@ export default function CryptoForm({ editingId, onClose }: CryptoFormProps) {
       !formData.name ||
       !formData.locationId ||
       !formData.quantity ||
-      !formData.averagePrice ||
-      !formData.currentPrice
+      !formData.averagePrice
     ) {
       alert('Semua field harus diisi')
       return
@@ -67,7 +81,7 @@ export default function CryptoForm({ editingId, onClose }: CryptoFormProps) {
       locationId: formData.locationId,
       quantity: parseFloat(formData.quantity),
       averagePrice: parseFloat(formData.averagePrice),
-      currentPrice: parseFloat(formData.currentPrice),
+      currentPrice: editingCrypto?.currentPrice ?? 0,
       purchaseDate: editingCrypto?.purchaseDate || Date.now(),
     }
 
@@ -83,7 +97,6 @@ export default function CryptoForm({ editingId, onClose }: CryptoFormProps) {
       locationId: cryptoLocations[0]?.id || '',
       quantity: '',
       averagePrice: '',
-      currentPrice: '',
     })
     onClose()
   }
@@ -108,6 +121,7 @@ export default function CryptoForm({ editingId, onClose }: CryptoFormProps) {
               type="text"
               value={formData.symbol}
               onChange={(e) => setFormData({ ...formData, symbol: e.target.value })}
+              onBlur={handleSymbolBlur}
               placeholder="e.g., BTC"
               className="mt-1"
             />
@@ -115,13 +129,18 @@ export default function CryptoForm({ editingId, onClose }: CryptoFormProps) {
 
           <div>
             <label className="text-sm font-medium">Nama Crypto</label>
-            <Input
-              type="text"
-              value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              placeholder="e.g., Bitcoin"
-              className="mt-1"
-            />
+            <div className="relative mt-1">
+              <Input
+                type="text"
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                placeholder="e.g., Bitcoin"
+                className={nameLookupLoading ? 'pr-8' : ''}
+              />
+              {nameLookupLoading && (
+                <Loader2 className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 animate-spin text-muted-foreground" />
+              )}
+            </div>
           </div>
         </div>
 
@@ -135,7 +154,7 @@ export default function CryptoForm({ editingId, onClose }: CryptoFormProps) {
           />
         </div>
 
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="text-sm font-medium">Quantity</label>
             <Input
@@ -155,18 +174,6 @@ export default function CryptoForm({ editingId, onClose }: CryptoFormProps) {
               step="0.01"
               value={formData.averagePrice}
               onChange={(e) => setFormData({ ...formData, averagePrice: e.target.value })}
-              placeholder="0.00"
-              className="mt-1"
-            />
-          </div>
-
-          <div>
-            <label className="text-sm font-medium">Harga Terkini (IDR)</label>
-            <Input
-              type="number"
-              step="0.01"
-              value={formData.currentPrice}
-              onChange={(e) => setFormData({ ...formData, currentPrice: e.target.value })}
               placeholder="0.00"
               className="mt-1"
             />
