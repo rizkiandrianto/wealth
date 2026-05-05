@@ -37,13 +37,14 @@ export default function StockForm({ editingId, onClose }: StockFormProps) {
         currentPrice: editingStock.currentPrice.toString(),
       })
     } else {
-      // Reset locationId when not editing
       setFormData(prev => ({
         ...prev,
-        locationId: stockLocations[0]?.id || '',
+        locationId: stockLocations.find(l => l.id === prev.locationId)
+          ? prev.locationId
+          : stockLocations[0]?.id || '',
       }))
     }
-  }, [editingStock]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [editingStock, stockLocations])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()

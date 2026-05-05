@@ -37,13 +37,14 @@ export default function CryptoForm({ editingId, onClose }: CryptoFormProps) {
         currentPrice: editingCrypto.currentPrice.toString(),
       })
     } else {
-      // Reset locationId when not editing
       setFormData(prev => ({
         ...prev,
-        locationId: cryptoLocations[0]?.id || '',
+        locationId: cryptoLocations.find(l => l.id === prev.locationId)
+          ? prev.locationId
+          : cryptoLocations[0]?.id || '',
       }))
     }
-  }, [editingCrypto]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [editingCrypto, cryptoLocations])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
