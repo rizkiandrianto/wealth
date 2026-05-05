@@ -1,11 +1,13 @@
 'use client'
 
+import { useState } from 'react'
 import { StockHolding } from '@/lib/types'
 import { formatCurrency } from '@/lib/format'
 import { useAssetStore } from '@/lib/useAssetStore'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Trash2, Edit2, TrendingUp, TrendingDown } from 'lucide-react'
+import { Trash2, Edit2, TrendingUp, TrendingDown, DollarSign } from 'lucide-react'
+import StockSellDialog from './StockSellDialog'
 
 interface StocksListProps {
   stocks: StockHolding[]
@@ -13,7 +15,9 @@ interface StocksListProps {
 }
 
 export default function StocksList({ stocks, onEdit }: StocksListProps) {
-  const { deleteStock, getStockProfitLoss } = useAssetStore()
+  const { deleteStock, getStockProfitLoss, sellStock } = useAssetStore()
+  const [sellingStockId, setSellingStockId] = useState<string | null>(null)
+  const sellingStock = sellingStockId ? stocks.find(s => s.id === sellingStockId && stocks.some(x => x.id === sellingStockId)) : null
 
   // Group stocks by ticker
   const groupedByTicker = stocks.reduce(
@@ -135,6 +139,15 @@ export default function StocksList({ stocks, onEdit }: StocksListProps) {
                     <Button
                       size="sm"
                       variant="outline"
+                      onClick={() => setSellingStockId(tickerStocks[0].id)}
+                      className="flex-1 gap-2 bg-green-50 text-green-700 hover:bg-green-100"
+                    >
+                      <DollarSign className="w-3 h-3" />
+                      Sell
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
                       onClick={() => deleteStock(tickerStocks[0].id)}
                       className="flex-1 gap-2 text-red-600 hover:text-red-700"
                     >
@@ -147,6 +160,17 @@ export default function StocksList({ stocks, onEdit }: StocksListProps) {
             </Card>
           )
         })}
+
+      {sellingStock && (
+        <StockSellDialog
+          stock={sellingStock}
+          onSell={(quantity, salePrice) => {
+            sellStock(sellingStock.id, quantity, salePrice)
+            setSellingStockId(null)
+          }}
+          onClose={() => setSellingStockId(null)}
+        />
+      )}
     </div>
   )
 }

@@ -1,7 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useState } from 'react'
-import { Account, AppState, CryptoHolding, CryptoLocation, DailyBalance, StockHolding, StockLocation, Transaction } from './types'
+import { Account, AppState, CryptoHolding, CryptoLocation, CryptoSale, DailyBalance, StockHolding, StockLocation, StockSale, Transaction } from './types'
 
 const STORAGE_KEY = 'asset-tracker-app'
 
@@ -21,6 +21,8 @@ const defaultState: AppState = {
   dailyBalances: [],
   stocks: [],
   cryptos: [],
+  stockSales: [],
+  cryptoSales: [],
   lastUpdated: Date.now(),
 }
 
@@ -340,6 +342,94 @@ export function useAssetStore() {
     }))
   }, [])
 
+  const sellStock = useCallback((stockId: string, quantity: number, salePrice: number) => {
+    setState((prev) => {
+      const stock = prev.stocks.find((s) => s.id === stockId)
+      if (!stock || quantity <= 0 || stock.quantity < quantity) return prev
+
+      const realizedPnL = quantity * salePrice - quantity * stock.averagePrice
+      const realizedPnLPercent = (realizedPnL / (quantity * stock.averagePrice)) * 100
+
+      const updatedStocks = stock.quantity === quantity
+        ? prev.stocks.filter((s) => s.id !== stockId)
+        : prev.stocks.map((s) =>
+            s.id === stockId
+              ? { ...s, quantity: s.quantity - quantity }
+              : s
+          )
+
+      return {
+        ...prev,
+        stocks: updatedStocks,
+        stockSales: [
+          ...prev.stockSales,
+          {
+            id: Date.now().toString(),
+            stockId,
+            ticker: stock.ticker,
+            quantity,
+            salePrice,
+            averageCostPrice: stock.averagePrice,
+            realizedPnL,
+            realizedPnLPercent,
+            saleDate: Date.now(),
+            createdAt: Date.now(),
+          },
+        ],
+        lastUpdated: Date.now(),
+      }
+    })
+  }, [])
+
+  const sellCrypto = useCallback((cryptoId: string, quantity: number, salePrice: number) => {
+    setState((prev) => {
+      const crypto = prev.cryptos.find((c) => c.id === cryptoId)
+      if (!crypto || quantity <= 0 || crypto.quantity < quantity) return prev
+
+      const realizedPnL = quantity * salePrice - quantity * crypto.averagePrice
+      const realizedPnLPercent = (realizedPnL / (quantity * crypto.averagePrice)) * 100
+
+      const updatedCryptos = crypto.quantity === quantity
+        ? prev.cryptos.filter((c) => c.id !== cryptoId)
+        : prev.cryptos.map((c) =>
+            c.id === cryptoId
+              ? { ...c, quantity: c.quantity - quantity }
+              : c
+          )
+
+      return {
+        ...prev,
+        cryptos: updatedCryptos,
+        cryptoSales: [
+          ...prev.cryptoSales,
+          {
+            id: Date.now().toString(),
+            cryptoId,
+            symbol: crypto.symbol,
+            quantity,
+            salePrice,
+            averageCostPrice: crypto.averagePrice,
+            realizedPnL,
+            realizedPnLPercent,
+            saleDate: Date.now(),
+            createdAt: Date.now(),
+          },
+        ],
+        lastUpdated: Date.now(),
+      }
+    })
+  }, [])
+
+  const getTotalRealizedPnL = useCallback((): { stocks: number; cryptos: number; total: number } => {
+    const stockPnL = state.stockSales.reduce((sum, sale) => sum + sale.realizedPnL, 0)
+    const cryptoPnL = state.cryptoSales.reduce((sum, sale) => sum + sale.realizedPnL, 0)
+    return {
+      stocks: stockPnL,
+      cryptos: cryptoPnL,
+      total: stockPnL + cryptoPnL,
+    }
+  }, [state.stockSales, state.cryptoSales])
+
   return {
     // State
     accounts: state.accounts,
@@ -349,6 +439,8 @@ export function useAssetStore() {
     dailyBalances: state.dailyBalances,
     stocks: state.stocks,
     cryptos: state.cryptos,
+    stockSales: state.stockSales,
+    cryptoSales: state.cryptoSales,
     mounted,
 
     // Account operations
@@ -380,6 +472,10 @@ export function useAssetStore() {
     updateCrypto,
     deleteCrypto,
 
+    // Sale operations
+    sellStock,
+    sellCrypto,
+
     // Queries
     getAccountBalance,
     getTotalBalance,
@@ -390,6 +486,7 @@ export function useAssetStore() {
     getCryptoValue,
     getCryptoProfitLoss,
     getTotalCryptoValue,
+    getTotalRealizedPnL,
   }
 }
 

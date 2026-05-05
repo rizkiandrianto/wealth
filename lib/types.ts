@@ -61,6 +61,32 @@ export interface CryptoHolding {
   createdAt: number;
 }
 
+export interface StockSale {
+  id: string;
+  stockId: string;
+  ticker: string;
+  quantity: number;
+  salePrice: number; // in IDR
+  averageCostPrice: number; // in IDR
+  realizedPnL: number; // in IDR
+  realizedPnLPercent: number; // percentage
+  saleDate: number; // timestamp
+  createdAt: number;
+}
+
+export interface CryptoSale {
+  id: string;
+  cryptoId: string;
+  symbol: string;
+  quantity: number;
+  salePrice: number; // in IDR
+  averageCostPrice: number; // in IDR
+  realizedPnL: number; // in IDR
+  realizedPnLPercent: number; // percentage
+  saleDate: number; // timestamp
+  createdAt: number;
+}
+
 export interface AppState {
   accounts: Account[];
   stockLocations: StockLocation[];
@@ -69,5 +95,7 @@ export interface AppState {
   dailyBalances: DailyBalance[];
   stocks: StockHolding[];
   cryptos: CryptoHolding[];
+  stockSales: StockSale[];
+  cryptoSales: CryptoSale[];
   lastUpdated: number;
 }

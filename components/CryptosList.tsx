@@ -1,11 +1,13 @@
 'use client'
 
+import { useState } from 'react'
 import { CryptoHolding } from '@/lib/types'
 import { formatCurrency } from '@/lib/format'
 import { useAssetStore } from '@/lib/useAssetStore'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Trash2, Edit2, TrendingUp, TrendingDown } from 'lucide-react'
+import { Trash2, Edit2, TrendingUp, TrendingDown, DollarSign } from 'lucide-react'
+import CryptoSellDialog from './CryptoSellDialog'
 
 interface CryptosListProps {
   cryptos: CryptoHolding[]
@@ -13,7 +15,9 @@ interface CryptosListProps {
 }
 
 export default function CryptosList({ cryptos, onEdit }: CryptosListProps) {
-  const { deleteCrypto, getCryptoProfitLoss } = useAssetStore()
+  const { deleteCrypto, getCryptoProfitLoss, sellCrypto } = useAssetStore()
+  const [sellingCryptoId, setSellingCryptoId] = useState<string | null>(null)
+  const sellingCrypto = sellingCryptoId ? cryptos.find(c => c.id === sellingCryptoId) : null
 
   // Group cryptos by symbol
   const groupedBySymbol = cryptos.reduce(
@@ -136,6 +140,15 @@ export default function CryptosList({ cryptos, onEdit }: CryptosListProps) {
                   <Button
                     variant="ghost"
                     size="sm"
+                    onClick={() => setSellingCryptoId(symbolCryptos[0].id)}
+                    className="gap-2 text-green-600 hover:text-green-700 hover:bg-green-50"
+                  >
+                    <DollarSign className="w-4 h-4" />
+                    Sell
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
                     onClick={() => {
                       if (confirm('Delete this crypto holding?')) {
                         deleteCrypto(symbolCryptos[0].id)
@@ -152,6 +165,17 @@ export default function CryptosList({ cryptos, onEdit }: CryptosListProps) {
           </Card>
         )
       })}
+
+      {sellingCrypto && (
+        <CryptoSellDialog
+          crypto={sellingCrypto}
+          onSell={(quantity, salePrice) => {
+            sellCrypto(sellingCrypto.id, quantity, salePrice)
+            setSellingCryptoId(null)
+          }}
+          onClose={() => setSellingCryptoId(null)}
+        />
+      )}
     </div>
   )
 }
