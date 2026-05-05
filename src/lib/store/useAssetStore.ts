@@ -1,63 +1,93 @@
 import { create } from 'zustand'
-import { persist } from 'zustand/middleware'
 import {
   Account,
+  AccountType,
   AppState,
   AssetPrice,
   CryptoHolding,
   CryptoLocation,
+  CryptoSale,
   DailyBalance,
   StockHolding,
   StockLocation,
+  StockSale,
   Transaction,
 } from '@/lib/types'
 
-interface AssetStore extends AppState {
-  // Account operations
-  addAccount: (account: Omit<Account, 'id' | 'createdAt'>) => void
-  updateAccount: (id: string, updates: Partial<Omit<Account, 'id' | 'createdAt'>>) => void
-  deleteAccount: (id: string) => void
+// ─── DB row → store type normalizers ────────────────────────────────────────
 
-  // Transaction operations
-  addTransaction: (transaction: Omit<Transaction, 'id' | 'createdAt'>) => void
-  deleteTransaction: (id: string) => void
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type Row = Record<string, any>
 
-  // Stock Location operations
-  addStockLocation: (location: Omit<StockLocation, 'id' | 'createdAt'>) => string
-  updateStockLocation: (id: string, updates: Partial<Omit<StockLocation, 'id' | 'createdAt'>>) => void
-  deleteStockLocation: (id: string) => void
+const ts = (v: unknown) => new Date(v as string).getTime()
+const num = (v: unknown) => parseFloat(v as string)
 
-  // Stock operations
-  addStock: (stock: Omit<StockHolding, 'id' | 'createdAt'>) => void
-  updateStock: (id: string, updates: Partial<Omit<StockHolding, 'id' | 'createdAt'>>) => void
-  deleteStock: (id: string) => void
-  sellStock: (stockId: string, quantity: number, salePrice: number) => void
+const toAccount = (r: Row): Account => ({
+  id: r.id, name: r.name, type: r.type as AccountType,
+  currency: r.currency, createdAt: ts(r.createdAt),
+})
 
-  // Crypto Location operations
-  addCryptoLocation: (location: Omit<CryptoLocation, 'id' | 'createdAt'>) => string
-  updateCryptoLocation: (id: string, updates: Partial<Omit<CryptoLocation, 'id' | 'createdAt'>>) => void
-  deleteCryptoLocation: (id: string) => void
+const toTransaction = (r: Row): Transaction => ({
+  id: r.id,
+  fromAccountId: r.fromAccountId ?? undefined,
+  toAccountId: r.toAccountId ?? undefined,
+  amount: num(r.amount),
+  description: r.description ?? undefined,
+  date: ts(r.date),
+  createdAt: ts(r.createdAt),
+})
 
-  // Crypto operations
-  addCrypto: (crypto: Omit<CryptoHolding, 'id' | 'createdAt'>) => void
-  updateCrypto: (id: string, updates: Partial<Omit<CryptoHolding, 'id' | 'createdAt'>>) => void
-  deleteCrypto: (id: string) => void
-  sellCrypto: (cryptoId: string, quantity: number, salePrice: number) => void
+const toLocation = (r: Row): StockLocation | CryptoLocation => ({
+  id: r.id, name: r.name, createdAt: ts(r.createdAt),
+})
 
-  // Queries
-  getAccountBalance: (accountId: string) => number
-  getTotalBalance: () => number
-  getAccountTransactions: (accountId: string) => Transaction[]
-  getStockValue: (stockId: string) => number
-  getStockProfitLoss: (stockId: string) => { amount: number; percentage: number }
-  getTotalStockValue: () => number
-  getCryptoValue: (cryptoId: string) => number
-  getCryptoProfitLoss: (cryptoId: string) => { amount: number; percentage: number }
-  getTotalCryptoValue: () => number
-  getTotalRealizedPnL: () => { stocks: number; cryptos: number; total: number }
+const toStock = (r: Row): StockHolding => ({
+  id: r.id, ticker: r.ticker, locationId: r.locationId,
+  quantity: num(r.quantity), averagePrice: num(r.averagePrice),
+  purchaseDate: ts(r.purchaseDate), createdAt: ts(r.createdAt),
+})
 
-  // Asset price operations
-  setAssetPrices: (prices: AssetPrice[]) => void
+const toCrypto = (r: Row): CryptoHolding => ({
+  id: r.id, symbol: r.symbol, name: r.name, locationId: r.locationId,
+  quantity: num(r.quantity), averagePrice: num(r.averagePrice),
+  purchaseDate: ts(r.purchaseDate), createdAt: ts(r.createdAt),
+})
+
+const toStockSale = (r: Row): StockSale => ({
+  id: r.id, stockId: r.stockId, ticker: r.ticker,
+  quantity: num(r.quantity), salePrice: num(r.salePrice),
+  averageCostPrice: num(r.averageCostPrice),
+  realizedPnL: num(r.realizedPnl), realizedPnLPercent: num(r.realizedPnlPercent),
+  saleDate: ts(r.saleDate), createdAt: ts(r.createdAt),
+})
+
+const toCryptoSale = (r: Row): CryptoSale => ({
+  id: r.id, cryptoId: r.cryptoId, symbol: r.symbol,
+  quantity: num(r.quantity), salePrice: num(r.salePrice),
+  averageCostPrice: num(r.averageCostPrice),
+  realizedPnL: num(r.realizedPnl), realizedPnLPercent: num(r.realizedPnlPercent),
+  saleDate: ts(r.saleDate), createdAt: ts(r.createdAt),
+})
+
+const toAssetPrice = (r: Row): AssetPrice => ({
+  ticker: r.ticker, assetType: r.assetType as 'stock' | 'crypto',
+  name: r.name, price: num(r.price), currency: r.currency,
+  updatedAt: ts(r.updatedAt),
+})
+
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+
+const DEFAULT_STOCK_LOCATIONS = ['Nanovest', 'Ajaib', 'Pluang']
+const DEFAULT_CRYPTO_LOCATIONS = ['Binance', 'Indodax', 'Cold Wallet']
+
+async function apiFetch(path: string, init?: RequestInit) {
+  const res = await fetch(path, {
+    ...init,
+    headers: { 'Content-Type': 'application/json', ...init?.headers },
+  })
+  if (!res.ok) throw new Error(`${init?.method ?? 'GET'} ${path} → ${res.status}`)
+  if (res.status === 204) return null
+  return res.json()
 }
 
 function calculateDailyBalances(accounts: Account[], transactions: Transaction[]): DailyBalance[] {
@@ -95,304 +125,441 @@ function calculateDailyBalances(accounts: Account[], transactions: Transaction[]
     }))
 }
 
+// ─── Store interface ──────────────────────────────────────────────────────────
+
+interface AssetStore extends AppState {
+  isLoading: boolean
+  error: string | null
+
+  // Bootstrap
+  fetchAll: () => Promise<void>
+
+  // Account operations
+  addAccount: (account: Omit<Account, 'id' | 'createdAt'>) => Promise<void>
+  updateAccount: (id: string, updates: Partial<Omit<Account, 'id' | 'createdAt'>>) => Promise<void>
+  deleteAccount: (id: string) => Promise<void>
+
+  // Transaction operations
+  addTransaction: (transaction: Omit<Transaction, 'id' | 'createdAt'>) => Promise<void>
+  deleteTransaction: (id: string) => Promise<void>
+
+  // Stock Location operations
+  addStockLocation: (location: Omit<StockLocation, 'id' | 'createdAt'>) => Promise<string>
+  updateStockLocation: (id: string, updates: Partial<Omit<StockLocation, 'id' | 'createdAt'>>) => Promise<void>
+  deleteStockLocation: (id: string) => Promise<void>
+
+  // Stock operations
+  addStock: (stock: Omit<StockHolding, 'id' | 'createdAt'>) => Promise<void>
+  updateStock: (id: string, updates: Partial<Omit<StockHolding, 'id' | 'createdAt'>>) => Promise<void>
+  deleteStock: (id: string) => Promise<void>
+  sellStock: (stockId: string, quantity: number, salePrice: number) => Promise<void>
+
+  // Crypto Location operations
+  addCryptoLocation: (location: Omit<CryptoLocation, 'id' | 'createdAt'>) => Promise<string>
+  updateCryptoLocation: (id: string, updates: Partial<Omit<CryptoLocation, 'id' | 'createdAt'>>) => Promise<void>
+  deleteCryptoLocation: (id: string) => Promise<void>
+
+  // Crypto operations
+  addCrypto: (crypto: Omit<CryptoHolding, 'id' | 'createdAt'>) => Promise<void>
+  updateCrypto: (id: string, updates: Partial<Omit<CryptoHolding, 'id' | 'createdAt'>>) => Promise<void>
+  deleteCrypto: (id: string) => Promise<void>
+  sellCrypto: (cryptoId: string, quantity: number, salePrice: number) => Promise<void>
+
+  // Asset price operations
+  setAssetPrices: (prices: AssetPrice[]) => void
+
+  // Queries
+  getAccountBalance: (accountId: string) => number
+  getTotalBalance: () => number
+  getAccountTransactions: (accountId: string) => Transaction[]
+  getStockValue: (stockId: string) => number
+  getStockProfitLoss: (stockId: string) => { amount: number; percentage: number }
+  getTotalStockValue: () => number
+  getCryptoValue: (cryptoId: string) => number
+  getCryptoProfitLoss: (cryptoId: string) => { amount: number; percentage: number }
+  getTotalCryptoValue: () => number
+  getTotalRealizedPnL: () => { stocks: number; cryptos: number; total: number }
+}
+
+// ─── Store implementation ─────────────────────────────────────────────────────
+
 export const useAssetStore = create<AssetStore>()(
-  persist(
-    (set, get) => ({
-      // Initial state
-      accounts: [],
-      stockLocations: [
-        { id: 'stock-loc-1', name: 'Nanovest', createdAt: Date.now() },
-        { id: 'stock-loc-2', name: 'Ajaib', createdAt: Date.now() },
-        { id: 'stock-loc-3', name: 'Crypto', createdAt: Date.now() },
-      ],
-      cryptoLocations: [
-        { id: 'crypto-loc-1', name: 'Binance', createdAt: Date.now() },
-        { id: 'crypto-loc-2', name: 'Coinbase', createdAt: Date.now() },
-        { id: 'crypto-loc-3', name: 'Cold Wallet', createdAt: Date.now() },
-      ],
-      transactions: [],
-      dailyBalances: [],
-      stocks: [],
-      cryptos: [],
-      stockSales: [],
-      cryptoSales: [],
-      assetPrices: [],
-      lastUpdated: Date.now(),
+  (set, get) => ({
+    // Initial state
+    accounts: [],
+    stockLocations: [],
+    cryptoLocations: [],
+    transactions: [],
+    dailyBalances: [],
+    stocks: [],
+    cryptos: [],
+    stockSales: [],
+    cryptoSales: [],
+    assetPrices: [],
+    lastUpdated: Date.now(),
+    isLoading: false,
+    error: null,
 
-      // Account operations
-      addAccount: (account) =>
-        set((s) => ({
-          accounts: [...s.accounts, { ...account, id: Date.now().toString(), createdAt: Date.now() }],
+    // ── Bootstrap ───────────────────────────────────────────────────────────
+
+    fetchAll: async () => {
+      set({ isLoading: true, error: null })
+      try {
+        const [
+          accountRows,
+          txRows,
+          stockLocRows,
+          cryptoLocRows,
+          stockRows,
+          cryptoRows,
+          stockSaleRows,
+          cryptoSaleRows,
+          priceRows,
+        ] = await Promise.all([
+          apiFetch('/api/accounts'),
+          apiFetch('/api/transactions'),
+          apiFetch('/api/stock-locations'),
+          apiFetch('/api/crypto-locations'),
+          apiFetch('/api/stocks'),
+          apiFetch('/api/crypto'),
+          apiFetch('/api/stocks/sales'),
+          apiFetch('/api/crypto/sales'),
+          apiFetch('/api/market/prices'),
+        ])
+
+        const accounts: Account[] = accountRows.map(toAccount)
+        const transactions: Transaction[] = txRows.map(toTransaction)
+
+        // Seed default locations on first use
+        let stockLocations: StockLocation[] = stockLocRows.map(toLocation)
+        if (stockLocations.length === 0) {
+          stockLocations = await Promise.all(
+            DEFAULT_STOCK_LOCATIONS.map(async (name) => {
+              const row = await apiFetch('/api/stock-locations', {
+                method: 'POST',
+                body: JSON.stringify({ name }),
+              })
+              return toLocation(row) as StockLocation
+            })
+          )
+        }
+
+        let cryptoLocations: CryptoLocation[] = cryptoLocRows.map(toLocation)
+        if (cryptoLocations.length === 0) {
+          cryptoLocations = await Promise.all(
+            DEFAULT_CRYPTO_LOCATIONS.map(async (name) => {
+              const row = await apiFetch('/api/crypto-locations', {
+                method: 'POST',
+                body: JSON.stringify({ name }),
+              })
+              return toLocation(row) as CryptoLocation
+            })
+          )
+        }
+
+        set({
+          accounts,
+          transactions,
+          dailyBalances: calculateDailyBalances(accounts, transactions),
+          stockLocations,
+          cryptoLocations,
+          stocks: stockRows.map(toStock),
+          cryptos: cryptoRows.map(toCrypto),
+          stockSales: stockSaleRows.map(toStockSale),
+          cryptoSales: cryptoSaleRows.map(toCryptoSale),
+          assetPrices: priceRows.map(toAssetPrice),
           lastUpdated: Date.now(),
-        })),
+          isLoading: false,
+        })
+      } catch (err) {
+        set({ isLoading: false, error: (err as Error).message })
+      }
+    },
 
-      updateAccount: (id, updates) =>
-        set((s) => ({
-          accounts: s.accounts.map((a) => (a.id === id ? { ...a, ...updates } : a)),
+    // ── Account operations ───────────────────────────────────────────────────
+
+    addAccount: async (account) => {
+      const row = await apiFetch('/api/accounts', {
+        method: 'POST', body: JSON.stringify(account),
+      })
+      set((s) => ({ accounts: [...s.accounts, toAccount(row)], lastUpdated: Date.now() }))
+    },
+
+    updateAccount: async (id, updates) => {
+      const row = await apiFetch(`/api/accounts/${id}`, {
+        method: 'PATCH', body: JSON.stringify(updates),
+      })
+      set((s) => ({
+        accounts: s.accounts.map((a) => (a.id === id ? toAccount(row) : a)),
+        lastUpdated: Date.now(),
+      }))
+    },
+
+    deleteAccount: async (id) => {
+      await apiFetch(`/api/accounts/${id}`, { method: 'DELETE' })
+      set((s) => ({
+        accounts: s.accounts.filter((a) => a.id !== id),
+        transactions: s.transactions.filter((tx) => tx.fromAccountId !== id && tx.toAccountId !== id),
+        lastUpdated: Date.now(),
+      }))
+    },
+
+    // ── Transaction operations ───────────────────────────────────────────────
+
+    addTransaction: async (transaction) => {
+      const row = await apiFetch('/api/transactions', {
+        method: 'POST', body: JSON.stringify(transaction),
+      })
+      set((s) => {
+        const transactions = [...s.transactions, toTransaction(row)]
+        return {
+          transactions,
+          dailyBalances: calculateDailyBalances(s.accounts, transactions),
           lastUpdated: Date.now(),
-        })),
+        }
+      })
+    },
 
-      deleteAccount: (id) =>
-        set((s) => ({
-          accounts: s.accounts.filter((a) => a.id !== id),
-          transactions: s.transactions.filter((tx) => tx.fromAccountId !== id && tx.toAccountId !== id),
+    deleteTransaction: async (id) => {
+      await apiFetch(`/api/transactions/${id}`, { method: 'DELETE' })
+      set((s) => {
+        const transactions = s.transactions.filter((tx) => tx.id !== id)
+        return {
+          transactions,
+          dailyBalances: calculateDailyBalances(s.accounts, transactions),
           lastUpdated: Date.now(),
-        })),
+        }
+      })
+    },
 
-      // Transaction operations
-      addTransaction: (transaction) =>
-        set((s) => {
-          const newTx: Transaction = { ...transaction, id: Date.now().toString(), createdAt: Date.now() }
-          const transactions = [...s.transactions, newTx]
-          return {
-            transactions,
-            dailyBalances: calculateDailyBalances(s.accounts, transactions),
-            lastUpdated: Date.now(),
-          }
+    // ── Stock Location operations ────────────────────────────────────────────
+
+    addStockLocation: async (location) => {
+      const row = await apiFetch('/api/stock-locations', {
+        method: 'POST', body: JSON.stringify(location),
+      })
+      const newLoc = toLocation(row) as StockLocation
+      set((s) => ({ stockLocations: [...s.stockLocations, newLoc], lastUpdated: Date.now() }))
+      return newLoc.id
+    },
+
+    updateStockLocation: async (id, updates) => {
+      const row = await apiFetch(`/api/stock-locations/${id}`, {
+        method: 'PATCH', body: JSON.stringify(updates),
+      })
+      set((s) => ({
+        stockLocations: s.stockLocations.map((loc) => (loc.id === id ? toLocation(row) as StockLocation : loc)),
+        lastUpdated: Date.now(),
+      }))
+    },
+
+    deleteStockLocation: async (id) => {
+      await apiFetch(`/api/stock-locations/${id}`, { method: 'DELETE' })
+      set((s) => ({
+        stockLocations: s.stockLocations.filter((loc) => loc.id !== id),
+        stocks: s.stocks.filter((stock) => stock.locationId !== id),
+        lastUpdated: Date.now(),
+      }))
+    },
+
+    // ── Stock operations ─────────────────────────────────────────────────────
+
+    addStock: async (stock) => {
+      const row = await apiFetch('/api/stocks', {
+        method: 'POST', body: JSON.stringify({
+          ...stock,
+          purchaseDate: stock.purchaseDate,
         }),
+      })
+      set((s) => ({ stocks: [...s.stocks, toStock(row)], lastUpdated: Date.now() }))
+    },
 
-      deleteTransaction: (id) =>
-        set((s) => {
-          const transactions = s.transactions.filter((tx) => tx.id !== id)
-          return {
-            transactions,
-            dailyBalances: calculateDailyBalances(s.accounts, transactions),
-            lastUpdated: Date.now(),
-          }
-        }),
+    updateStock: async (id, updates) => {
+      const row = await apiFetch(`/api/stocks/${id}`, {
+        method: 'PATCH', body: JSON.stringify(updates),
+      })
+      set((s) => ({
+        stocks: s.stocks.map((stock) => (stock.id === id ? toStock(row) : stock)),
+        lastUpdated: Date.now(),
+      }))
+    },
 
-      // Stock Location operations
-      addStockLocation: (location) => {
-        const id = Date.now().toString()
-        set((s) => ({
-          stockLocations: [...s.stockLocations, { ...location, id, createdAt: Date.now() }],
-          lastUpdated: Date.now(),
-        }))
-        return id
-      },
+    deleteStock: async (id) => {
+      await apiFetch(`/api/stocks/${id}`, { method: 'DELETE' })
+      set((s) => ({ stocks: s.stocks.filter((stock) => stock.id !== id), lastUpdated: Date.now() }))
+    },
 
-      updateStockLocation: (id, updates) =>
-        set((s) => ({
-          stockLocations: s.stockLocations.map((loc) => (loc.id === id ? { ...loc, ...updates } : loc)),
-          lastUpdated: Date.now(),
-        })),
+    sellStock: async (stockId, quantity, salePrice) => {
+      const stock = get().stocks.find((s) => s.id === stockId)
+      if (!stock || quantity <= 0 || stock.quantity < quantity) return
 
-      deleteStockLocation: (id) =>
-        set((s) => ({
-          stockLocations: s.stockLocations.filter((loc) => loc.id !== id),
-          stocks: s.stocks.filter((stock) => stock.locationId !== id),
-          lastUpdated: Date.now(),
-        })),
+      const row = await apiFetch(`/api/stocks/${stockId}/sell`, {
+        method: 'POST', body: JSON.stringify({ quantity, salePrice }),
+      })
 
-      // Stock operations
-      addStock: (stock) =>
-        set((s) => ({
-          stocks: [...s.stocks, { ...stock, id: Date.now().toString(), createdAt: Date.now() }],
-          lastUpdated: Date.now(),
-        })),
+      set((s) => ({
+        stocks: stock.quantity === quantity
+          ? s.stocks.filter((st) => st.id !== stockId)
+          : s.stocks.map((st) => st.id === stockId ? { ...st, quantity: st.quantity - quantity } : st),
+        stockSales: [...s.stockSales, toStockSale(row)],
+        lastUpdated: Date.now(),
+      }))
+    },
 
-      updateStock: (id, updates) =>
-        set((s) => ({
-          stocks: s.stocks.map((stock) => (stock.id === id ? { ...stock, ...updates } : stock)),
-          lastUpdated: Date.now(),
-        })),
+    // ── Crypto Location operations ───────────────────────────────────────────
 
-      deleteStock: (id) =>
-        set((s) => ({
-          stocks: s.stocks.filter((stock) => stock.id !== id),
-          lastUpdated: Date.now(),
-        })),
+    addCryptoLocation: async (location) => {
+      const row = await apiFetch('/api/crypto-locations', {
+        method: 'POST', body: JSON.stringify(location),
+      })
+      const newLoc = toLocation(row) as CryptoLocation
+      set((s) => ({ cryptoLocations: [...s.cryptoLocations, newLoc], lastUpdated: Date.now() }))
+      return newLoc.id
+    },
 
-      sellStock: (stockId, quantity, salePrice) =>
-        set((s) => {
-          const stock = s.stocks.find((st) => st.id === stockId)
-          if (!stock || quantity <= 0 || stock.quantity < quantity) return s
+    updateCryptoLocation: async (id, updates) => {
+      const row = await apiFetch(`/api/crypto-locations/${id}`, {
+        method: 'PATCH', body: JSON.stringify(updates),
+      })
+      set((s) => ({
+        cryptoLocations: s.cryptoLocations.map((loc) => (loc.id === id ? toLocation(row) as CryptoLocation : loc)),
+        lastUpdated: Date.now(),
+      }))
+    },
 
-          const realizedPnL = quantity * salePrice - quantity * stock.averagePrice
-          const realizedPnLPercent = (realizedPnL / (quantity * stock.averagePrice)) * 100
+    deleteCryptoLocation: async (id) => {
+      await apiFetch(`/api/crypto-locations/${id}`, { method: 'DELETE' })
+      set((s) => ({
+        cryptoLocations: s.cryptoLocations.filter((loc) => loc.id !== id),
+        cryptos: s.cryptos.filter((c) => c.locationId !== id),
+        lastUpdated: Date.now(),
+      }))
+    },
 
-          return {
-            stocks:
-              stock.quantity === quantity
-                ? s.stocks.filter((st) => st.id !== stockId)
-                : s.stocks.map((st) => (st.id === stockId ? { ...st, quantity: st.quantity - quantity } : st)),
-            stockSales: [
-              ...s.stockSales,
-              {
-                id: Date.now().toString(),
-                stockId,
-                ticker: stock.ticker,
-                quantity,
-                salePrice,
-                averageCostPrice: stock.averagePrice,
-                realizedPnL,
-                realizedPnLPercent,
-                saleDate: Date.now(),
-                createdAt: Date.now(),
-              },
-            ],
-            lastUpdated: Date.now(),
-          }
-        }),
+    // ── Crypto operations ────────────────────────────────────────────────────
 
-      // Crypto Location operations
-      addCryptoLocation: (location) => {
-        const id = Date.now().toString()
-        set((s) => ({
-          cryptoLocations: [...s.cryptoLocations, { ...location, id, createdAt: Date.now() }],
-          lastUpdated: Date.now(),
-        }))
-        return id
-      },
+    addCrypto: async (crypto) => {
+      const row = await apiFetch('/api/crypto', {
+        method: 'POST', body: JSON.stringify(crypto),
+      })
+      set((s) => ({ cryptos: [...s.cryptos, toCrypto(row)], lastUpdated: Date.now() }))
+    },
 
-      updateCryptoLocation: (id, updates) =>
-        set((s) => ({
-          cryptoLocations: s.cryptoLocations.map((loc) => (loc.id === id ? { ...loc, ...updates } : loc)),
-          lastUpdated: Date.now(),
-        })),
+    updateCrypto: async (id, updates) => {
+      const row = await apiFetch(`/api/crypto/${id}`, {
+        method: 'PATCH', body: JSON.stringify(updates),
+      })
+      set((s) => ({
+        cryptos: s.cryptos.map((c) => (c.id === id ? toCrypto(row) : c)),
+        lastUpdated: Date.now(),
+      }))
+    },
 
-      deleteCryptoLocation: (id) =>
-        set((s) => ({
-          cryptoLocations: s.cryptoLocations.filter((loc) => loc.id !== id),
-          cryptos: s.cryptos.filter((c) => c.locationId !== id),
-          lastUpdated: Date.now(),
-        })),
+    deleteCrypto: async (id) => {
+      await apiFetch(`/api/crypto/${id}`, { method: 'DELETE' })
+      set((s) => ({ cryptos: s.cryptos.filter((c) => c.id !== id), lastUpdated: Date.now() }))
+    },
 
-      // Crypto operations
-      addCrypto: (crypto) =>
-        set((s) => ({
-          cryptos: [...s.cryptos, { ...crypto, id: Date.now().toString(), createdAt: Date.now() }],
-          lastUpdated: Date.now(),
-        })),
+    sellCrypto: async (cryptoId, quantity, salePrice) => {
+      const crypto = get().cryptos.find((c) => c.id === cryptoId)
+      if (!crypto || quantity <= 0 || crypto.quantity < quantity) return
 
-      updateCrypto: (id, updates) =>
-        set((s) => ({
-          cryptos: s.cryptos.map((c) => (c.id === id ? { ...c, ...updates } : c)),
-          lastUpdated: Date.now(),
-        })),
+      const row = await apiFetch(`/api/crypto/${cryptoId}/sell`, {
+        method: 'POST', body: JSON.stringify({ quantity, salePrice }),
+      })
 
-      deleteCrypto: (id) =>
-        set((s) => ({
-          cryptos: s.cryptos.filter((c) => c.id !== id),
-          lastUpdated: Date.now(),
-        })),
+      set((s) => ({
+        cryptos: crypto.quantity === quantity
+          ? s.cryptos.filter((c) => c.id !== cryptoId)
+          : s.cryptos.map((c) => c.id === cryptoId ? { ...c, quantity: c.quantity - quantity } : c),
+        cryptoSales: [...s.cryptoSales, toCryptoSale(row)],
+        lastUpdated: Date.now(),
+      }))
+    },
 
-      sellCrypto: (cryptoId, quantity, salePrice) =>
-        set((s) => {
-          const crypto = s.cryptos.find((c) => c.id === cryptoId)
-          if (!crypto || quantity <= 0 || crypto.quantity < quantity) return s
+    // ── Asset prices ─────────────────────────────────────────────────────────
 
-          const realizedPnL = quantity * salePrice - quantity * crypto.averagePrice
-          const realizedPnLPercent = (realizedPnL / (quantity * crypto.averagePrice)) * 100
+    setAssetPrices: (prices) =>
+      set({ assetPrices: prices, lastUpdated: Date.now() }),
 
-          return {
-            cryptos:
-              crypto.quantity === quantity
-                ? s.cryptos.filter((c) => c.id !== cryptoId)
-                : s.cryptos.map((c) => (c.id === cryptoId ? { ...c, quantity: c.quantity - quantity } : c)),
-            cryptoSales: [
-              ...s.cryptoSales,
-              {
-                id: Date.now().toString(),
-                cryptoId,
-                symbol: crypto.symbol,
-                quantity,
-                salePrice,
-                averageCostPrice: crypto.averagePrice,
-                realizedPnL,
-                realizedPnLPercent,
-                saleDate: Date.now(),
-                createdAt: Date.now(),
-              },
-            ],
-            lastUpdated: Date.now(),
-          }
-        }),
+    // ── Queries ──────────────────────────────────────────────────────────────
 
-      // Queries — read directly from current store state
-      getAccountBalance: (accountId) => {
-        const { accounts, transactions } = get()
-        const account = accounts.find((a) => a.id === accountId)
-        if (!account) return 0
-        const incoming = transactions
-          .filter((tx) => tx.toAccountId === accountId)
-          .reduce((sum, tx) => sum + tx.amount, 0)
-        const outgoing = transactions
-          .filter((tx) => tx.fromAccountId === accountId)
-          .reduce((sum, tx) => sum + tx.amount, 0)
-        return incoming - outgoing
-      },
+    getAccountBalance: (accountId) => {
+      const { accounts, transactions } = get()
+      const account = accounts.find((a) => a.id === accountId)
+      if (!account) return 0
+      const incoming = transactions
+        .filter((tx) => tx.toAccountId === accountId)
+        .reduce((sum, tx) => sum + tx.amount, 0)
+      const outgoing = transactions
+        .filter((tx) => tx.fromAccountId === accountId)
+        .reduce((sum, tx) => sum + tx.amount, 0)
+      return incoming - outgoing
+    },
 
-      getTotalBalance: () => {
-        const { accounts, getAccountBalance } = get()
-        return accounts.reduce((sum, a) => sum + getAccountBalance(a.id), 0)
-      },
+    getTotalBalance: () => {
+      const { accounts, getAccountBalance } = get()
+      return accounts.reduce((sum, a) => sum + getAccountBalance(a.id), 0)
+    },
 
-      getAccountTransactions: (accountId) => {
-        const { transactions } = get()
-        return transactions.filter((tx) => tx.fromAccountId === accountId || tx.toAccountId === accountId)
-      },
+    getAccountTransactions: (accountId) => {
+      const { transactions } = get()
+      return transactions.filter((tx) => tx.fromAccountId === accountId || tx.toAccountId === accountId)
+    },
 
-      getStockValue: (stockId) => {
-        const { stocks, assetPrices } = get()
-        const stock = stocks.find((s) => s.id === stockId)
-        if (!stock) return 0
-        const price = assetPrices.find((p) => p.ticker === stock.ticker)?.price ?? 0
-        return stock.quantity * price
-      },
+    getStockValue: (stockId) => {
+      const { stocks, assetPrices } = get()
+      const stock = stocks.find((s) => s.id === stockId)
+      if (!stock) return 0
+      const price = assetPrices.find((p) => p.ticker === stock.ticker)?.price ?? 0
+      return stock.quantity * price
+    },
 
-      getStockProfitLoss: (stockId) => {
-        const { stocks, assetPrices } = get()
-        const stock = stocks.find((s) => s.id === stockId)
-        if (!stock) return { amount: 0, percentage: 0 }
-        const price = assetPrices.find((p) => p.ticker === stock.ticker)?.price ?? 0
-        const totalCost = stock.quantity * stock.averagePrice
-        const currentValue = stock.quantity * price
-        const amount = currentValue - totalCost
-        return { amount, percentage: totalCost > 0 ? (amount / totalCost) * 100 : 0 }
-      },
+    getStockProfitLoss: (stockId) => {
+      const { stocks, assetPrices } = get()
+      const stock = stocks.find((s) => s.id === stockId)
+      if (!stock) return { amount: 0, percentage: 0 }
+      const price = assetPrices.find((p) => p.ticker === stock.ticker)?.price ?? 0
+      const totalCost = stock.quantity * stock.averagePrice
+      const currentValue = stock.quantity * price
+      const amount = currentValue - totalCost
+      return { amount, percentage: totalCost > 0 ? (amount / totalCost) * 100 : 0 }
+    },
 
-      getTotalStockValue: () => {
-        const { stocks, getStockValue } = get()
-        return stocks.reduce((sum, s) => sum + getStockValue(s.id), 0)
-      },
+    getTotalStockValue: () => {
+      const { stocks, getStockValue } = get()
+      return stocks.reduce((sum, s) => sum + getStockValue(s.id), 0)
+    },
 
-      getCryptoValue: (cryptoId) => {
-        const { cryptos, assetPrices } = get()
-        const crypto = cryptos.find((c) => c.id === cryptoId)
-        if (!crypto) return 0
-        const price = assetPrices.find((p) => p.ticker === crypto.symbol)?.price ?? 0
-        return crypto.quantity * price
-      },
+    getCryptoValue: (cryptoId) => {
+      const { cryptos, assetPrices } = get()
+      const crypto = cryptos.find((c) => c.id === cryptoId)
+      if (!crypto) return 0
+      const price = assetPrices.find((p) => p.ticker === crypto.symbol)?.price ?? 0
+      return crypto.quantity * price
+    },
 
-      getCryptoProfitLoss: (cryptoId) => {
-        const { cryptos, assetPrices } = get()
-        const crypto = cryptos.find((c) => c.id === cryptoId)
-        if (!crypto) return { amount: 0, percentage: 0 }
-        const price = assetPrices.find((p) => p.ticker === crypto.symbol)?.price ?? 0
-        const totalCost = crypto.quantity * crypto.averagePrice
-        const currentValue = crypto.quantity * price
-        const amount = currentValue - totalCost
-        return { amount, percentage: totalCost > 0 ? (amount / totalCost) * 100 : 0 }
-      },
+    getCryptoProfitLoss: (cryptoId) => {
+      const { cryptos, assetPrices } = get()
+      const crypto = cryptos.find((c) => c.id === cryptoId)
+      if (!crypto) return { amount: 0, percentage: 0 }
+      const price = assetPrices.find((p) => p.ticker === crypto.symbol)?.price ?? 0
+      const totalCost = crypto.quantity * crypto.averagePrice
+      const currentValue = crypto.quantity * price
+      const amount = currentValue - totalCost
+      return { amount, percentage: totalCost > 0 ? (amount / totalCost) * 100 : 0 }
+    },
 
-      getTotalCryptoValue: () => {
-        const { cryptos, getCryptoValue } = get()
-        return cryptos.reduce((sum, c) => sum + getCryptoValue(c.id), 0)
-      },
+    getTotalCryptoValue: () => {
+      const { cryptos, getCryptoValue } = get()
+      return cryptos.reduce((sum, c) => sum + getCryptoValue(c.id), 0)
+    },
 
-      getTotalRealizedPnL: () => {
-        const { stockSales, cryptoSales } = get()
-        const stocks = stockSales.reduce((sum, s) => sum + s.realizedPnL, 0)
-        const cryptos = cryptoSales.reduce((sum, s) => sum + s.realizedPnL, 0)
-        return { stocks, cryptos, total: stocks + cryptos }
-      },
-
-      setAssetPrices: (prices) =>
-        set({ assetPrices: prices, lastUpdated: Date.now() }),
-    }),
-    {
-      name: 'asset-tracker-app',
-    }
-  )
+    getTotalRealizedPnL: () => {
+      const { stockSales, cryptoSales } = get()
+      const stocks = stockSales.reduce((sum, s) => sum + s.realizedPnL, 0)
+      const cryptos = cryptoSales.reduce((sum, s) => sum + s.realizedPnL, 0)
+      return { stocks, cryptos, total: stocks + cryptos }
+    },
+  })
 )

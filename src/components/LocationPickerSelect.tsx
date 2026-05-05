@@ -27,7 +27,7 @@ interface LocationPickerSelectProps {
   locations: Location[]
   value: string
   onChange: (id: string) => void
-  onAddLocation: (name: string) => string
+  onAddLocation: (name: string) => Promise<string> | string
 }
 
 export default function LocationPickerSelect({
@@ -40,10 +40,10 @@ export default function LocationPickerSelect({
   const [dialogOpen, setDialogOpen] = useState(false)
   const [newName, setNewName] = useState('')
 
-  const handleSave = () => {
+  const handleSave = async () => {
     const trimmed = newName.trim()
     if (!trimmed) return
-    const newId = onAddLocation(trimmed)
+    const newId = await onAddLocation(trimmed)
     onChange(newId)
     setNewName('')
     setDialogOpen(false)

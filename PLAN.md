@@ -99,14 +99,17 @@ Wealth app saat ini murni client-side — semua data tersimpan di `localStorage`
 - [x] Semua route: auth check via `auth()` dari `@/lib/auth`
 - [x] `pnpm build` clean
 
-## Phase 7 — Connect Store ke Database
+## Phase 7 — Connect Store ke Database ✅
 
-- [ ] Update Zustand store: on mount fetch dari server (ganti localStorage read)
-- [ ] Setiap mutasi (add/update/delete): call API → update state on success
-- [ ] Tambah `loading` dan `error` state ke store
-- [ ] Seed default locations per-user (Nanovest, Ajaib, Binance, dll.) jika belum ada
-- [ ] Hapus semua localStorage logic
-- [ ] `pnpm build` clean
+- [x] Update Zustand store: on mount fetch dari server (ganti localStorage read)
+- [x] Setiap mutasi (add/update/delete): call API → update state on success
+- [x] Tambah `isLoading` dan `error` state ke store
+- [x] Seed default locations per-user (Nanovest, Ajaib, Pluang / Binance, Indodax, Cold Wallet) jika belum ada
+- [x] Hapus semua localStorage logic (remove `persist` middleware)
+- [x] Buat `StoreInitializer` client component — panggil `fetchAll` on mount dari dashboard layout
+- [x] Tambah `GET /api/stocks/sales` dan `GET /api/crypto/sales` (dipakai fetchAll)
+- [x] `LocationPickerSelect.onAddLocation` — ubah ke async, `handleSave` di-await
+- [x] `pnpm build` clean
 
 ## Phase 8 — Menu Redesign + Sign Out ✅
 
@@ -231,8 +234,8 @@ Saat ini: chart hanya tampilkan total balance. `DailyBalance` di store sudah pun
 - [x] TypeScript check (`npx tsc --noEmit`) — clean
 - [x] Buka `/crypto`, tambah crypto → langsung muncul di list tanpa refresh (Phase 5)
 - [x] Buka `/stocks`, tambah saham → langsung muncul (Phase 5)
-- [ ] Refresh page → data masih ada (Phase 7)
-- [ ] Login di browser berbeda → data muncul (Phase 7)
+- [x] Refresh page → data masih ada (Phase 7)
+- [x] Login di browser berbeda → data muncul (Phase 7)
 - [x] Sign Out → redirect ke `/login` (Phase 8)
 - [x] Active nav item highlight update saat navigasi (Phase 5/8)
 - [x] Finance dropdown: Accounts & Transactions (Phase 8)
