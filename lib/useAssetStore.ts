@@ -1,7 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useState } from 'react'
-import { Account, AppState, DailyBalance, StockHolding, StockLocation, Transaction } from './types'
+import { Account, AppState, CryptoHolding, CryptoLocation, DailyBalance, StockHolding, StockLocation, Transaction } from './types'
 
 const STORAGE_KEY = 'asset-tracker-app'
 
@@ -12,9 +12,15 @@ const defaultState: AppState = {
     { id: 'stock-loc-2', name: 'Ajaib', createdAt: Date.now() },
     { id: 'stock-loc-3', name: 'Crypto', createdAt: Date.now() },
   ],
+  cryptoLocations: [
+    { id: 'crypto-loc-1', name: 'Binance', createdAt: Date.now() },
+    { id: 'crypto-loc-2', name: 'Coinbase', createdAt: Date.now() },
+    { id: 'crypto-loc-3', name: 'Cold Wallet', createdAt: Date.now() },
+  ],
   transactions: [],
   dailyBalances: [],
   stocks: [],
+  cryptos: [],
   lastUpdated: Date.now(),
 }
 
@@ -243,13 +249,106 @@ export function useAssetStore() {
     }))
   }, [])
 
+  const addCrypto = useCallback((crypto: Omit<CryptoHolding, 'id' | 'createdAt'>) => {
+    setState((prev) => ({
+      ...prev,
+      cryptos: [
+        ...prev.cryptos,
+        {
+          ...crypto,
+          id: Date.now().toString(),
+          createdAt: Date.now(),
+        },
+      ],
+      lastUpdated: Date.now(),
+    }))
+  }, [])
+
+  const updateCrypto = useCallback((id: string, updates: Partial<Omit<CryptoHolding, 'id' | 'createdAt'>>) => {
+    setState((prev) => ({
+      ...prev,
+      cryptos: prev.cryptos.map((crypto) => (crypto.id === id ? { ...crypto, ...updates } : crypto)),
+      lastUpdated: Date.now(),
+    }))
+  }, [])
+
+  const deleteCrypto = useCallback((id: string) => {
+    setState((prev) => ({
+      ...prev,
+      cryptos: prev.cryptos.filter((crypto) => crypto.id !== id),
+      lastUpdated: Date.now(),
+    }))
+  }, [])
+
+  const getCryptoValue = useCallback(
+    (cryptoId: string): number => {
+      const crypto = state.cryptos.find((c) => c.id === cryptoId)
+      if (!crypto) return 0
+      return crypto.quantity * crypto.currentPrice
+    },
+    [state.cryptos]
+  )
+
+  const getCryptoProfitLoss = useCallback(
+    (cryptoId: string): { amount: number; percentage: number } => {
+      const crypto = state.cryptos.find((c) => c.id === cryptoId)
+      if (!crypto) return { amount: 0, percentage: 0 }
+      
+      const totalCost = crypto.quantity * crypto.averagePrice
+      const currentValue = crypto.quantity * crypto.currentPrice
+      const amount = currentValue - totalCost
+      const percentage = totalCost > 0 ? (amount / totalCost) * 100 : 0
+      
+      return { amount, percentage }
+    },
+    [state.cryptos]
+  )
+
+  const getTotalCryptoValue = useCallback((): number => {
+    return state.cryptos.reduce((sum, crypto) => sum + getCryptoValue(crypto.id), 0)
+  }, [state.cryptos, getCryptoValue])
+
+  const addCryptoLocation = useCallback((location: Omit<CryptoLocation, 'id' | 'createdAt'>) => {
+    setState((prev) => ({
+      ...prev,
+      cryptoLocations: [
+        ...prev.cryptoLocations,
+        {
+          ...location,
+          id: Date.now().toString(),
+          createdAt: Date.now(),
+        },
+      ],
+      lastUpdated: Date.now(),
+    }))
+  }, [])
+
+  const updateCryptoLocation = useCallback((id: string, updates: Partial<Omit<CryptoLocation, 'id' | 'createdAt'>>) => {
+    setState((prev) => ({
+      ...prev,
+      cryptoLocations: prev.cryptoLocations.map((loc) => (loc.id === id ? { ...loc, ...updates } : loc)),
+      lastUpdated: Date.now(),
+    }))
+  }, [])
+
+  const deleteCryptoLocation = useCallback((id: string) => {
+    setState((prev) => ({
+      ...prev,
+      cryptoLocations: prev.cryptoLocations.filter((loc) => loc.id !== id),
+      cryptos: prev.cryptos.filter((crypto) => crypto.locationId !== id),
+      lastUpdated: Date.now(),
+    }))
+  }, [])
+
   return {
     // State
     accounts: state.accounts,
     stockLocations: state.stockLocations,
+    cryptoLocations: state.cryptoLocations,
     transactions: state.transactions,
     dailyBalances: state.dailyBalances,
     stocks: state.stocks,
+    cryptos: state.cryptos,
     mounted,
 
     // Account operations
@@ -262,6 +361,11 @@ export function useAssetStore() {
     updateStockLocation,
     deleteStockLocation,
 
+    // Crypto Location operations
+    addCryptoLocation,
+    updateCryptoLocation,
+    deleteCryptoLocation,
+
     // Transaction operations
     addTransaction,
     deleteTransaction,
@@ -271,6 +375,11 @@ export function useAssetStore() {
     updateStock,
     deleteStock,
 
+    // Crypto operations
+    addCrypto,
+    updateCrypto,
+    deleteCrypto,
+
     // Queries
     getAccountBalance,
     getTotalBalance,
@@ -278,6 +387,9 @@ export function useAssetStore() {
     getStockValue,
     getStockProfitLoss,
     getTotalStockValue,
+    getCryptoValue,
+    getCryptoProfitLoss,
+    getTotalCryptoValue,
   }
 }
 

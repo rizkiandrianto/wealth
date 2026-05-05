@@ -24,6 +24,12 @@ export default function Home() {
   const totalStockProfitPercent = totalStockCost > 0 ? (totalStockProfit / totalStockCost) * 100 : 0
   const isStockPositive = totalStockProfit >= 0
 
+  const totalCryptoValue = store.getTotalCryptoValue()
+  const totalCryptoCost = store.cryptos.reduce((sum, crypto) => sum + crypto.quantity * crypto.averagePrice, 0)
+  const totalCryptoProfit = totalCryptoValue - totalCryptoCost
+  const totalCryptoProfitPercent = totalCryptoCost > 0 ? (totalCryptoProfit / totalCryptoCost) * 100 : 0
+  const isCryptoPositive = totalCryptoProfit >= 0
+
   return (
     <DashboardLayout>
       <div className="space-y-6">
@@ -57,6 +63,34 @@ export default function Home() {
                 </div>
               </div>
               <Link href="/stocks">
+                <Button variant="outline" className="gap-2">
+                  Lihat Detail
+                  <ArrowRight className="w-4 h-4" />
+                </Button>
+              </Link>
+            </div>
+          </Card>
+        )}
+
+        {store.cryptos.length > 0 && (
+          <Card className="p-6 border-l-4 border-l-orange-500 bg-gradient-to-r from-orange-50 to-transparent">
+            <div className="flex items-start justify-between">
+              <div>
+                <h3 className="text-lg font-semibold">Portfolio Crypto</h3>
+                <p className="text-sm text-muted-foreground mt-1">{store.cryptos.length} crypto dimiliki</p>
+                <div className="mt-3 space-y-2">
+                  <p className="text-2xl font-bold">{formatCurrency(totalCryptoValue)}</p>
+                  <p className={`text-sm font-medium flex items-center gap-1 ${isCryptoPositive ? 'text-green-600' : 'text-red-600'}`}>
+                    {isCryptoPositive ? (
+                      <TrendingUp className="w-4 h-4" />
+                    ) : (
+                      <TrendingDown className="w-4 h-4" />
+                    )}
+                    {formatCurrency(totalCryptoProfit)} ({totalCryptoProfitPercent.toFixed(2)}%)
+                  </p>
+                </div>
+              </div>
+              <Link href="/crypto">
                 <Button variant="outline" className="gap-2">
                   Lihat Detail
                   <ArrowRight className="w-4 h-4" />

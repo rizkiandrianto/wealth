@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react'
 import Link from 'next/link'
-import { LayoutDashboard, Wallet, TrendingUp, Calendar, Menu, X, PieChart } from 'lucide-react'
+import { LayoutDashboard, Wallet, TrendingUp, Calendar, Menu, X, PieChart, Coins } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
@@ -15,6 +15,7 @@ const NAVIGATION = [
   { href: '/accounts', label: 'Accounts', icon: Wallet },
   { href: '/transactions', label: 'Transactions', icon: TrendingUp },
   { href: '/stocks', label: 'Stocks', icon: PieChart },
+  { href: '/crypto', label: 'Crypto', icon: Coins },
   { href: '/history', label: 'History', icon: Calendar },
 ]
 

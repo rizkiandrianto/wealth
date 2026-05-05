@@ -43,11 +43,31 @@ export interface StockHolding {
   createdAt: number;
 }
 
+export interface CryptoLocation {
+  id: string;
+  name: string;
+  createdAt: number;
+}
+
+export interface CryptoHolding {
+  id: string;
+  symbol: string;
+  name: string;
+  locationId: string; // reference to CryptoLocation.id
+  quantity: number;
+  averagePrice: number; // in IDR
+  currentPrice: number; // in IDR (will be fetched from API later)
+  purchaseDate: number; // timestamp
+  createdAt: number;
+}
+
 export interface AppState {
   accounts: Account[];
   stockLocations: StockLocation[];
+  cryptoLocations: CryptoLocation[];
   transactions: Transaction[];
   dailyBalances: DailyBalance[];
   stocks: StockHolding[];
+  cryptos: CryptoHolding[];
   lastUpdated: number;
 }
