@@ -13,6 +13,7 @@ import {
   X,
   PieChart,
   Coins,
+  Gem,
   ChevronDown,
   LogOut,
   User,
@@ -39,6 +40,7 @@ const FINANCE_ITEMS = [
 const PORTFOLIO_ITEMS = [
   { href: '/stocks', label: 'Stocks', icon: PieChart },
   { href: '/crypto', label: 'Crypto', icon: Coins },
+  { href: '/gold', label: 'Gold', icon: Gem },
 ]
 
 // Bottom nav: 4 items — Finance goes to /accounts, Portfolio goes to /stocks

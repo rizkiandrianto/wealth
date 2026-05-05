@@ -8,6 +8,9 @@ import {
   CryptoLocation,
   CryptoSale,
   DailyBalance,
+  GoldHolding,
+  GoldLocation,
+  GoldSale,
   StockHolding,
   StockLocation,
   StockSale,
@@ -70,9 +73,27 @@ const toCryptoSale = (r: Row): CryptoSale => ({
 })
 
 const toAssetPrice = (r: Row): AssetPrice => ({
-  ticker: r.ticker, assetType: r.assetType as 'stock' | 'crypto',
+  ticker: r.ticker, assetType: r.assetType as 'stock' | 'crypto' | 'gold',
   name: r.name, price: num(r.price), currency: r.currency,
   updatedAt: ts(r.updatedAt),
+})
+
+const toGoldLocation = (r: Row): GoldLocation => ({
+  id: r.id, name: r.name, createdAt: ts(r.createdAt),
+})
+
+const toGold = (r: Row): GoldHolding => ({
+  id: r.id, locationId: r.locationId,
+  weight: num(r.weight), purchasePrice: num(r.purchasePrice),
+  purchaseDate: ts(r.purchaseDate), createdAt: ts(r.createdAt),
+})
+
+const toGoldSale = (r: Row): GoldSale => ({
+  id: r.id, goldId: r.goldId,
+  weight: num(r.weight), salePrice: num(r.salePrice),
+  averageCostPrice: num(r.averageCostPrice),
+  realizedPnL: num(r.realizedPnl), realizedPnLPercent: num(r.realizedPnlPercent),
+  saleDate: ts(r.saleDate), createdAt: ts(r.createdAt),
 })
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -165,6 +186,17 @@ interface AssetStore extends AppState {
   deleteCrypto: (id: string) => Promise<void>
   sellCrypto: (cryptoId: string, quantity: number, salePrice: number) => Promise<void>
 
+  // Gold Location operations
+  addGoldLocation: (location: Omit<GoldLocation, 'id' | 'createdAt'>) => Promise<string>
+  updateGoldLocation: (id: string, updates: Partial<Omit<GoldLocation, 'id' | 'createdAt'>>) => Promise<void>
+  deleteGoldLocation: (id: string) => Promise<void>
+
+  // Gold operations
+  addGold: (gold: Omit<GoldHolding, 'id' | 'createdAt'>) => Promise<void>
+  updateGold: (id: string, updates: Partial<Omit<GoldHolding, 'id' | 'createdAt'>>) => Promise<void>
+  deleteGold: (id: string) => Promise<void>
+  sellGold: (goldId: string, weight: number, salePrice: number) => Promise<void>
+
   // Asset price operations
   setAssetPrices: (prices: AssetPrice[]) => void
 
@@ -179,6 +211,11 @@ interface AssetStore extends AppState {
   getCryptoProfitLoss: (cryptoId: string) => { amount: number; percentage: number }
   getTotalCryptoValue: () => number
   getTotalRealizedPnL: () => { stocks: number; cryptos: number; total: number }
+
+  // Gold queries
+  getGoldValue: (goldId: string) => number
+  getGoldProfitLoss: (goldId: string) => { amount: number; percentage: number }
+  getTotalGoldValue: () => number
 }
 
 // ─── Store implementation ─────────────────────────────────────────────────────
@@ -189,12 +226,15 @@ export const useAssetStore = create<AssetStore>()(
     accounts: [],
     stockLocations: [],
     cryptoLocations: [],
+    goldLocations: [],
     transactions: [],
     dailyBalances: [],
     stocks: [],
     cryptos: [],
+    golds: [],
     stockSales: [],
     cryptoSales: [],
+    goldSales: [],
     assetPrices: [],
     lastUpdated: Date.now(),
     isLoading: false,
@@ -210,20 +250,26 @@ export const useAssetStore = create<AssetStore>()(
           txRows,
           stockLocRows,
           cryptoLocRows,
+          goldLocRows,
           stockRows,
           cryptoRows,
+          goldRows,
           stockSaleRows,
           cryptoSaleRows,
+          goldSaleRows,
           priceRows,
         ] = await Promise.all([
           apiFetch('/api/accounts'),
           apiFetch('/api/transactions'),
           apiFetch('/api/stock-locations'),
           apiFetch('/api/crypto-locations'),
+          apiFetch('/api/gold-locations'),
           apiFetch('/api/stocks'),
           apiFetch('/api/crypto'),
+          apiFetch('/api/gold'),
           apiFetch('/api/stocks/sales'),
           apiFetch('/api/crypto/sales'),
+          apiFetch('/api/gold/sales'),
           apiFetch('/api/market/prices'),
         ])
 
@@ -263,10 +309,13 @@ export const useAssetStore = create<AssetStore>()(
           dailyBalances: calculateDailyBalances(accounts, transactions),
           stockLocations,
           cryptoLocations,
+          goldLocations: goldLocRows.map(toGoldLocation),
           stocks: stockRows.map(toStock),
           cryptos: cryptoRows.map(toCrypto),
+          golds: goldRows.map(toGold),
           stockSales: stockSaleRows.map(toStockSale),
           cryptoSales: cryptoSaleRows.map(toCryptoSale),
+          goldSales: goldSaleRows.map(toGoldSale),
           assetPrices: priceRows.map(toAssetPrice),
           lastUpdated: Date.now(),
           isLoading: false,
@@ -477,6 +526,77 @@ export const useAssetStore = create<AssetStore>()(
       }))
     },
 
+    // ── Gold Location operations ─────────────────────────────────────────────
+
+    addGoldLocation: async (location) => {
+      const row = await apiFetch('/api/gold-locations', {
+        method: 'POST', body: JSON.stringify(location),
+      })
+      const newLoc = toGoldLocation(row)
+      set((s) => ({ goldLocations: [...s.goldLocations, newLoc], lastUpdated: Date.now() }))
+      return newLoc.id
+    },
+
+    updateGoldLocation: async (id, updates) => {
+      const row = await apiFetch(`/api/gold-locations/${id}`, {
+        method: 'PATCH', body: JSON.stringify(updates),
+      })
+      set((s) => ({
+        goldLocations: s.goldLocations.map((loc) => (loc.id === id ? toGoldLocation(row) : loc)),
+        lastUpdated: Date.now(),
+      }))
+    },
+
+    deleteGoldLocation: async (id) => {
+      await apiFetch(`/api/gold-locations/${id}`, { method: 'DELETE' })
+      set((s) => ({
+        goldLocations: s.goldLocations.filter((loc) => loc.id !== id),
+        golds: s.golds.filter((g) => g.locationId !== id),
+        lastUpdated: Date.now(),
+      }))
+    },
+
+    // ── Gold operations ──────────────────────────────────────────────────────
+
+    addGold: async (gold) => {
+      const row = await apiFetch('/api/gold', {
+        method: 'POST', body: JSON.stringify(gold),
+      })
+      set((s) => ({ golds: [...s.golds, toGold(row)], lastUpdated: Date.now() }))
+    },
+
+    updateGold: async (id, updates) => {
+      const row = await apiFetch(`/api/gold/${id}`, {
+        method: 'PATCH', body: JSON.stringify(updates),
+      })
+      set((s) => ({
+        golds: s.golds.map((g) => (g.id === id ? toGold(row) : g)),
+        lastUpdated: Date.now(),
+      }))
+    },
+
+    deleteGold: async (id) => {
+      await apiFetch(`/api/gold/${id}`, { method: 'DELETE' })
+      set((s) => ({ golds: s.golds.filter((g) => g.id !== id), lastUpdated: Date.now() }))
+    },
+
+    sellGold: async (goldId, weight, salePrice) => {
+      const gold = get().golds.find((g) => g.id === goldId)
+      if (!gold || weight <= 0 || gold.weight < weight) return
+
+      const row = await apiFetch(`/api/gold/${goldId}/sell`, {
+        method: 'POST', body: JSON.stringify({ weight, salePrice }),
+      })
+
+      set((s) => ({
+        golds: gold.weight === weight
+          ? s.golds.filter((g) => g.id !== goldId)
+          : s.golds.map((g) => g.id === goldId ? { ...g, weight: g.weight - weight } : g),
+        goldSales: [...s.goldSales, toGoldSale(row)],
+        lastUpdated: Date.now(),
+      }))
+    },
+
     // ── Asset prices ─────────────────────────────────────────────────────────
 
     setAssetPrices: (prices) =>
@@ -560,6 +680,30 @@ export const useAssetStore = create<AssetStore>()(
       const stocks = stockSales.reduce((sum, s) => sum + s.realizedPnL, 0)
       const cryptos = cryptoSales.reduce((sum, s) => sum + s.realizedPnL, 0)
       return { stocks, cryptos, total: stocks + cryptos }
+    },
+
+    getGoldValue: (goldId) => {
+      const { golds, assetPrices } = get()
+      const gold = golds.find((g) => g.id === goldId)
+      if (!gold) return 0
+      const price = assetPrices.find((p) => p.ticker === 'XAU')?.price ?? 0
+      return gold.weight * price
+    },
+
+    getGoldProfitLoss: (goldId) => {
+      const { golds, assetPrices } = get()
+      const gold = golds.find((g) => g.id === goldId)
+      if (!gold) return { amount: 0, percentage: 0 }
+      const price = assetPrices.find((p) => p.ticker === 'XAU')?.price ?? 0
+      const totalCost = gold.weight * gold.purchasePrice
+      const currentValue = gold.weight * price
+      const amount = currentValue - totalCost
+      return { amount, percentage: totalCost > 0 ? (amount / totalCost) * 100 : 0 }
+    },
+
+    getTotalGoldValue: () => {
+      const { golds, getGoldValue } = get()
+      return golds.reduce((sum, g) => sum + getGoldValue(g.id), 0)
     },
   })
 )

@@ -33,11 +33,38 @@ export interface DailyBalance {
 
 export interface AssetPrice {
   ticker: string;
-  assetType: 'stock' | 'crypto';
+  assetType: 'stock' | 'crypto' | 'gold';
   name: string;
   price: number;
   currency: string;
   updatedAt: number;
+}
+
+export interface GoldLocation {
+  id: string;
+  name: string;
+  createdAt: number;
+}
+
+export interface GoldHolding {
+  id: string;
+  locationId: string;
+  weight: number; // grams
+  purchasePrice: number; // IDR per gram
+  purchaseDate: number; // timestamp
+  createdAt: number;
+}
+
+export interface GoldSale {
+  id: string;
+  goldId: string;
+  weight: number;
+  salePrice: number; // IDR per gram
+  averageCostPrice: number; // IDR per gram
+  realizedPnL: number;
+  realizedPnLPercent: number;
+  saleDate: number; // timestamp
+  createdAt: number;
 }
 
 export interface StockHolding {
@@ -97,12 +124,15 @@ export interface AppState {
   accounts: Account[];
   stockLocations: StockLocation[];
   cryptoLocations: CryptoLocation[];
+  goldLocations: GoldLocation[];
   transactions: Transaction[];
   dailyBalances: DailyBalance[];
   stocks: StockHolding[];
   cryptos: CryptoHolding[];
+  golds: GoldHolding[];
   stockSales: StockSale[];
   cryptoSales: CryptoSale[];
+  goldSales: GoldSale[];
   assetPrices: AssetPrice[];
   lastUpdated: number;
 }

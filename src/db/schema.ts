@@ -176,6 +176,44 @@ export const cryptoSales = pgTable("crypto_sales", {
   createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
 });
 
+export const goldLocations = pgTable("gold_locations", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: uuid("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  name: text("name").notNull(),
+  createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+});
+
+export const goldHoldings = pgTable("gold_holdings", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: uuid("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  locationId: uuid("location_id")
+    .notNull()
+    .references(() => goldLocations.id, { onDelete: "cascade" }),
+  weight: numeric("weight", { precision: 20, scale: 4 }).notNull(), // in grams
+  purchasePrice: numeric("purchase_price", { precision: 20, scale: 4 }).notNull(), // IDR per gram
+  purchaseDate: timestamp("purchase_date", { mode: "date" }).notNull(),
+  createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+});
+
+export const goldSales = pgTable("gold_sales", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: uuid("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  goldId: uuid("gold_id").notNull(),
+  weight: numeric("weight", { precision: 20, scale: 4 }).notNull(),
+  salePrice: numeric("sale_price", { precision: 20, scale: 4 }).notNull(), // IDR per gram
+  averageCostPrice: numeric("average_cost_price", { precision: 20, scale: 4 }).notNull(),
+  realizedPnl: numeric("realized_pnl", { precision: 20, scale: 4 }).notNull(),
+  realizedPnlPercent: numeric("realized_pnl_percent", { precision: 10, scale: 4 }).notNull(),
+  saleDate: timestamp("sale_date", { mode: "date" }).notNull(),
+  createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+});
+
 export const dailyBalances = pgTable("daily_balances", {
   id: uuid("id").primaryKey().defaultRandom(),
   userId: uuid("user_id")

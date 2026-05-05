@@ -256,11 +256,11 @@ Saat ini: chart hanya tampilkan total balance. `DailyBalance` di store sudah pun
 
 ### 11a — Schema & Types
 
-- [ ] Tambah tabel di `src/db/schema.ts`:
+- [x] Tambah tabel di `src/db/schema.ts`:
   - `gold_locations` — id, userId (fk), name, createdAt
   - `gold_holdings` — id, userId (fk), locationId (fk), weight numeric(20,4) (gram), purchasePrice numeric(20,4) (IDR/gram), purchaseDate, createdAt
   - `gold_sales` — id, userId (fk), goldId, weight, salePrice (IDR/gram), averageCostPrice, realizedPnl, realizedPnlPercent, saleDate, createdAt
-- [ ] Tambah ke `src/lib/types.ts`:
+- [x] Tambah ke `src/lib/types.ts`:
   - `GoldLocation { id, name, createdAt }`
   - `GoldHolding { id, locationId, weight, purchasePrice, purchaseDate, createdAt }`
   - `GoldSale { id, goldId, weight, salePrice, averageCostPrice, realizedPnL, realizedPnLPercent, saleDate, createdAt }`
@@ -269,7 +269,7 @@ Saat ini: chart hanya tampilkan total balance. `DailyBalance` di store sudah pun
 
 ### 11b — Store
 
-- [ ] Tambah ke Zustand store:
+- [x] Tambah ke Zustand store:
   - State: `goldLocations: GoldLocation[]`, `golds: GoldHolding[]`, `goldSales: GoldSale[]`
   - Actions: `addGoldLocation`, `updateGoldLocation`, `deleteGoldLocation`
   - Actions: `addGold`, `updateGold`, `deleteGold`, `sellGold`
@@ -278,22 +278,163 @@ Saat ini: chart hanya tampilkan total balance. `DailyBalance` di store sudah pun
 
 ### 11c — API Routes
 
-- [ ] `GET/POST /api/gold-locations`
-- [ ] `PATCH/DELETE /api/gold-locations/[id]`
-- [ ] `GET/POST /api/gold`
-- [ ] `PATCH/DELETE /api/gold/[id]`
-- [ ] `POST /api/gold/[id]/sell` — update weight + insert sale record (DB transaction)
+- [x] `GET/POST /api/gold-locations`
+- [x] `PATCH/DELETE /api/gold-locations/[id]`
+- [x] `GET/POST /api/gold`
+- [x] `GET /api/gold/sales`
+- [x] `PATCH/DELETE /api/gold/[id]`
+- [x] `POST /api/gold/[id]/sell` — update weight + insert sale record (DB transaction)
 
 ### 11d — UI Components & Page
 
-- [ ] `GoldForm.tsx` — fields: lokasi, berat (gram), harga beli (IDR/gram), tanggal beli
+- [x] `GoldForm.tsx` — fields: lokasi, berat (gram), harga beli (IDR/gram), tanggal beli
   - Gunakan `LocationPickerSelect` (reuse dari stocks/crypto)
-- [ ] `GoldList.tsx` — group by lokasi, tampilkan weight + value + P&L
+- [x] `GoldList.tsx` — group by lokasi, tampilkan weight + value + P&L
   - "Harga Terkini" dari `asset_prices` (XAU), tampilkan '—' bila belum ada
-- [ ] `GoldSummary.tsx` — total weight, total value, total P&L
-- [ ] `GoldSellDialog.tsx` — weight to sell, sale price/gram, preview realized P&L
-- [ ] `src/app/(dashboard)/gold/page.tsx` — full page: summary + form + list
-- [ ] Update `DashboardLayout.tsx`: tambah "Gold" ke Portfolio dropdown & mobile nav
+- [x] `GoldSummary.tsx` — total weight, total value, total P&L
+- [x] `GoldSellDialog.tsx` — weight to sell, sale price/gram, preview realized P&L
+- [x] `src/app/(dashboard)/gold/page.tsx` — full page: summary + form + list
+- [x] Update `DashboardLayout.tsx`: tambah "Gold" ke Portfolio dropdown & mobile nav
+
+---
+
+## Phase 12 — Market Price Update System
+
+> Sistem untuk update harga terkini ke tabel `asset_prices`. Flow: scheduler (atau manual trigger) → GET unique tickers dari semua holdings → fetch harga dari masing-masing data source → upsert ke `asset_prices`. Semua API di phase ini menggunakan internal API key (`x-api-key` header) — bukan user session — karena dipanggil oleh scheduler/cron, bukan user.
+
+### 12a — Get Unique Tickers API
+
+**File:** `src/app/api/market/tickers/route.ts`
+
+- [ ] `GET /api/market/tickers` — return semua unique ticker dari seluruh holdings (cross-user)
+  - Query `stock_holdings` → distinct `ticker` values → group as `assetType: "stock"`
+  - Query `crypto_holdings` → distinct `symbol` values → group as `assetType: "crypto"`
+  - Query `gold_holdings` (Phase 11) → hardcode `XAU` → group as `assetType: "gold"` (skip jika tabel belum ada)
+  - Response shape:
+    ```json
+    {
+      "stock": ["BBCA", "TLKM", "GOTO"],
+      "crypto": ["BTC", "ETH", "SOL"],
+      "gold": ["XAU"]
+    }
+    ```
+  - Auth: cek `x-api-key` header vs `INTERNAL_API_KEY` env var (return 401 jika tidak match)
+
+### 12b — Update Market Prices API
+
+**File:** `src/app/api/market/prices/update/route.ts`
+
+- [ ] `POST /api/market/prices/update` — trigger price update untuk semua asset type
+  - Auth: cek `x-api-key` header vs `INTERNAL_API_KEY` env var
+  - Flow internal:
+    1. Panggil logic yang sama dengan `GET /api/market/tickers` untuk dapat unique tickers
+    2. **Crypto**: fetch ke CoinGecko `GET /api/v3/simple/price?ids={coinIds}&vs_currencies=usd`
+       - Perlu mapping symbol (`BTC`) → CoinGecko ID (`bitcoin`); gunakan `GET /api/v3/coins/list` untuk lookup atau simpan mapping di memory cache
+       - Price dalam USD
+    3. **Stock**: fetch ke Yahoo Finance `GET https://query1.finance.yahoo.com/v8/finance/chart/{ticker}.JK` (IDX suffix `.JK`)
+       - Price dalam IDR
+       - Fallback: skip ticker yang gagal (log warning), jangan fail seluruh request
+    4. **Gold**: fetch XAU/IDR price dari `https://www.goldapi.io/api/XAU/IDR` (butuh `GOLD_API_KEY` env var) atau alternatif free: kalkulasi dari XAU/USD × USD/IDR rate
+    5. Upsert semua harga ke `asset_prices` (ON CONFLICT ticker DO UPDATE price, updatedAt)
+  - Response:
+    ```json
+    {
+      "updated": { "stock": 3, "crypto": 3, "gold": 1 },
+      "failed": { "stock": ["GOTO"], "crypto": [], "gold": [] },
+      "updatedAt": "2026-05-06T10:00:00Z"
+    }
+    ```
+
+### 12c — Manual Single Price Update
+
+**File:** `src/app/api/market/prices/[ticker]/route.ts`
+
+- [ ] `PUT /api/market/prices/[ticker]` — manual override harga satu ticker
+  - Auth: user session (bisa dipakai dari UI admin sederhana)
+  - Body: `{ price: number, currency?: string, name?: string }`
+  - Upsert ke `asset_prices`; cocok untuk kasus saham IDX yang tidak punya free API reliabel
+
+### 12d — Environment Variables
+
+- [ ] Tambah ke `.env.local` template:
+  - `INTERNAL_API_KEY` — random secret untuk auth scheduler calls
+  - `GOLD_API_KEY` — API key dari goldapi.io (free tier: 100 req/month)
+- [ ] Document flow di README atau Notes
+
+---
+
+## Phase 13 — Google Sign-In / Registration
+
+> Tambahkan Google OAuth sebagai opsi login/register di samping Credentials. Referensi: project `../excalidraw` yang sudah implement flow yang sama dengan NextAuth v5 + DrizzleAdapter.
+
+**Flow untuk user baru via Google:**
+1. User klik "Masuk dengan Google" di login page
+2. `signIn("google", { callbackUrl: "/" })` → OAuth redirect ke Google
+3. `signIn` callback di auth config: cek apakah email sudah ada di DB
+   - Sudah ada → `return true` → login normal, Google account di-link ke user via `allowDangerousEmailAccountLinking`
+   - Belum ada → `return "/register?from=google&name=...&email=..."` → redirect ke register page
+4. Register page: pre-fill name & email (locked), user set password → `POST /api/register`
+5. Setelah register: `signIn("credentials", { email, password })` → auto-login → redirect ke `/`
+6. Sesi berikutnya: Google sign-in langsung masuk (user sudah exist + account linked)
+
+### 13a — Auth Config
+
+**File:** `src/lib/auth.ts`
+
+- [ ] Import `Google` dari `next-auth/providers/google`
+- [ ] Tambah `Google({ clientId, clientSecret, allowDangerousEmailAccountLinking: true })` ke `providers[]`
+- [ ] Tambah `signIn` callback:
+  ```ts
+  async signIn({ user, account }) {
+    if (account?.provider === 'google') {
+      const [existing] = await db.select({ id: users.id }).from(users)
+        .where(eq(users.email, user.email!)).limit(1)
+      if (!existing) {
+        const params = new URLSearchParams({ name: user.name ?? '', email: user.email ?? '', from: 'google' })
+        return `/register?${params.toString()}`
+      }
+    }
+    return true
+  }
+  ```
+
+### 13b — Login Page
+
+**File:** `src/app/(auth)/login/page.tsx`
+
+- [ ] Tambah state `googleLoading`
+- [ ] Tambah handler `handleGoogle`: `signIn('google', { callbackUrl: '/' })`
+- [ ] Tambah tombol "Masuk dengan Google" di atas form (dengan Google SVG icon)
+- [ ] Tambah divider "atau" antara tombol Google dan form email/password
+
+### 13c — Register Page
+
+**File:** `src/app/(auth)/register/page.tsx`
+
+- [ ] Wrap form dalam `<Suspense>` (diperlukan untuk `useSearchParams()`)
+- [ ] Baca search params: `from`, `email`, `name`
+- [ ] Jika `from=google`:
+  - Tampilkan badge "Mendaftar via Google"
+  - Pre-fill & lock field email (readOnly, disabled styling)
+  - Pre-fill field nama
+  - Label password: "Password (untuk aktifkan login email juga)"
+  - Setelah register berhasil: langsung `signIn('credentials', { email, password })` → redirect ke `/`
+  - Sembunyikan link "Sudah punya akun?"
+- [ ] Jika `from` tidak ada: flow register biasa (tidak ada perubahan)
+
+### 13d — Environment Variables
+
+- [ ] Tambah ke `.env.local`:
+  - `GOOGLE_CLIENT_ID` — dari Google Cloud Console → APIs & Services → Credentials
+  - `GOOGLE_CLIENT_SECRET` — dari Google Cloud Console
+
+**Setup Google Cloud Console:**
+1. Buka [console.cloud.google.com](https://console.cloud.google.com)
+2. Buat project baru atau pilih project existing
+3. Enable **Google+ API** atau **Google Identity** API
+4. Buat OAuth 2.0 Client ID (tipe: Web application)
+5. Authorized redirect URIs: `http://localhost:3000/api/auth/callback/google` (dev) + URL production
+6. Copy Client ID & Client Secret ke `.env.local`
 
 ---
 
@@ -303,7 +444,6 @@ Saat ini: chart hanya tampilkan total balance. `DailyBalance` di store sudah pun
 - Default locations di-seed per-user saat pertama kali fetch (Phase 7)
 - `stockSales` & `cryptoSales` tidak punya FK ke holdings by design
 - PWA dipertahankan: `next-pwa` v5.6.0, build pakai `--webpack` flag
-- Google OAuth tidak masuk scope, bisa ditambahkan belakangan
 - `asset_prices` tabel global (bukan per-user): akan di-feed oleh BE scheduler nanti
 - CoinGecko free tier: ~10-30 req/min, cukup untuk auto-complete on blur (tidak setiap keystroke)
 - IDX stock names: tidak ada free API yang reliable, simpan di `asset_prices` secara manual atau via BE scheduler nanti
