@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react'
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import { LayoutDashboard, Wallet, TrendingUp, Calendar, Menu, X, PieChart, Coins } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
@@ -21,11 +22,7 @@ const NAVIGATION = [
 
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const [currentPath, setCurrentPath] = useState('/')
-
-  React.useEffect(() => {
-    setCurrentPath(window.location.pathname)
-  }, [])
+  const currentPath = usePathname()
 
   return (
     <div className="flex flex-col min-h-screen bg-background">

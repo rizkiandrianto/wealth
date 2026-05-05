@@ -70,16 +70,15 @@ Wealth app saat ini murni client-side — semua data tersimpan di `localStorage`
 
 ---
 
-## Phase 5 — Zustand Migration + Bug Fix ✅ / 🔄
+## Phase 5 — Zustand Migration + Bug Fix ✅
 
 > Root cause bug "ga kesimpen": `useAssetStore` adalah custom hook biasa (bukan singleton). Setiap komponen mendapat instance state terpisah — perubahan di `CryptoForm` tidak terlihat di `CryptoPage` sampai page refresh. Solusi: Zustand, yang merupakan singleton global.
 
-- [ ] Install `zustand`
-- [ ] Buat `src/lib/store/useAssetStore.ts` — Zustand store (state & actions sama dengan hook lama)
-- [ ] Hapus `src/lib/useAssetStore.ts` lama
-- [ ] Update semua import dari `@/lib/useAssetStore` → `@/lib/store/useAssetStore`
-- [ ] Fix `DashboardLayout.tsx`: ganti `window.location.pathname` dengan `usePathname()`
-- [ ] `pnpm build` clean
+- [x] Install `zustand`
+- [x] Buat `src/lib/store/useAssetStore.ts` — Zustand store (state & actions sama dengan hook lama)
+- [x] `src/lib/useAssetStore.ts` lama dijadikan re-export shim (semua import tidak perlu diubah)
+- [x] Fix `DashboardLayout.tsx`: ganti `window.location.pathname` dengan `usePathname()`
+- [x] `pnpm build` clean
 
 ## Phase 6 — API Routes (CRUD untuk semua entitas)
 
