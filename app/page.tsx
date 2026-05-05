@@ -1,13 +1,28 @@
 'use client'
 
+import Link from 'next/link'
 import { useAssetStore } from '@/lib/useAssetStore'
 import DashboardLayout from '@/components/DashboardLayout'
 import DashboardSummary from '@/components/DashboardSummary'
 import AccountsList from '@/components/AccountsList'
 import RecentTransactions from '@/components/RecentTransactions'
+import { Card } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { formatCurrency } from '@/lib/format'
+import { TrendingUp, TrendingDown, ArrowRight } from 'lucide-react'
 
 export default function Home() {
   const store = useAssetStore()
+
+  if (!store.mounted) {
+    return <DashboardLayout><div>Loading...</div></DashboardLayout>
+  }
+
+  const totalStockValue = store.getTotalStockValue()
+  const totalStockCost = store.stocks.reduce((sum, stock) => sum + stock.quantity * stock.averagePrice, 0)
+  const totalStockProfit = totalStockValue - totalStockCost
+  const totalStockProfitPercent = totalStockCost > 0 ? (totalStockProfit / totalStockCost) * 100 : 0
+  const isStockPositive = totalStockProfit >= 0
 
   return (
     <DashboardLayout>
@@ -22,6 +37,34 @@ export default function Home() {
           accounts={store.accounts}
           getBalance={store.getAccountBalance}
         />
+
+        {store.stocks.length > 0 && (
+          <Card className="p-6 border-l-4 border-l-purple-500 bg-gradient-to-r from-purple-50 to-transparent">
+            <div className="flex items-start justify-between">
+              <div>
+                <h3 className="text-lg font-semibold">Portfolio Saham</h3>
+                <p className="text-sm text-muted-foreground mt-1">{store.stocks.length} saham dimiliki</p>
+                <div className="mt-3 space-y-2">
+                  <p className="text-2xl font-bold">{formatCurrency(totalStockValue)}</p>
+                  <p className={`text-sm font-medium flex items-center gap-1 ${isStockPositive ? 'text-green-600' : 'text-red-600'}`}>
+                    {isStockPositive ? (
+                      <TrendingUp className="w-4 h-4" />
+                    ) : (
+                      <TrendingDown className="w-4 h-4" />
+                    )}
+                    {formatCurrency(totalStockProfit)} ({totalStockProfitPercent.toFixed(2)}%)
+                  </p>
+                </div>
+              </div>
+              <Link href="/stocks">
+                <Button variant="outline" className="gap-2">
+                  Lihat Detail
+                  <ArrowRight className="w-4 h-4" />
+                </Button>
+              </Link>
+            </div>
+          </Card>
+        )}
         
         <RecentTransactions transactions={store.transactions.slice(-5).reverse()} />
       </div>

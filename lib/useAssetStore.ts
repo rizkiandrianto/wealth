@@ -1,7 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useState } from 'react'
-import { Account, AppState, DailyBalance, Transaction } from './types'
+import { Account, AppState, DailyBalance, StockHolding, Transaction } from './types'
 
 const STORAGE_KEY = 'asset-tracker-app'
 
@@ -9,6 +9,7 @@ const defaultState: AppState = {
   accounts: [],
   transactions: [],
   dailyBalances: [],
+  stocks: [],
   lastUpdated: Date.now(),
 }
 
@@ -137,11 +138,71 @@ export function useAssetStore() {
     [state.transactions]
   )
 
+  const addStock = useCallback((stock: Omit<StockHolding, 'id' | 'createdAt'>) => {
+    setState((prev) => ({
+      ...prev,
+      stocks: [
+        ...prev.stocks,
+        {
+          ...stock,
+          id: Date.now().toString(),
+          createdAt: Date.now(),
+        },
+      ],
+      lastUpdated: Date.now(),
+    }))
+  }, [])
+
+  const updateStock = useCallback((id: string, updates: Partial<Omit<StockHolding, 'id' | 'createdAt'>>) => {
+    setState((prev) => ({
+      ...prev,
+      stocks: prev.stocks.map((stock) => (stock.id === id ? { ...stock, ...updates } : stock)),
+      lastUpdated: Date.now(),
+    }))
+  }, [])
+
+  const deleteStock = useCallback((id: string) => {
+    setState((prev) => ({
+      ...prev,
+      stocks: prev.stocks.filter((stock) => stock.id !== id),
+      lastUpdated: Date.now(),
+    }))
+  }, [])
+
+  const getStockValue = useCallback(
+    (stockId: string): number => {
+      const stock = state.stocks.find((s) => s.id === stockId)
+      if (!stock) return 0
+      return stock.quantity * stock.currentPrice
+    },
+    [state.stocks]
+  )
+
+  const getStockProfitLoss = useCallback(
+    (stockId: string): { amount: number; percentage: number } => {
+      const stock = state.stocks.find((s) => s.id === stockId)
+      if (!stock) return { amount: 0, percentage: 0 }
+      
+      const totalCost = stock.quantity * stock.averagePrice
+      const currentValue = stock.quantity * stock.currentPrice
+      const amount = currentValue - totalCost
+      const percentage = totalCost > 0 ? (amount / totalCost) * 100 : 0
+      
+      return { amount, percentage }
+    },
+    [state.stocks]
+  )
+
+  const getTotalStockValue = useCallback((): number => {
+    return state.stocks.reduce((sum, stock) => sum + getStockValue(stock.id), 0)
+  }, [state.stocks, getStockValue])
+
   return {
     // State
     accounts: state.accounts,
     transactions: state.transactions,
     dailyBalances: state.dailyBalances,
+    stocks: state.stocks,
     mounted,
 
     // Account operations
@@ -153,10 +214,18 @@ export function useAssetStore() {
     addTransaction,
     deleteTransaction,
 
+    // Stock operations
+    addStock,
+    updateStock,
+    deleteStock,
+
     // Queries
     getAccountBalance,
     getTotalBalance,
     getAccountTransactions,
+    getStockValue,
+    getStockProfitLoss,
+    getTotalStockValue,
   }
 }
 
