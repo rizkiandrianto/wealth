@@ -170,10 +170,10 @@ Wealth app saat ini murni client-side — semua data tersimpan di `localStorage`
 
 **File:** `src/components/TransactionForm.tsx`
 
-- [ ] Saat type = transfer atau withdrawal, validasi `amount <= getAccountBalance(fromAccountId)`
-- [ ] Tampilkan saldo tersedia di bawah dropdown "From account" setelah account dipilih
-- [ ] Error message: `"Saldo tidak cukup — tersedia: Rp X,xxx"`
-- [ ] `getAccountBalance` sudah ada di Zustand store, tinggal dipanggil di form
+- [x] Saat type = transfer atau withdrawal, validasi `amount <= getAccountBalance(fromAccountId)`
+- [x] Tampilkan saldo tersedia di bawah dropdown "From account" setelah account dipilih
+- [x] Error message: `"Saldo tidak cukup — tersedia: Rp X,xxx"`
+- [x] `getAccountBalance` sudah ada di Zustand store, tinggal dipanggil di form
 
 ### 10b — Tambah Lokasi via Modal (Stocks & Crypto)
 
@@ -182,15 +182,15 @@ Wealth app saat ini murni client-side — semua data tersimpan di `localStorage`
 Saat ini: ada form inline di bawah select untuk tambah lokasi (tidak rapi).
 Target: item `"+ Tambah lokasi baru"` di dalam Select dropdown → buka Dialog kecil.
 
-- [ ] Buat komponen reusable `LocationPickerSelect.tsx`:
+- [x] Buat komponen reusable `LocationPickerSelect.tsx`:
   - Props: `locations[]`, `value`, `onChange(id)`, `onAddLocation(name) => void`
   - `SelectContent`: render semua lokasi + separator + item `"+ Tambah lokasi baru"`
   - Klik item tambah → buka `Dialog` (shadcn `dialog.tsx` sudah ada)
   - Dialog: satu input nama + tombol Simpan / Batal
   - Setelah simpan: `onAddLocation(name)` dipanggil, `value` otomatis berubah ke lokasi baru
-- [ ] Ganti section tambah lokasi di `StockForm.tsx` → pakai `<LocationPickerSelect />`
-- [ ] Ganti section tambah lokasi di `CryptoForm.tsx` → pakai `<LocationPickerSelect />`
-- [ ] Hapus state `showLocationForm` / `newLocationName` dari kedua form
+- [x] Ganti section tambah lokasi di `StockForm.tsx` → pakai `<LocationPickerSelect />`
+- [x] Ganti section tambah lokasi di `CryptoForm.tsx` → pakai `<LocationPickerSelect />`
+- [x] Hapus state `showLocationForm` / `newLocationName` dari kedua form
 
 ### 10c — Crypto: Auto-complete Nama dari Symbol
 
@@ -215,11 +215,11 @@ Target: ketik symbol → nama auto-isi dari CoinGecko.
 
 Saat ini: chart hanya tampilkan total balance. `DailyBalance` di store sudah punya `balances: { [accountId]: number }` per account — tinggal divisualisasikan.
 
-- [ ] Update `BalanceChart.tsx`:
+- [x] Update `BalanceChart.tsx`:
   - Tambah toggle: "Total" vs "Per Account"
   - Mode "Per Account": satu line per account dengan warna berbeda, legend di bawah
   - Data: `dailyBalances[].balances[accountId]` sudah ada di store
-- [ ] Update `history/page.tsx`:
+- [x] Update `history/page.tsx`:
   - Pass `accounts` ke `BalanceChart` (cek apakah sudah ada)
   - Opsional: tambah checkbox filter untuk pilih account mana yang ditampilkan
 
@@ -239,11 +239,11 @@ Saat ini: chart hanya tampilkan total balance. `DailyBalance` di store sudah pun
 - [x] Portfolio dropdown: Stocks & Crypto (Phase 8)
 - [x] User dropdown: nama + Sign Out (Phase 8)
 - [x] Mobile bottom nav: 4 item (Phase 8)
-- [ ] Transfer melebihi saldo → error ditampilkan (Phase 10a)
-- [ ] Tambah lokasi via modal di dalam Select (Phase 10b)
+- [x] Transfer melebihi saldo → error ditampilkan (Phase 10a)
+- [x] Tambah lokasi via modal di dalam Select (Phase 10b)
 - [ ] Ketik symbol crypto → nama auto-isi (Phase 10c)
 - [ ] Form saham & crypto tidak punya field harga terkini (Phase 9)
-- [ ] History chart bisa toggle Total vs Per Account (Phase 10d)
+- [x] History chart bisa toggle Total vs Per Account (Phase 10d)
 
 ---
 
