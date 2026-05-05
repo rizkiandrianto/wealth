@@ -1,13 +1,8 @@
-# Plan + Tracker: Auth & DB Setup — Wealth App
+# Plan + Tracker — Wealth App
 
 ## Context
 
 Wealth app saat ini murni client-side — semua data tersimpan di `localStorage` via Zustand, belum ada DB, API routes, atau auth sama sekali. Referensi arsitektur diambil dari project excalidraw yang menggunakan Next.js App Router + Drizzle ORM + NextAuth v5.
-
-Tujuan plan ini:
-1. Restrukturisasi ke `src/`-based layout
-2. Setup PostgreSQL + Drizzle ORM
-3. Implementasi auth (login & register) mengikuti pola excalidraw
 
 ---
 
@@ -47,7 +42,7 @@ Tujuan plan ini:
     - [x] `daily_balances` — id, userId (fk), date, totalBalance
 - [x] Tambah scripts ke `package.json`: `db:generate`, `db:migrate`, `db:push`
 - [x] Buat `.env.local` template dengan `DATABASE_URL`, `AUTH_SECRET`, `AUTH_URL`
-- [ ] Jalankan `npm run db:push` untuk sync schema ke DB ← **butuh DATABASE_URL valid**
+- [ ] Jalankan `pnpm db:push` untuk sync schema ke DB ← **butuh DATABASE_URL valid**
 
 ## Phase 3 — Auth Implementation ✅
 
@@ -75,23 +70,80 @@ Tujuan plan ini:
 
 ---
 
+## Phase 5 — Zustand Migration + Bug Fix ✅ / 🔄
+
+> Root cause bug "ga kesimpen": `useAssetStore` adalah custom hook biasa (bukan singleton). Setiap komponen mendapat instance state terpisah — perubahan di `CryptoForm` tidak terlihat di `CryptoPage` sampai page refresh. Solusi: Zustand, yang merupakan singleton global.
+
+- [ ] Install `zustand`
+- [ ] Buat `src/lib/store/useAssetStore.ts` — Zustand store (state & actions sama dengan hook lama)
+- [ ] Hapus `src/lib/useAssetStore.ts` lama
+- [ ] Update semua import dari `@/lib/useAssetStore` → `@/lib/store/useAssetStore`
+- [ ] Fix `DashboardLayout.tsx`: ganti `window.location.pathname` dengan `usePathname()`
+- [ ] `pnpm build` clean
+
+## Phase 6 — API Routes (CRUD untuk semua entitas)
+
+- [ ] `src/app/api/accounts/route.ts` — GET list, POST create
+- [ ] `src/app/api/accounts/[id]/route.ts` — PATCH update, DELETE
+- [ ] `src/app/api/transactions/route.ts` — GET list, POST create
+- [ ] `src/app/api/transactions/[id]/route.ts` — DELETE
+- [ ] `src/app/api/stock-locations/route.ts` — GET, POST
+- [ ] `src/app/api/stock-locations/[id]/route.ts` — PATCH, DELETE
+- [ ] `src/app/api/stocks/route.ts` — GET, POST
+- [ ] `src/app/api/stocks/[id]/route.ts` — PATCH, DELETE
+- [ ] `src/app/api/stocks/[id]/sell/route.ts` — POST
+- [ ] `src/app/api/crypto-locations/route.ts` — GET, POST
+- [ ] `src/app/api/crypto-locations/[id]/route.ts` — PATCH, DELETE
+- [ ] `src/app/api/crypto/route.ts` — GET, POST
+- [ ] `src/app/api/crypto/[id]/route.ts` — PATCH, DELETE
+- [ ] `src/app/api/crypto/[id]/sell/route.ts` — POST
+- [ ] Semua route: auth check via `auth()` dari `@/lib/auth`
+- [ ] `pnpm build` clean
+
+## Phase 7 — Connect Store ke Database
+
+- [ ] Update Zustand store: on mount fetch dari server (ganti localStorage read)
+- [ ] Setiap mutasi (add/update/delete): call API → update state on success
+- [ ] Tambah `loading` dan `error` state ke store
+- [ ] Seed default locations per-user (Nanovest, Ajaib, Binance, dll.) jika belum ada
+- [ ] Hapus semua localStorage logic
+- [ ] `pnpm build` clean
+
+## Phase 8 — Menu Redesign + Sign Out
+
+- [ ] Refactor `DashboardLayout.tsx`:
+  - Grouped top nav: Dashboard | Finance ▼ | Portfolio ▼ | History | [Nama User ▼]
+  - Finance dropdown: Accounts, Transactions
+  - Portfolio dropdown: Stocks, Crypto
+  - User dropdown: nama user dari session + Sign Out
+  - Mobile bottom nav: 4 item (Dashboard, Finance, Portfolio, History)
+  - Mobile hamburger: tambah Sign Out di bawah list nav
+  - `signOut()` dari `next-auth/react`
+- [ ] `pnpm build` clean
+
+---
+
 ## Verification Checklist
 
 - [x] `pnpm build` — berhasil tanpa error
 - [x] TypeScript check (`npx tsc --noEmit`) — clean
-- [ ] Buka `/` → redirect ke `/login`
-- [ ] Register user baru → redirect ke `/`
-- [ ] Login dengan user yang sama → masuk ke dashboard
-- [ ] Akses `/login` saat sudah login → redirect ke `/`
-- [ ] `pnpm db:generate` → menghasilkan migration file di `drizzle/`
-
-> Untuk verifikasi runtime, isi `DATABASE_URL` di `.env.local` lalu jalankan `pnpm db:push` dan `pnpm dev`.
+- [ ] Buka `/crypto`, tambah crypto → langsung muncul di list tanpa refresh (Phase 5)
+- [ ] Buka `/stocks`, tambah saham → langsung muncul (Phase 5)
+- [ ] Refresh page → data masih ada (Phase 7)
+- [ ] Login di browser berbeda → data muncul (Phase 7)
+- [ ] Sign Out → redirect ke `/login` (Phase 8)
+- [ ] Active nav item highlight update saat navigasi (Phase 5/8)
+- [ ] Finance dropdown: Accounts & Transactions (Phase 8)
+- [ ] Portfolio dropdown: Stocks & Crypto (Phase 8)
+- [ ] User dropdown: nama + Sign Out (Phase 8)
+- [ ] Mobile bottom nav: 4 item (Phase 8)
 
 ---
 
 ## Notes
 
-- Data localStorage belum dimigrasi ke DB — itu step selanjutnya setelah auth berjalan
-- Google OAuth tidak masuk scope awal, bisa ditambahkan belakangan
-- PWA dipertahankan: `next-pwa` v5.6.0, build menggunakan `--webpack` flag (Turbopack tidak kompatibel dengan next-pwa v5)
-- Referensi: project excalidraw (`../excalidraw`)
+- `pnpm db:push` butuh `DATABASE_URL` valid di `.env.local`
+- Default locations di-seed per-user saat pertama kali fetch (Phase 7)
+- `stockSales` & `cryptoSales` tidak punya FK ke holdings by design (sale record tetap ada walau holding dihapus)
+- PWA dipertahankan: `next-pwa` v5.6.0, build pakai `--webpack` flag (Turbopack tidak kompatibel)
+- Google OAuth tidak masuk scope, bisa ditambahkan belakangan
