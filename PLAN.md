@@ -108,17 +108,18 @@ Wealth app saat ini murni client-side — semua data tersimpan di `localStorage`
 - [ ] Hapus semua localStorage logic
 - [ ] `pnpm build` clean
 
-## Phase 8 — Menu Redesign + Sign Out
+## Phase 8 — Menu Redesign + Sign Out ✅
 
-- [ ] Refactor `DashboardLayout.tsx`:
+- [x] Refactor `DashboardLayout.tsx`:
   - Grouped top nav: Dashboard | Finance ▼ | Portfolio ▼ | History | [Nama User ▼]
   - Finance dropdown: Accounts, Transactions
   - Portfolio dropdown: Stocks, Crypto
-  - User dropdown: nama user dari session + Sign Out
-  - Mobile bottom nav: 4 item (Dashboard, Finance, Portfolio, History)
-  - Mobile hamburger: tambah Sign Out di bawah list nav
-  - `signOut()` dari `next-auth/react`
-- [ ] `pnpm build` clean
+  - User dropdown: nama user + email + Sign Out
+  - Mobile bottom nav: 4 item (Overview, Finance, Portfolio, History)
+  - Mobile hamburger: semua item + Sign Out di bawah
+  - `signOut({ callbackUrl: '/login' })` dari `next-auth/react`
+  - `useSession()` untuk nama & email user
+- [x] `pnpm build` clean
 
 ---
 
