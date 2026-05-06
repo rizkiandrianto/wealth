@@ -16,7 +16,7 @@ export default function RecentTransactions({ transactions }: RecentTransactionsP
   const { accounts } = useAssetStore()
 
   const getAccountName = (accountId: string) => {
-    return accounts.find((a) => a.id === accountId)?.name || 'Unknown'
+    return accounts.find((a) => a.id === accountId)?.name || 'Topup'
   }
 
   if (transactions.length === 0) {
