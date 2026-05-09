@@ -78,7 +78,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
                 <Wallet className="w-5 h-5 text-white" />
               </div>
-              <h1 className="text-xl font-bold text-foreground">Asset Tracker</h1>
+              <h1 className="text-xl font-bold text-foreground">Wealth</h1>
             </Link>
 
             {/* Desktop Navigation */}

@@ -7,11 +7,11 @@ import './globals.css'
 const geist = Geist({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: 'Asset Tracker',
+  title: 'Wealth',
   description: 'Track your assets across different accounts - bank, deposit, and more',
   icons: {
-    icon: '/icon-192.png',
-    apple: '/icon-192.png',
+    icon: '/wealth.png',
+    apple: '/wealth.png',
   },
 }
 
