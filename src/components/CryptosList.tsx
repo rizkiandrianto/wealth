@@ -4,8 +4,13 @@ import { useState } from 'react'
 import { CryptoHolding } from '@/lib/types'
 import { formatCurrency } from '@/lib/format'
 import { useAssetStore } from '@/lib/useAssetStore'
-import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion'
 import { Trash2, Edit2, TrendingUp, TrendingDown, DollarSign } from 'lucide-react'
 import CryptoSellDialog from './CryptoSellDialog'
 
@@ -35,41 +40,48 @@ export default function CryptosList({ cryptos, onEdit }: CryptosListProps) {
   )
 
   return (
-    <div className="space-y-4">
-      {Object.entries(groupedBySymbol).map(([symbol, symbolCryptos]) => {
-        const price = getPrice(symbol)
-        const totalQuantity = symbolCryptos.reduce((sum, c) => sum + c.quantity, 0)
-        const totalValue = totalQuantity * price
-        const totalCost = symbolCryptos.reduce((sum, c) => sum + c.quantity * c.averagePrice, 0)
-        const profitLoss = totalValue - totalCost
-        const profitLossPercent = totalCost > 0 ? (profitLoss / totalCost) * 100 : 0
-        const isPositive = profitLoss >= 0
-        const averagePrice = totalQuantity > 0 ? totalCost / totalQuantity : 0
+    <>
+      <Accordion type="multiple" className="space-y-4">
+        {Object.entries(groupedBySymbol).map(([symbol, symbolCryptos]) => {
+          const price = getPrice(symbol)
+          const totalQuantity = symbolCryptos.reduce((sum, c) => sum + c.quantity, 0)
+          const totalValue = totalQuantity * price
+          const totalCost = symbolCryptos.reduce((sum, c) => sum + c.quantity * c.averagePrice, 0)
+          const profitLoss = totalValue - totalCost
+          const profitLossPercent = totalCost > 0 ? (profitLoss / totalCost) * 100 : 0
+          const isPositive = profitLoss >= 0
+          const averagePrice = totalQuantity > 0 ? totalCost / totalQuantity : 0
 
-        return (
-          <Card key={symbol} className="p-4 border-l-4 border-l-purple-500">
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-lg font-semibold">{symbol}</h3>
-                  <p className="text-sm text-muted-foreground">
-                    {symbolCryptos[0].name}
-                  </p>
+          return (
+            <AccordionItem
+              key={symbol}
+              value={symbol}
+              className="border border-l-4 border-l-purple-500 rounded-lg bg-card px-4"
+            >
+              <AccordionTrigger className="hover:no-underline">
+                <div className="flex flex-1 items-center justify-between gap-4 pr-2">
+                  <div className="text-left">
+                    <h3 className="text-lg font-semibold">{symbol}</h3>
+                    <p className="text-sm text-muted-foreground">
+                      {symbolCryptos[0].name}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-2xl font-bold">{formatCurrency(totalValue)}</p>
+                    <p className={`text-sm font-medium flex items-center justify-end gap-1 ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
+                      {isPositive ? (
+                        <TrendingUp className="w-4 h-4" />
+                      ) : (
+                        <TrendingDown className="w-4 h-4" />
+                      )}
+                      {formatCurrency(profitLoss)} ({profitLossPercent.toFixed(2)}%)
+                    </p>
+                  </div>
                 </div>
-                <div className="text-right">
-                  <p className="text-2xl font-bold">{formatCurrency(totalValue)}</p>
-                  <p className={`text-sm font-medium flex items-center justify-end gap-1 ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
-                    {isPositive ? (
-                      <TrendingUp className="w-4 h-4" />
-                    ) : (
-                      <TrendingDown className="w-4 h-4" />
-                    )}
-                    {formatCurrency(profitLoss)} ({profitLossPercent.toFixed(2)}%)
-                  </p>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-4 gap-2 text-sm bg-muted/50 p-2 rounded">
+              </AccordionTrigger>
+              <AccordionContent>
+                <div className="space-y-3">
+                  <div className="grid grid-cols-4 gap-2 text-sm bg-muted/50 p-2 rounded">
                 <div>
                   <p className="text-muted-foreground text-xs">Quantity</p>
                   <p className="font-semibold">{totalQuantity.toFixed(8)}</p>
@@ -163,10 +175,12 @@ export default function CryptosList({ cryptos, onEdit }: CryptosListProps) {
                   </Button>
                 </div>
               )}
-            </div>
-          </Card>
-        )
-      })}
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+          )
+        })}
+      </Accordion>
 
       {sellingCrypto && (
         <CryptoSellDialog
@@ -178,6 +192,6 @@ export default function CryptosList({ cryptos, onEdit }: CryptosListProps) {
           onClose={() => setSellingCryptoId(null)}
         />
       )}
-    </div>
+    </>
   )
 }

@@ -2,9 +2,16 @@
 
 import { StockHolding, StockLocation } from '@/lib/types'
 import { formatCurrency } from '@/lib/format'
+import { stockShares } from '@/lib/stock'
 import { useAssetStore } from '@/lib/useAssetStore'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion'
 import { Trash2, Edit2, TrendingUp, TrendingDown } from 'lucide-react'
 
 interface StocksByLocationProps {
@@ -34,34 +41,41 @@ export default function StocksByLocation({ stocks, locations, onEdit }: StocksBy
   )
 
   return (
-    <div className="space-y-6">
+    <Accordion type="multiple" className="space-y-3">
       {locations.map((location) => {
         const locationStocks = groupedByLocation[location.id] || []
         if (locationStocks.length === 0) return null
 
-        const totalValue = locationStocks.reduce((sum, s) => sum + s.quantity * getPrice(s.ticker), 0)
-        const totalCost = locationStocks.reduce((sum, s) => sum + s.quantity * s.averagePrice, 0)
+        const totalValue = locationStocks.reduce((sum, s) => sum + stockShares(s) * getPrice(s.ticker), 0)
+        const totalCost = locationStocks.reduce((sum, s) => sum + stockShares(s) * s.averagePrice, 0)
         const profitLoss = totalValue - totalCost
         const profitLossPercent = totalCost > 0 ? (profitLoss / totalCost) * 100 : 0
         const isPositive = profitLoss >= 0
 
         return (
-          <div key={location.id} className="space-y-3">
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold">{location.name}</h3>
-              <div className="text-right">
-                <p className="text-sm text-muted-foreground">{locationStocks.length} saham</p>
-                <p className={`text-sm font-semibold ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
-                  {formatCurrency(profitLoss)}
-                </p>
+          <AccordionItem
+            key={location.id}
+            value={location.id}
+            className="border rounded-lg bg-card px-4"
+          >
+            <AccordionTrigger className="hover:no-underline">
+              <div className="flex flex-1 items-center justify-between gap-4 pr-2">
+                <h3 className="text-lg font-semibold">{location.name}</h3>
+                <div className="text-right">
+                  <p className="text-sm text-muted-foreground">{locationStocks.length} saham</p>
+                  <p className={`text-sm font-semibold ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
+                    {formatCurrency(profitLoss)}
+                  </p>
+                </div>
               </div>
-            </div>
-
-            <div className="space-y-2">
-              {locationStocks.map((stock) => {
+            </AccordionTrigger>
+            <AccordionContent>
+              <div className="space-y-2">
+                {locationStocks.map((stock) => {
                 const price = getPrice(stock.ticker)
-                const value = stock.quantity * price
-                const cost = stock.quantity * stock.averagePrice
+                const shares = stockShares(stock)
+                const value = shares * price
+                const cost = shares * stock.averagePrice
                 const profit = value - cost
                 const profitPercent = cost > 0 ? (profit / cost) * 100 : 0
                 const isPosStock = profit >= 0
@@ -130,10 +144,11 @@ export default function StocksByLocation({ stocks, locations, onEdit }: StocksBy
                   </Card>
                 )
               })}
-            </div>
-          </div>
+              </div>
+            </AccordionContent>
+          </AccordionItem>
         )
       })}
-    </div>
+    </Accordion>
   )
 }

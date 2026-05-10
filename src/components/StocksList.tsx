@@ -3,9 +3,15 @@
 import { useState } from 'react'
 import { StockHolding } from '@/lib/types'
 import { formatCurrency } from '@/lib/format'
+import { stockShares } from '@/lib/stock'
 import { useAssetStore } from '@/lib/useAssetStore'
-import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion'
 import { Trash2, Edit2, TrendingUp, TrendingDown, DollarSign } from 'lucide-react'
 import StockSellDialog from './StockSellDialog'
 
@@ -39,24 +45,29 @@ export default function StocksList({ stocks, onEdit }: StocksListProps) {
   )
 
   return (
-    <div className="space-y-3">
-      {Object.entries(groupedByTicker)
+    <>
+      <Accordion type="multiple" className="space-y-3">
+        {Object.entries(groupedByTicker)
         .sort((a, b) => a[0].localeCompare(b[0]))
         .map(([ticker, tickerStocks]) => {
           const price = getPrice(ticker)
           const totalQuantity = tickerStocks.reduce((sum, s) => sum + s.quantity, 0)
-          const totalCost = tickerStocks.reduce((sum, s) => sum + s.quantity * s.averagePrice, 0)
-          const totalValue = totalQuantity * price
+          const totalShares = tickerStocks.reduce((sum, s) => sum + stockShares(s), 0)
+          const totalCost = tickerStocks.reduce((sum, s) => sum + stockShares(s) * s.averagePrice, 0)
+          const totalValue = totalShares * price
           const profitLoss = totalValue - totalCost
           const profitLossPercent = totalCost > 0 ? (profitLoss / totalCost) * 100 : 0
           const isPositive = profitLoss >= 0
 
           return (
-            <Card key={ticker} className="p-4">
-              <div className="space-y-3">
-                {/* Header with ticker and summary */}
-                <div className="flex items-start justify-between">
-                  <div>
+            <AccordionItem
+              key={ticker}
+              value={ticker}
+              className="border rounded-lg bg-card px-4"
+            >
+              <AccordionTrigger className="hover:no-underline">
+                <div className="flex flex-1 items-start justify-between gap-4 pr-2">
+                  <div className="text-left">
                     <h3 className="font-bold text-lg">{ticker}</h3>
                     <p className="text-sm text-muted-foreground">
                       {getName(ticker)}
@@ -74,16 +85,18 @@ export default function StocksList({ stocks, onEdit }: StocksListProps) {
                     </p>
                   </div>
                 </div>
-
-                {/* Holdings details */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm bg-muted p-3 rounded">
+              </AccordionTrigger>
+              <AccordionContent>
+                <div className="space-y-3">
+                  {/* Holdings details */}
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm bg-muted p-3 rounded">
                   <div>
                     <p className="text-muted-foreground text-xs">Qty</p>
                     <p className="font-semibold">{totalQuantity.toFixed(2)}</p>
                   </div>
                   <div>
                     <p className="text-muted-foreground text-xs">Harga Rata-rata</p>
-                    <p className="font-semibold">{formatCurrency(totalCost / totalQuantity)}</p>
+                    <p className="font-semibold">{formatCurrency(totalShares > 0 ? totalCost / totalShares : 0)}</p>
                   </div>
                   <div>
                     <p className="text-muted-foreground text-xs">Harga Terkini</p>
@@ -163,10 +176,12 @@ export default function StocksList({ stocks, onEdit }: StocksListProps) {
                     </Button>
                   </div>
                 )}
-              </div>
-            </Card>
+                </div>
+              </AccordionContent>
+            </AccordionItem>
           )
         })}
+      </Accordion>
 
       {sellingStock && (
         <StockSellDialog
@@ -178,6 +193,6 @@ export default function StocksList({ stocks, onEdit }: StocksListProps) {
           onClose={() => setSellingStockId(null)}
         />
       )}
-    </div>
+    </>
   )
 }

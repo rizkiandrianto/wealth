@@ -5,6 +5,12 @@ import { formatCurrency } from '@/lib/format'
 import { useAssetStore } from '@/lib/useAssetStore'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion'
 import { Trash2, Edit2, TrendingUp, TrendingDown } from 'lucide-react'
 
 interface CryptosByLocationProps {
@@ -32,7 +38,7 @@ export default function CryptosByLocation({ cryptos, locations, onEdit }: Crypto
   )
 
   return (
-    <div className="space-y-6">
+    <Accordion type="multiple" className="space-y-3">
       {locations.map((location) => {
         const locationCryptos = groupedByLocation[location.id] || []
         if (locationCryptos.length === 0) return null
@@ -44,23 +50,30 @@ export default function CryptosByLocation({ cryptos, locations, onEdit }: Crypto
         const isPositive = profitLoss >= 0
 
         return (
-          <div key={location.id} className="space-y-3">
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold">{location.name}</h3>
-              <div className="text-right">
-                <p className="text-2xl font-bold">{formatCurrency(totalValue)}</p>
-                <p className={`text-sm font-medium flex items-center justify-end gap-1 ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
-                  {isPositive ? (
-                    <TrendingUp className="w-4 h-4" />
-                  ) : (
-                    <TrendingDown className="w-4 h-4" />
-                  )}
-                  {formatCurrency(profitLoss)} ({profitLossPercent.toFixed(2)}%)
-                </p>
+          <AccordionItem
+            key={location.id}
+            value={location.id}
+            className="border rounded-lg bg-card px-4"
+          >
+            <AccordionTrigger className="hover:no-underline">
+              <div className="flex flex-1 items-center justify-between gap-4 pr-2">
+                <h3 className="text-lg font-semibold">{location.name}</h3>
+                <div className="text-right">
+                  <p className="text-2xl font-bold">{formatCurrency(totalValue)}</p>
+                  <p className={`text-sm font-medium flex items-center justify-end gap-1 ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
+                    {isPositive ? (
+                      <TrendingUp className="w-4 h-4" />
+                    ) : (
+                      <TrendingDown className="w-4 h-4" />
+                    )}
+                    {formatCurrency(profitLoss)} ({profitLossPercent.toFixed(2)}%)
+                  </p>
+                </div>
               </div>
-            </div>
-
-            {locationCryptos.map((crypto) => {
+            </AccordionTrigger>
+            <AccordionContent>
+              <div className="space-y-2">
+                {locationCryptos.map((crypto) => {
               const price = getPrice(crypto.symbol)
               return (
               <Card key={crypto.id} className="p-4 border-l-4 border-l-purple-500">
@@ -134,10 +147,12 @@ export default function CryptosByLocation({ cryptos, locations, onEdit }: Crypto
                 </div>
               </Card>
               )
-            })}
-          </div>
+                })}
+              </div>
+            </AccordionContent>
+          </AccordionItem>
         )
       })}
-    </div>
+    </Accordion>
   )
 }
