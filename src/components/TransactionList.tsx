@@ -1,7 +1,7 @@
 'use client'
 
 import { Account, Transaction } from '@/lib/types'
-import { formatCurrency, formatDateTime } from '@/lib/format'
+import { useFormatCurrency, formatDateTime } from '@/lib/format'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { ArrowRight, Trash2 } from 'lucide-react'
@@ -17,6 +17,8 @@ export default function TransactionList({
   accounts,
   onDelete,
 }: TransactionListProps) {
+  const formatCurrency = useFormatCurrency()
+
   const getAccountName = (accountId: string) => {
     return accounts.find((a) => a.id === accountId)?.name || 'Unknown'
   }

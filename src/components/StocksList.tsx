@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { StockHolding } from '@/lib/types'
-import { formatCurrency } from '@/lib/format'
+import { useFormatCurrency } from '@/lib/format'
 import { stockShares } from '@/lib/stock'
 import { useAssetStore } from '@/lib/useAssetStore'
 import { Button } from '@/components/ui/button'
@@ -22,6 +22,7 @@ interface StocksListProps {
 
 export default function StocksList({ stocks, onEdit }: StocksListProps) {
   const { deleteStock, getStockProfitLoss, sellStock, stockLocations, assetPrices } = useAssetStore()
+  const formatCurrency = useFormatCurrency()
   const getLocationName = (locationId: string) =>
     stockLocations.find((l) => l.id === locationId)?.name ?? locationId
   const getPrice = (ticker: string) =>

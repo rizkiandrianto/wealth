@@ -1,10 +1,32 @@
-export function formatCurrency(amount: number, currency: string = 'IDR'): string {
+import { useCallback } from 'react'
+import { useUIStore } from '@/lib/store/useUIStore'
+
+export const HIDDEN_VALUE_MASK = '••••••'
+
+export function formatCurrency(amount: number, currency: string = 'IDR', hide = false): string {
+  if (hide) return HIDDEN_VALUE_MASK
   return new Intl.NumberFormat('id-ID', {
     style: 'currency',
     currency,
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
   }).format(amount)
+}
+
+export function useFormatCurrency() {
+  const hide = useUIStore((s) => s.hideValues)
+  return useCallback(
+    (amount: number, currency: string = 'IDR') => formatCurrency(amount, currency, hide),
+    [hide]
+  )
+}
+
+export function useMaskValue() {
+  const hide = useUIStore((s) => s.hideValues)
+  return useCallback(
+    <T,>(value: T, formatted: string): string => (hide ? HIDDEN_VALUE_MASK : formatted),
+    [hide]
+  )
 }
 
 export function formatDate(timestamp: number | string): string {

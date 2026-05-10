@@ -1,7 +1,7 @@
 'use client'
 
 import { Account, DailyBalance } from '@/lib/types'
-import { formatCurrency, formatDate, formatMonth } from '@/lib/format'
+import { useFormatCurrency, formatDate, formatMonth } from '@/lib/format'
 import { Card } from '@/components/ui/card'
 
 interface HistoryTableProps {
@@ -15,6 +15,8 @@ export default function HistoryTable({
   accounts,
   viewType,
 }: HistoryTableProps) {
+  const formatCurrency = useFormatCurrency()
+
   if (data.length === 0) {
     return (
       <Card className="p-8">

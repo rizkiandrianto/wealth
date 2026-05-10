@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { Account } from '@/lib/types'
-import { formatCurrency } from '@/lib/format'
+import { useFormatCurrency } from '@/lib/format'
 import { Banknote, PiggyBank, Wallet, Trash2 } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -34,6 +34,7 @@ export default function AccountCard({
 }: AccountCardProps) {
   const Icon = ACCOUNT_TYPE_ICONS[account.type]
   const colorClass = ACCOUNT_TYPE_COLORS[account.type]
+  const formatCurrency = useFormatCurrency()
 
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)

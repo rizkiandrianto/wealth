@@ -13,7 +13,8 @@ import {
 } from 'recharts'
 import { Card } from '@/components/ui/card'
 import { DailyBalance, Account } from '@/lib/types'
-import { formatCurrency, formatDateShort, formatMonth } from '@/lib/format'
+import { useFormatCurrency, formatDateShort, formatMonth, HIDDEN_VALUE_MASK } from '@/lib/format'
+import { useUIStore } from '@/lib/store/useUIStore'
 
 interface BalanceChartProps {
   data: DailyBalance[]
@@ -31,6 +32,8 @@ export default function BalanceChart({
   viewType,
 }: BalanceChartProps) {
   const [mode, setMode] = useState<ChartMode>('total')
+  const formatCurrency = useFormatCurrency()
+  const hideValues = useUIStore((s) => s.hideValues)
 
   const chartData = useMemo(() => {
     return data.map((item) => {
@@ -82,7 +85,7 @@ export default function BalanceChart({
           <YAxis
             stroke="#9ca3af"
             style={{ fontSize: '12px' }}
-            tickFormatter={(value) => `${(value / 1000000).toFixed(0)}M`}
+            tickFormatter={(value) => (hideValues ? HIDDEN_VALUE_MASK : `${(value / 1000000).toFixed(0)}M`)}
           />
           <Tooltip
             contentStyle={{

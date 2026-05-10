@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Transaction } from '@/lib/types'
-import { formatCurrency, formatDateTime } from '@/lib/format'
+import { useFormatCurrency, formatDateTime } from '@/lib/format'
 import { ArrowRight } from 'lucide-react'
 import { useAssetStore } from '@/lib/useAssetStore'
 
@@ -14,6 +14,7 @@ interface RecentTransactionsProps {
 
 export default function RecentTransactions({ transactions }: RecentTransactionsProps) {
   const { accounts } = useAssetStore()
+  const formatCurrency = useFormatCurrency()
 
   const getAccountName = (accountId: string) => {
     return accounts.find((a) => a.id === accountId)?.name || 'Topup'

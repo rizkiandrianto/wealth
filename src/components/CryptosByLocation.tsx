@@ -1,7 +1,7 @@
 'use client'
 
 import { CryptoHolding, CryptoLocation } from '@/lib/types'
-import { formatCurrency } from '@/lib/format'
+import { useFormatCurrency } from '@/lib/format'
 import { useAssetStore } from '@/lib/useAssetStore'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -21,6 +21,7 @@ interface CryptosByLocationProps {
 
 export default function CryptosByLocation({ cryptos, locations, onEdit }: CryptosByLocationProps) {
   const { deleteCrypto, assetPrices } = useAssetStore()
+  const formatCurrency = useFormatCurrency()
   const getPrice = (symbol: string) =>
     assetPrices.find((p) => p.ticker === symbol)?.price ?? 0
 

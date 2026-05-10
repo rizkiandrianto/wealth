@@ -1,7 +1,7 @@
 'use client'
 
 import { StockHolding, StockLocation } from '@/lib/types'
-import { formatCurrency } from '@/lib/format'
+import { useFormatCurrency } from '@/lib/format'
 import { stockShares } from '@/lib/stock'
 import { useAssetStore } from '@/lib/useAssetStore'
 import { Card } from '@/components/ui/card'
@@ -22,6 +22,7 @@ interface StocksByLocationProps {
 
 export default function StocksByLocation({ stocks, locations, onEdit }: StocksByLocationProps) {
   const { deleteStock, assetPrices } = useAssetStore()
+  const formatCurrency = useFormatCurrency()
   const getPrice = (ticker: string) =>
     assetPrices.find((p) => p.ticker === ticker)?.price ?? 0
   const getName = (ticker: string) =>

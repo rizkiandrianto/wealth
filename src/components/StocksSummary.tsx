@@ -1,13 +1,14 @@
 'use client'
 
 import { useAssetStore } from '@/lib/useAssetStore'
-import { formatCurrency } from '@/lib/format'
+import { useFormatCurrency } from '@/lib/format'
 import { stockShares } from '@/lib/stock'
 import { Card } from '@/components/ui/card'
 import { TrendingUp, TrendingDown } from 'lucide-react'
 
 export default function StocksSummary() {
   const { stocks, getStockValue, getStockProfitLoss, getTotalStockValue } = useAssetStore()
+  const formatCurrency = useFormatCurrency()
 
   const totalValue = getTotalStockValue()
   const totalCost = stocks.reduce((sum, stock) => sum + stockShares(stock) * stock.averagePrice, 0)

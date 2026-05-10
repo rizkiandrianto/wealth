@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { CryptoHolding } from '@/lib/types'
-import { formatCurrency } from '@/lib/format'
+import { useFormatCurrency } from '@/lib/format'
 import { useAssetStore } from '@/lib/useAssetStore'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -17,6 +17,7 @@ interface CryptoSellDialogProps {
 
 export default function CryptoSellDialog({ crypto, onSell, onClose }: CryptoSellDialogProps) {
   const { assetPrices } = useAssetStore()
+  const formatCurrency = useFormatCurrency()
   const currentPrice = assetPrices.find((p) => p.ticker === crypto.symbol)?.price ?? 0
   const [quantity, setQuantity] = useState('')
   const [salePrice, setSalePrice] = useState(currentPrice > 0 ? currentPrice.toString() : '')

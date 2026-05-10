@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { CryptoHolding } from '@/lib/types'
-import { formatCurrency } from '@/lib/format'
+import { useFormatCurrency } from '@/lib/format'
 import { useAssetStore } from '@/lib/useAssetStore'
 import { Button } from '@/components/ui/button'
 import {
@@ -21,6 +21,7 @@ interface CryptosListProps {
 
 export default function CryptosList({ cryptos, onEdit }: CryptosListProps) {
   const { deleteCrypto, getCryptoProfitLoss, sellCrypto, assetPrices } = useAssetStore()
+  const formatCurrency = useFormatCurrency()
   const getPrice = (symbol: string) =>
     assetPrices.find((p) => p.ticker === symbol)?.price ?? 0
   const [sellingCryptoId, setSellingCryptoId] = useState<string | null>(null)

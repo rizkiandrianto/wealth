@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { StockHolding } from '@/lib/types'
-import { formatCurrency } from '@/lib/format'
+import { useFormatCurrency } from '@/lib/format'
 import { sharesFor } from '@/lib/stock'
 import { useAssetStore } from '@/lib/useAssetStore'
 import { Button } from '@/components/ui/button'
@@ -18,6 +18,7 @@ interface StockSellDialogProps {
 
 export default function StockSellDialog({ stock, onSell, onClose }: StockSellDialogProps) {
   const { assetPrices } = useAssetStore()
+  const formatCurrency = useFormatCurrency()
   const currentPrice = assetPrices.find((p) => p.ticker === stock.ticker)?.price ?? 0
   const [quantity, setQuantity] = useState('')
   const [salePrice, setSalePrice] = useState(currentPrice > 0 ? currentPrice.toString() : '')

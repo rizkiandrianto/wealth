@@ -7,11 +7,12 @@ import AccountsList from '@/components/AccountsList'
 import RecentTransactions from '@/components/RecentTransactions'
 import PageLoader from '@/components/PageLoader'
 import { Card } from '@/components/ui/card'
-import { formatCurrency } from '@/lib/format'
+import { useFormatCurrency } from '@/lib/format'
 
 export default function Home() {
   const store = useAssetStore()
   const hasHydrated = useAssetStore((s) => s.hasHydrated)
+  const formatCurrency = useFormatCurrency()
 
   if (!hasHydrated) {
     return <PageLoader />

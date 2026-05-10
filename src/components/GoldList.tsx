@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { GoldHolding, GoldLocation } from '@/lib/types'
-import { formatCurrency } from '@/lib/format'
+import { useFormatCurrency } from '@/lib/format'
 import { useAssetStore } from '@/lib/useAssetStore'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -17,6 +17,7 @@ interface GoldListProps {
 
 export default function GoldList({ golds, locations, onEdit }: GoldListProps) {
   const { deleteGold, getGoldProfitLoss, sellGold, assetPrices } = useAssetStore()
+  const formatCurrency = useFormatCurrency()
   const goldPrice = assetPrices.find((p) => p.ticker === 'XAU')?.price ?? 0
   const [sellingGoldId, setSellingGoldId] = useState<string | null>(null)
   const sellingGold = sellingGoldId ? golds.find((g) => g.id === sellingGoldId) : null

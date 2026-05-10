@@ -1,9 +1,10 @@
 'use client'
 
 import { Card } from '@/components/ui/card'
-import { formatCurrency } from '@/lib/format'
+import { useFormatCurrency } from '@/lib/format'
 import { useAssetStore } from '@/lib/useAssetStore'
-import { ArrowRight, TrendingDown, TrendingUp } from 'lucide-react'
+import { useUIStore } from '@/lib/store/useUIStore'
+import { ArrowRight, Eye, EyeOff, TrendingDown, TrendingUp } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from './ui/button'
 
@@ -21,6 +22,9 @@ export default function DashboardSummary({
   transactionCount,
 }: DashboardSummaryProps) {
   const store = useAssetStore()
+  const formatCurrency = useFormatCurrency()
+  const hideValues = useUIStore((s) => s.hideValues)
+  const toggleHideValues = useUIStore((s) => s.toggleHideValues)
 
   const totalStockValue = store.getTotalStockValue()
   const totalStockCost = store.stocks.reduce((sum, stock) => sum + stockShares(stock) * stock.averagePrice, 0)
@@ -44,9 +48,19 @@ export default function DashboardSummary({
               {formatCurrency(totalBalance)}
             </p>
           </div>
-          <div className="w-12 h-12 rounded-lg bg-blue-500 flex items-center justify-center">
-            <TrendingUp className="w-6 h-6 text-white" />
-          </div>
+          <button
+            type="button"
+            onClick={toggleHideValues}
+            aria-label={hideValues ? 'Show values' : 'Hide values'}
+            title={hideValues ? 'Show values' : 'Hide values'}
+            className="w-12 h-12 rounded-lg bg-blue-500 hover:bg-blue-600 flex items-center justify-center transition-colors"
+          >
+            {hideValues ? (
+              <EyeOff className="w-6 h-6 text-white" />
+            ) : (
+              <Eye className="w-6 h-6 text-white" />
+            )}
+          </button>
         </div>
       </Card>
 

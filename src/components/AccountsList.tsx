@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
 import { Account } from '@/lib/types'
-import { formatCurrency } from '@/lib/format'
+import { useFormatCurrency } from '@/lib/format'
 import { Banknote, PiggyBank, Wallet, ChevronRight, Plus } from 'lucide-react'
 
 interface AccountsListProps {
@@ -34,6 +34,7 @@ export default function AccountsList({
   defaultHideZeroBalance = true,
 }: AccountsListProps) {
   const [hideZeroBalance, setHideZeroBalance] = useState(defaultHideZeroBalance)
+  const formatCurrency = useFormatCurrency()
 
   if (accounts.length === 0) {
     return (

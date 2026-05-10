@@ -1,12 +1,13 @@
 'use client'
 
 import { useAssetStore } from '@/lib/useAssetStore'
-import { formatCurrency } from '@/lib/format'
+import { useFormatCurrency } from '@/lib/format'
 import { Card } from '@/components/ui/card'
 import { TrendingUp, TrendingDown } from 'lucide-react'
 
 export default function CryptosSummary() {
   const { cryptos, assetPrices } = useAssetStore()
+  const formatCurrency = useFormatCurrency()
   const getPrice = (symbol: string) =>
     assetPrices.find((p) => p.ticker === symbol)?.price ?? 0
 

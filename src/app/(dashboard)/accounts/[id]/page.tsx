@@ -16,7 +16,7 @@ import DashboardLayout from '@/components/DashboardLayout'
 import AccountForm from '@/components/AccountForm'
 import PageLoader from '@/components/PageLoader'
 import { useAssetStore } from '@/lib/useAssetStore'
-import { formatCurrency, formatDateTime } from '@/lib/format'
+import { useFormatCurrency, formatDateTime } from '@/lib/format'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import ConfirmDialog from '@/components/ConfirmDialog'
@@ -49,6 +49,7 @@ export default function AccountDetailPage({
     getAccountTransactions,
   } = useAssetStore()
   const hasHydrated = useAssetStore((s) => s.hasHydrated)
+  const formatCurrency = useFormatCurrency()
 
   const account = useMemo(() => accounts.find((a) => a.id === id), [accounts, id])
   const transactions = useMemo(

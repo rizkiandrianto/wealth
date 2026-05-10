@@ -5,7 +5,7 @@ import { Account, Transaction } from '@/lib/types'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useAssetStore } from '@/lib/useAssetStore'
-import { formatCurrency } from '@/lib/format'
+import { useFormatCurrency } from '@/lib/format'
 
 interface TransactionFormProps {
   accounts: Account[]
@@ -19,6 +19,7 @@ export default function TransactionForm({
   onCancel,
 }: TransactionFormProps) {
   const { getAccountBalance } = useAssetStore()
+  const formatCurrency = useFormatCurrency()
   const [fromAccountId, setFromAccountId] = useState('')
   const [toAccountId, setToAccountId] = useState('')
   const [transactionType, setTransactionType] = useState<'transfer' | 'topup' | 'withdrawal'>('transfer')

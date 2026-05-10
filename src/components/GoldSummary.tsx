@@ -1,12 +1,13 @@
 'use client'
 
 import { useAssetStore } from '@/lib/useAssetStore'
-import { formatCurrency } from '@/lib/format'
+import { useFormatCurrency } from '@/lib/format'
 import { Card } from '@/components/ui/card'
 import { TrendingUp, TrendingDown } from 'lucide-react'
 
 export default function GoldSummary() {
   const { golds, assetPrices } = useAssetStore()
+  const formatCurrency = useFormatCurrency()
   const goldPrice = assetPrices.find((p) => p.ticker === 'XAU')?.price ?? 0
 
   const totalWeight = golds.reduce((sum, g) => sum + g.weight, 0)
