@@ -346,11 +346,16 @@ export const useAssetStore = create<AssetStore>()(
 
     deleteAccount: async (id) => {
       await apiFetch(`/api/accounts/${id}`, { method: 'DELETE' })
-      set((s) => ({
-        accounts: s.accounts.filter((a) => a.id !== id),
-        transactions: s.transactions.filter((tx) => tx.fromAccountId !== id && tx.toAccountId !== id),
-        lastUpdated: Date.now(),
-      }))
+      set((s) => {
+        const accounts = s.accounts.filter((a) => a.id !== id)
+        const transactions = s.transactions.filter((tx) => tx.fromAccountId !== id && tx.toAccountId !== id)
+        return {
+          accounts,
+          transactions,
+          dailyBalances: calculateDailyBalances(accounts, transactions),
+          lastUpdated: Date.now(),
+        }
+      })
     },
 
     // ── Transaction operations ───────────────────────────────────────────────

@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { db } from '@/db'
-import { and, eq } from 'drizzle-orm'
-import { wealthAccounts } from '@/db/schema'
+import { and, eq, or } from 'drizzle-orm'
+import { transactions, wealthAccounts } from '@/db/schema'
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth()
@@ -30,9 +30,20 @@ export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ 
 
   const { id } = await params
 
-  await db
-    .delete(wealthAccounts)
-    .where(and(eq(wealthAccounts.id, id), eq(wealthAccounts.userId, userId)))
+  await db.transaction(async (tx) => {
+    await tx
+      .delete(transactions)
+      .where(
+        and(
+          eq(transactions.userId, userId),
+          or(eq(transactions.fromAccountId, id), eq(transactions.toAccountId, id))
+        )
+      )
+
+    await tx
+      .delete(wealthAccounts)
+      .where(and(eq(wealthAccounts.id, id), eq(wealthAccounts.userId, userId)))
+  })
 
   return new NextResponse(null, { status: 204 })
 }
