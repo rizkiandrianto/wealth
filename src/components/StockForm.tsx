@@ -4,9 +4,17 @@ import { useState, useEffect } from 'react'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { X } from 'lucide-react'
 import { useAssetStore } from '@/lib/useAssetStore'
 import LocationPickerSelect from '@/components/LocationPickerSelect'
+import type { StockMarket } from '@/lib/types'
 
 interface StockFormProps {
   editingId: string | null
@@ -17,8 +25,15 @@ export default function StockForm({ editingId, onClose }: StockFormProps) {
   const { stocks, stockLocations, addStock, updateStock, addStockLocation } = useAssetStore()
   const editingStock = editingId ? stocks.find((s) => s.id === editingId) : null
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    ticker: string
+    market: StockMarket
+    locationId: string
+    quantity: string
+    averagePrice: string
+  }>({
     ticker: '',
+    market: 'IDX',
     locationId: stockLocations[0]?.id || '',
     quantity: '',
     averagePrice: '',
@@ -28,6 +43,7 @@ export default function StockForm({ editingId, onClose }: StockFormProps) {
     if (editingStock) {
       setFormData({
         ticker: editingStock.ticker,
+        market: editingStock.market,
         locationId: editingStock.locationId,
         quantity: editingStock.quantity.toString(),
         averagePrice: editingStock.averagePrice.toString(),
@@ -52,6 +68,7 @@ export default function StockForm({ editingId, onClose }: StockFormProps) {
 
     const stockData = {
       ticker: formData.ticker.toUpperCase(),
+      market: formData.market,
       locationId: formData.locationId,
       quantity: parseFloat(formData.quantity),
       averagePrice: parseFloat(formData.averagePrice),
@@ -66,6 +83,7 @@ export default function StockForm({ editingId, onClose }: StockFormProps) {
 
     setFormData({
       ticker: '',
+      market: 'IDX',
       locationId: stockLocations[0]?.id || '',
       quantity: '',
       averagePrice: '',
@@ -98,6 +116,22 @@ export default function StockForm({ editingId, onClose }: StockFormProps) {
             onChange={(e) => setFormData({ ...formData, ticker: e.target.value })}
             className="mt-1"
           />
+        </div>
+
+        <div>
+          <label className="text-sm font-medium">Pasar</label>
+          <Select
+            value={formData.market}
+            onValueChange={(v) => setFormData({ ...formData, market: v as StockMarket })}
+          >
+            <SelectTrigger className="mt-1">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="IDX">Indonesia (IDX)</SelectItem>
+              <SelectItem value="US">US (NASDAQ/NYSE)</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
         <div>

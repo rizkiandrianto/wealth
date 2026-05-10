@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { StockHolding } from '@/lib/types'
 import { formatCurrency } from '@/lib/format'
+import { sharesFor } from '@/lib/stock'
 import { useAssetStore } from '@/lib/useAssetStore'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -36,8 +37,9 @@ export default function StockSellDialog({ stock, onSell, onClose }: StockSellDia
     onClose()
   }
 
-  const totalSaleValue = quantity ? parseFloat(quantity) * parseFloat(salePrice) : 0
-  const totalCostValue = quantity ? parseFloat(quantity) * stock.averagePrice : 0
+  const sellShares = quantity ? sharesFor(stock.market, parseFloat(quantity)) : 0
+  const totalSaleValue = quantity && salePrice ? sellShares * parseFloat(salePrice) : 0
+  const totalCostValue = quantity ? sellShares * stock.averagePrice : 0
   const profit = totalSaleValue - totalCostValue
   const profitPercent = totalCostValue > 0 ? (profit / totalCostValue) * 100 : 0
 

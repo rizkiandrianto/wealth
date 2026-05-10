@@ -14,6 +14,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 
   const updates: Record<string, unknown> = {}
   if (body.ticker !== undefined) updates.ticker = body.ticker
+  if (body.market !== undefined) updates.market = body.market === 'US' ? 'US' : 'IDX'
   if (body.locationId !== undefined) updates.locationId = body.locationId
   if (body.quantity !== undefined) updates.quantity = String(body.quantity)
   if (body.averagePrice !== undefined) updates.averagePrice = String(body.averagePrice)

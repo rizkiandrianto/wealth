@@ -19,11 +19,13 @@ export async function POST(req: NextRequest) {
   if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const body = await req.json()
-  const { locationId, ticker, quantity, averagePrice, purchaseDate } = body
+  const { locationId, ticker, market, quantity, averagePrice, purchaseDate } = body
 
   if (!locationId || !ticker || !quantity || !averagePrice || !purchaseDate) {
     return NextResponse.json({ error: 'Missing fields' }, { status: 400 })
   }
+
+  const normalizedMarket = market === 'US' ? 'US' : 'IDX'
 
   const [row] = await db
     .insert(stockHoldings)
@@ -31,6 +33,7 @@ export async function POST(req: NextRequest) {
       userId,
       locationId,
       ticker,
+      market: normalizedMarket,
       quantity: String(quantity),
       averagePrice: String(averagePrice),
       purchaseDate: new Date(purchaseDate),

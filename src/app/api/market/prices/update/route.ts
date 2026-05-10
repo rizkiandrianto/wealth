@@ -3,6 +3,9 @@ import { db } from '@/db'
 import { stockHoldings, cryptoHoldings, goldHoldings, assetPrices } from '@/db/schema'
 import { sql } from 'drizzle-orm'
 import { resolveCryptoIds, fetchCryptoPricesByIds } from '@/lib/market/coingecko'
+import { getCachedUsdIdr, refreshUsdIdr } from '@/lib/market/fx'
+
+type StockMarket = 'IDX' | 'US'
 
 function checkApiKey(req: NextRequest): boolean {
   const key = req.headers.get('x-api-key')
@@ -11,7 +14,9 @@ function checkApiKey(req: NextRequest): boolean {
 
 async function getUniqueTickers() {
   const [stockRows, cryptoRows] = await Promise.all([
-    db.selectDistinct({ ticker: stockHoldings.ticker }).from(stockHoldings),
+    db
+      .selectDistinct({ ticker: stockHoldings.ticker, market: stockHoldings.market })
+      .from(stockHoldings),
     db
       .selectDistinct({ symbol: cryptoHoldings.symbol, name: cryptoHoldings.name })
       .from(cryptoHoldings),
@@ -26,22 +31,30 @@ async function getUniqueTickers() {
   }
 
   return {
-    stocks: stockRows.map((r) => r.ticker),
+    stocks: stockRows.map((r) => ({
+      ticker: r.ticker,
+      market: (r.market === 'US' ? 'US' : 'IDX') as StockMarket,
+    })),
     cryptos: cryptoRows,
     hasGold,
   }
 }
 
-async function fetchStockPrice(ticker: string): Promise<number | null> {
+async function fetchStockPrice(
+  ticker: string,
+  market: StockMarket,
+): Promise<{ price: number; currency: 'IDR' | 'USD' } | null> {
+  const symbol = market === 'IDX' ? `${ticker}.JK` : ticker
   try {
     const res = await fetch(
-      `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(ticker)}.JK`,
+      `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}`,
       { signal: AbortSignal.timeout(8000) },
     )
     if (!res.ok) return null
     const data = await res.json()
     const price = data?.chart?.result?.[0]?.meta?.regularMarketPrice
-    return typeof price === 'number' ? price : null
+    if (typeof price !== 'number') return null
+    return { price, currency: market === 'IDX' ? 'IDR' : 'USD' }
   } catch {
     return null
   }
@@ -101,20 +114,43 @@ export async function POST(req: NextRequest) {
   const failed = { stock: [] as string[], crypto: [] as string[], gold: [] as string[] }
 
   // --- Stocks ---
+  const hasUsStock = stocks.some((s) => s.market === 'US')
+  let usdIdr: number | null = null
+  if (hasUsStock) {
+    usdIdr = (await getCachedUsdIdr()) ?? (await refreshUsdIdr())
+    if (usdIdr === null) {
+      console.warn('[price-update] USD/IDR rate unavailable; US stocks will fail')
+    }
+  }
+
   await Promise.all(
-    stocks.map(async (ticker) => {
-      const price = await fetchStockPrice(ticker)
-      if (price === null) {
-        console.warn(`[price-update] stock ${ticker} failed`)
+    stocks.map(async ({ ticker, market }) => {
+      const result = await fetchStockPrice(ticker, market)
+      if (!result) {
+        console.warn(`[price-update] stock ${ticker} (${market}) failed`)
         failed.stock.push(ticker)
         return
       }
+      let priceIdr = result.price
+      if (result.currency === 'USD') {
+        if (usdIdr === null) {
+          failed.stock.push(ticker)
+          return
+        }
+        priceIdr = result.price * usdIdr
+      }
       await db
         .insert(assetPrices)
-        .values({ ticker, assetType: 'stock', name: ticker, price: String(price), currency: 'IDR' })
+        .values({
+          ticker,
+          assetType: 'stock',
+          name: ticker,
+          price: String(priceIdr),
+          currency: 'IDR',
+        })
         .onConflictDoUpdate({
           target: assetPrices.ticker,
-          set: { price: String(price), updatedAt: sql`now()` },
+          set: { price: String(priceIdr), updatedAt: sql`now()` },
         })
       updated.stock++
     }),

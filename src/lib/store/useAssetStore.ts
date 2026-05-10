@@ -16,6 +16,7 @@ import {
   StockSale,
   Transaction,
 } from '@/lib/types'
+import { stockShares } from '@/lib/stock'
 
 // ─── DB row → store type normalizers ────────────────────────────────────────
 
@@ -46,6 +47,7 @@ const toLocation = (r: Row): StockLocation | CryptoLocation => ({
 
 const toStock = (r: Row): StockHolding => ({
   id: r.id, ticker: r.ticker, locationId: r.locationId,
+  market: (r.market === 'US' ? 'US' : 'IDX'),
   quantity: num(r.quantity), averagePrice: num(r.averagePrice),
   purchaseDate: ts(r.purchaseDate), createdAt: ts(r.createdAt),
 })
@@ -637,7 +639,7 @@ export const useAssetStore = create<AssetStore>()(
       const stock = stocks.find((s) => s.id === stockId)
       if (!stock) return 0
       const price = assetPrices.find((p) => p.ticker === stock.ticker)?.price ?? 0
-      return stock.quantity * price
+      return stockShares(stock) * price
     },
 
     getStockProfitLoss: (stockId) => {
@@ -645,8 +647,9 @@ export const useAssetStore = create<AssetStore>()(
       const stock = stocks.find((s) => s.id === stockId)
       if (!stock) return { amount: 0, percentage: 0 }
       const price = assetPrices.find((p) => p.ticker === stock.ticker)?.price ?? 0
-      const totalCost = stock.quantity * stock.averagePrice
-      const currentValue = stock.quantity * price
+      const shares = stockShares(stock)
+      const totalCost = shares * stock.averagePrice
+      const currentValue = shares * price
       const amount = currentValue - totalCost
       return { amount, percentage: totalCost > 0 ? (amount / totalCost) * 100 : 0 }
     },

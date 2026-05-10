@@ -33,7 +33,7 @@ export interface DailyBalance {
 
 export interface AssetPrice {
   ticker: string;
-  assetType: 'stock' | 'crypto' | 'gold';
+  assetType: 'stock' | 'crypto' | 'gold' | 'fx';
   name: string;
   price: number;
   currency: string;
@@ -67,9 +67,12 @@ export interface GoldSale {
   createdAt: number;
 }
 
+export type StockMarket = 'IDX' | 'US';
+
 export interface StockHolding {
   id: string;
   ticker: string;
+  market: StockMarket;
   locationId: string; // reference to StockLocation.id
   quantity: number;
   averagePrice: number; // in IDR

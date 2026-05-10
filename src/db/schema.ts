@@ -104,6 +104,7 @@ export const stockHoldings = pgTable("stock_holdings", {
     .notNull()
     .references(() => stockLocations.id, { onDelete: "cascade" }),
   ticker: text("ticker").notNull(),
+  market: text("market").notNull().default("IDX"), // 'IDX' | 'US'
   quantity: numeric("quantity", { precision: 20, scale: 8 }).notNull(),
   averagePrice: numeric("average_price", { precision: 20, scale: 4 }).notNull(),
   purchaseDate: timestamp("purchase_date", { mode: "date" }).notNull(),

@@ -2,6 +2,7 @@
 
 import { useAssetStore } from '@/lib/useAssetStore'
 import { formatCurrency } from '@/lib/format'
+import { stockShares } from '@/lib/stock'
 import { Card } from '@/components/ui/card'
 import { TrendingUp, TrendingDown } from 'lucide-react'
 
@@ -9,7 +10,7 @@ export default function StocksSummary() {
   const { stocks, getStockValue, getStockProfitLoss, getTotalStockValue } = useAssetStore()
 
   const totalValue = getTotalStockValue()
-  const totalCost = stocks.reduce((sum, stock) => sum + stock.quantity * stock.averagePrice, 0)
+  const totalCost = stocks.reduce((sum, stock) => sum + stockShares(stock) * stock.averagePrice, 0)
   const totalProfit = totalValue - totalCost
   const totalProfitPercentage = totalCost > 0 ? (totalProfit / totalCost) * 100 : 0
   const isPositive = totalProfit >= 0

@@ -10,6 +10,7 @@ import RecentTransactions from '@/components/RecentTransactions'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { formatCurrency } from '@/lib/format'
+import { stockShares } from '@/lib/stock'
 import { TrendingUp, TrendingDown, ArrowRight } from 'lucide-react'
 
 export default function Home() {
@@ -23,7 +24,7 @@ export default function Home() {
   }
 
   const totalStockValue = store.getTotalStockValue()
-  const totalStockCost = store.stocks.reduce((sum, stock) => sum + stock.quantity * stock.averagePrice, 0)
+  const totalStockCost = store.stocks.reduce((sum, stock) => sum + stockShares(stock) * stock.averagePrice, 0)
   const totalStockProfit = totalStockValue - totalStockCost
   const totalStockProfitPercent = totalStockCost > 0 ? (totalStockProfit / totalStockCost) * 100 : 0
   const isStockPositive = totalStockProfit >= 0
