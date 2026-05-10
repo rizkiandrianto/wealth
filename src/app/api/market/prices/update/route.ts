@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/db'
 import { stockHoldings, cryptoHoldings, goldHoldings, assetPrices } from '@/db/schema'
 import { sql } from 'drizzle-orm'
-import { resolveCryptoIds, fetchCryptoPricesByIds } from '@/lib/market/coingecko'
+import { fetchCryptoPricesIDR } from '@/lib/market/cryptoPrice'
 import { getCachedUsdIdr, refreshUsdIdr } from '@/lib/market/fx'
 
 type StockMarket = 'IDX' | 'US'
@@ -157,44 +157,35 @@ export async function POST(req: NextRequest) {
   )
 
   // --- Crypto ---
-  // Resolve CoinGecko IDs (cached on asset_prices.external_id) before fetching
-  const idResult = await resolveCryptoIds(cryptos)
-  failed.crypto.push(...idResult.failed)
+  // CoinGecko primary; CoinMarketCap fallback for symbols CG can't resolve/price.
+  const cryptoResult = await fetchCryptoPricesIDR(cryptos)
+  failed.crypto.push(...cryptoResult.failed)
 
-  if (idResult.resolved.length > 0) {
-    const ids = idResult.resolved.map((r) => r.externalId)
-    const priceMap = await fetchCryptoPricesByIds(ids)
-
-    await Promise.all(
-      idResult.resolved.map(async ({ symbol, externalId, name }) => {
-        const price = priceMap.get(externalId)
-        if (price === undefined) {
-          failed.crypto.push(symbol)
-          return
-        }
-        await db
-          .insert(assetPrices)
-          .values({
-            ticker: symbol,
-            assetType: 'crypto',
-            name,
-            externalId,
+  await Promise.all(
+    cryptoResult.entries.map(async ({ symbol, name, price, externalId }) => {
+      await db
+        .insert(assetPrices)
+        .values({
+          ticker: symbol,
+          assetType: 'crypto',
+          name,
+          externalId,
+          price: String(price),
+          currency: 'IDR',
+        })
+        .onConflictDoUpdate({
+          target: assetPrices.ticker,
+          set: {
             price: String(price),
-            currency: 'IDR',
-          })
-          .onConflictDoUpdate({
-            target: assetPrices.ticker,
-            set: {
-              price: String(price),
-              name,
-              externalId,
-              updatedAt: sql`now()`,
-            },
-          })
-        updated.crypto++
-      }),
-    )
-  }
+            name,
+            // Don't clobber a previously-cached CG id with null when only CMC succeeded
+            ...(externalId ? { externalId } : {}),
+            updatedAt: sql`now()`,
+          },
+        })
+      updated.crypto++
+    }),
+  )
 
   // --- Gold ---
   if (hasGold) {
