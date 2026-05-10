@@ -155,6 +155,7 @@ export const assetPrices = pgTable("asset_prices", {
   ticker: text("ticker").primaryKey(),
   assetType: text("asset_type").notNull(), // stock | crypto
   name: text("name").notNull(),
+  externalId: text("external_id"), // CoinGecko id for crypto, used to fetch prices
   price: numeric("price", { precision: 20, scale: 4 }).notNull().default("0"),
   currency: text("currency").notNull().default("IDR"),
   updatedAt: timestamp("updated_at", { mode: "date" }).defaultNow().notNull(),

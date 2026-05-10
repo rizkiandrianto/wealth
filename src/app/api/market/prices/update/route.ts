@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/db'
 import { stockHoldings, cryptoHoldings, goldHoldings, assetPrices } from '@/db/schema'
 import { sql } from 'drizzle-orm'
+import { resolveCryptoIds, fetchCryptoPricesByIds } from '@/lib/market/coingecko'
 
 function checkApiKey(req: NextRequest): boolean {
   const key = req.headers.get('x-api-key')
@@ -29,66 +30,6 @@ async function getUniqueTickers() {
     cryptos: cryptoRows,
     hasGold,
   }
-}
-
-async function fetchCryptoPrices(
-  symbols: { symbol: string; name: string }[],
-): Promise<{ ticker: string; price: number; name: string; failed: string[] }> {
-  const failed: string[] = []
-  const results: { ticker: string; price: number; name: string }[] = []
-
-  // Resolve symbol → CoinGecko ID via search
-  const idMap = new Map<string, { id: string; name: string }>()
-  await Promise.all(
-    symbols.map(async ({ symbol, name }) => {
-      try {
-        const res = await fetch(
-          `https://api.coingecko.com/api/v3/search?query=${encodeURIComponent(symbol)}`,
-          { signal: AbortSignal.timeout(8000) },
-        )
-        if (!res.ok) throw new Error('CoinGecko search failed')
-        const data = await res.json()
-        const exact = data.coins?.find(
-          (c: { symbol: string; id: string; name: string }) =>
-            c.symbol.toLowerCase() === symbol.toLowerCase(),
-        )
-        if (exact) {
-          idMap.set(symbol, { id: exact.id, name: exact.name })
-        } else {
-          failed.push(symbol)
-        }
-      } catch {
-        failed.push(symbol)
-      }
-    }),
-  )
-
-  if (idMap.size === 0) return { ticker: '', price: 0, name: '', failed } as never
-
-  const ids = Array.from(idMap.values())
-    .map((v) => v.id)
-    .join(',')
-  try {
-    const res = await fetch(
-      `https://api.coingecko.com/api/v3/simple/price?ids=${encodeURIComponent(ids)}&vs_currencies=usd`,
-      { signal: AbortSignal.timeout(10000) },
-    )
-    if (!res.ok) throw new Error('CoinGecko price fetch failed')
-    const priceData: Record<string, { usd: number }> = await res.json()
-
-    for (const [symbol, { id, name: cgName }] of idMap.entries()) {
-      const price = priceData[id]?.usd
-      if (price !== undefined) {
-        results.push({ ticker: symbol, price, name: cgName })
-      } else {
-        failed.push(symbol)
-      }
-    }
-  } catch {
-    for (const symbol of idMap.keys()) failed.push(symbol)
-  }
-
-  return { ...results, failed } as never
 }
 
 async function fetchStockPrice(ticker: string): Promise<number | null> {
@@ -180,67 +121,44 @@ export async function POST(req: NextRequest) {
   )
 
   // --- Crypto ---
-  const cryptoResults: { ticker: string; price: number; name: string }[] = []
-  const cryptoFailed: string[] = []
+  // Resolve CoinGecko IDs (cached on asset_prices.external_id) before fetching
+  const idResult = await resolveCryptoIds(cryptos)
+  failed.crypto.push(...idResult.failed)
 
-  // Resolve IDs
-  const idMap = new Map<string, { id: string; name: string }>()
-  await Promise.all(
-    cryptos.map(async ({ symbol, name }) => {
-      try {
-        const res = await fetch(
-          `https://api.coingecko.com/api/v3/search?query=${encodeURIComponent(symbol)}`,
-          { signal: AbortSignal.timeout(8000) },
-        )
-        if (!res.ok) throw new Error()
-        const data = await res.json()
-        const exact = data.coins?.find(
-          (c: { symbol: string; id: string; name: string }) =>
-            c.symbol.toLowerCase() === symbol.toLowerCase(),
-        )
-        if (exact) idMap.set(symbol, { id: exact.id, name: exact.name || name })
-        else cryptoFailed.push(symbol)
-      } catch {
-        cryptoFailed.push(symbol)
-      }
-    }),
-  )
+  if (idResult.resolved.length > 0) {
+    const ids = idResult.resolved.map((r) => r.externalId)
+    const priceMap = await fetchCryptoPricesByIds(ids)
 
-  if (idMap.size > 0) {
-    const ids = Array.from(idMap.values())
-      .map((v) => v.id)
-      .join(',')
-    try {
-      const res = await fetch(
-        `https://api.coingecko.com/api/v3/simple/price?ids=${encodeURIComponent(ids)}&vs_currencies=usd`,
-        { signal: AbortSignal.timeout(10000) },
-      )
-      if (!res.ok) throw new Error()
-      const priceData: Record<string, { usd: number }> = await res.json()
-
-      for (const [symbol, { id, name }] of idMap.entries()) {
-        const price = priceData[id]?.usd
-        if (price !== undefined) cryptoResults.push({ ticker: symbol, price, name })
-        else cryptoFailed.push(symbol)
-      }
-    } catch {
-      for (const symbol of idMap.keys()) cryptoFailed.push(symbol)
-    }
+    await Promise.all(
+      idResult.resolved.map(async ({ symbol, externalId, name }) => {
+        const price = priceMap.get(externalId)
+        if (price === undefined) {
+          failed.crypto.push(symbol)
+          return
+        }
+        await db
+          .insert(assetPrices)
+          .values({
+            ticker: symbol,
+            assetType: 'crypto',
+            name,
+            externalId,
+            price: String(price),
+            currency: 'IDR',
+          })
+          .onConflictDoUpdate({
+            target: assetPrices.ticker,
+            set: {
+              price: String(price),
+              name,
+              externalId,
+              updatedAt: sql`now()`,
+            },
+          })
+        updated.crypto++
+      }),
+    )
   }
-
-  await Promise.all(
-    cryptoResults.map(async ({ ticker, price, name }) => {
-      await db
-        .insert(assetPrices)
-        .values({ ticker, assetType: 'crypto', name, price: String(price), currency: 'USD' })
-        .onConflictDoUpdate({
-          target: assetPrices.ticker,
-          set: { price: String(price), name, updatedAt: sql`now()` },
-        })
-      updated.crypto++
-    }),
-  )
-  failed.crypto = cryptoFailed
 
   // --- Gold ---
   if (hasGold) {
