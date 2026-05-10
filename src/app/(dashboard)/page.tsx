@@ -56,7 +56,7 @@ export default function Home() {
             <div className="flex items-start justify-between">
               <div>
                 <h3 className="text-lg font-semibold">Portfolio Saham</h3>
-                <p className="text-sm text-muted-foreground mt-1">{store.stocks.length} saham dimiliki</p>
+                <p className="text-sm text-muted-foreground mt-1">{new Set(store.stocks.map((s) => s.ticker)).size} saham dimiliki</p>
                 <div className="mt-3 space-y-2">
                   <p className="text-2xl font-bold">{formatCurrency(totalStockValue)}</p>
                   <p className={`text-sm font-medium flex items-center gap-1 ${isStockPositive ? 'text-green-600' : 'text-red-600'}`}>
@@ -84,7 +84,7 @@ export default function Home() {
             <div className="flex items-start justify-between">
               <div>
                 <h3 className="text-lg font-semibold">Portfolio Crypto</h3>
-                <p className="text-sm text-muted-foreground mt-1">{store.cryptos.length} crypto dimiliki</p>
+                <p className="text-sm text-muted-foreground mt-1">{new Set(store.cryptos.map((c) => c.symbol)).size} crypto dimiliki</p>
                 <div className="mt-3 space-y-2">
                   <p className="text-2xl font-bold">{formatCurrency(totalCryptoValue)}</p>
                   <p className={`text-sm font-medium flex items-center gap-1 ${isCryptoPositive ? 'text-green-600' : 'text-red-600'}`}>
