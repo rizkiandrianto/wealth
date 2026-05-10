@@ -4,6 +4,7 @@ import { useState, useMemo } from 'react'
 import DashboardLayout from '@/components/DashboardLayout'
 import BalanceChart from '@/components/BalanceChart'
 import HistoryTable from '@/components/HistoryTable'
+import PageLoader from '@/components/PageLoader'
 import { useAssetStore } from '@/lib/useAssetStore'
 import { getMonthFromDate, getYearFromDate } from '@/lib/format'
 import { Card } from '@/components/ui/card'
@@ -13,6 +14,7 @@ type ViewType = 'day' | 'month' | 'year'
 
 export default function HistoryPage() {
   const { accounts, dailyBalances } = useAssetStore()
+  const hasHydrated = useAssetStore((s) => s.hasHydrated)
   const [viewType, setViewType] = useState<ViewType>('month')
 
   const filteredData = useMemo(() => {
@@ -40,6 +42,10 @@ export default function HistoryPage() {
     })
     return Array.from(byYear.values()).sort((a, b) => a.date.localeCompare(b.date))
   }, [dailyBalances, viewType])
+
+  if (!hasHydrated) {
+    return <PageLoader />
+  }
 
   if (accounts.length === 0) {
     return (

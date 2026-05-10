@@ -14,6 +14,7 @@ import {
 } from 'lucide-react'
 import DashboardLayout from '@/components/DashboardLayout'
 import AccountForm from '@/components/AccountForm'
+import PageLoader from '@/components/PageLoader'
 import { useAssetStore } from '@/lib/useAssetStore'
 import { formatCurrency, formatDateTime } from '@/lib/format'
 import { Button } from '@/components/ui/button'
@@ -42,12 +43,12 @@ export default function AccountDetailPage({
   const router = useRouter()
   const {
     accounts,
-    isLoading,
     updateAccount,
     deleteAccount,
     getAccountBalance,
     getAccountTransactions,
   } = useAssetStore()
+  const hasHydrated = useAssetStore((s) => s.hasHydrated)
 
   const account = useMemo(() => accounts.find((a) => a.id === id), [accounts, id])
   const transactions = useMemo(
@@ -91,12 +92,8 @@ export default function AccountDetailPage({
     }
   }
 
-  if (isLoading && !account) {
-    return (
-      <DashboardLayout>
-        <div className="text-muted-foreground">Loading account…</div>
-      </DashboardLayout>
-    )
+  if (!hasHydrated) {
+    return <PageLoader />
   }
 
   if (!account) {

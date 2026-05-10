@@ -1,8 +1,9 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Plus } from 'lucide-react'
 import DashboardLayout from '@/components/DashboardLayout'
+import PageLoader from '@/components/PageLoader'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import CryptoForm from '@/components/CryptoForm'
@@ -13,14 +14,12 @@ import { useAssetStore } from '@/lib/useAssetStore'
 
 export default function CryptoPage() {
   const { cryptos, cryptoLocations } = useAssetStore()
+  const hasHydrated = useAssetStore((s) => s.hasHydrated)
   const [showForm, setShowForm] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
-  const [mounted, setMounted] = useState(false)
 
-  useEffect(() => setMounted(true), [])
-
-  if (!mounted) {
-    return <DashboardLayout>Loading...</DashboardLayout>
+  if (!hasHydrated) {
+    return <PageLoader />
   }
 
   return (

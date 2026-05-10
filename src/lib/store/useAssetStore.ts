@@ -152,6 +152,7 @@ function calculateDailyBalances(accounts: Account[], transactions: Transaction[]
 
 interface AssetStore extends AppState {
   isLoading: boolean
+  hasHydrated: boolean
   error: string | null
 
   // Bootstrap
@@ -240,6 +241,7 @@ export const useAssetStore = create<AssetStore>()(
     assetPrices: [],
     lastUpdated: Date.now(),
     isLoading: false,
+    hasHydrated: false,
     error: null,
 
     // ── Bootstrap ───────────────────────────────────────────────────────────
@@ -321,9 +323,10 @@ export const useAssetStore = create<AssetStore>()(
           assetPrices: priceRows.map(toAssetPrice),
           lastUpdated: Date.now(),
           isLoading: false,
+          hasHydrated: true,
         })
       } catch (err) {
-        set({ isLoading: false, error: (err as Error).message })
+        set({ isLoading: false, hasHydrated: true, error: (err as Error).message })
       }
     },
 

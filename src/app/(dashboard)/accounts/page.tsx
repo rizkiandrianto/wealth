@@ -4,6 +4,7 @@ import { useState } from 'react'
 import DashboardLayout from '@/components/DashboardLayout'
 import AccountForm from '@/components/AccountForm'
 import AccountCard from '@/components/AccountCard'
+import PageLoader from '@/components/PageLoader'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
 import { useAssetStore } from '@/lib/useAssetStore'
@@ -11,8 +12,13 @@ import { Wallet } from 'lucide-react'
 
 export default function AccountsPage() {
   const { accounts, addAccount, deleteAccount, getAccountBalance } = useAssetStore()
+  const hasHydrated = useAssetStore((s) => s.hasHydrated)
   const [showForm, setShowForm] = useState(false)
   const [hideZeroBalance, setHideZeroBalance] = useState(false)
+
+  if (!hasHydrated) {
+    return <PageLoader />
+  }
 
   const handleAddAccount = (data: any) => {
     addAccount(data)

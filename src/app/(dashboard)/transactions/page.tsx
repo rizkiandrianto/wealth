@@ -4,15 +4,21 @@ import { useState } from 'react'
 import DashboardLayout from '@/components/DashboardLayout'
 import TransactionForm from '@/components/TransactionForm'
 import TransactionList from '@/components/TransactionList'
+import PageLoader from '@/components/PageLoader'
 import { useAssetStore } from '@/lib/useAssetStore'
 import { ArrowRight } from 'lucide-react'
 
 export default function TransactionsPage() {
   const { accounts, transactions, addTransaction, deleteTransaction } = useAssetStore()
+  const hasHydrated = useAssetStore((s) => s.hasHydrated)
   const [showForm, setShowForm] = useState(false)
 
   const handleAddTransaction = () => {
     setShowForm(false)
+  }
+
+  if (!hasHydrated) {
+    return <PageLoader />
   }
 
   if (accounts.length < 2) {
