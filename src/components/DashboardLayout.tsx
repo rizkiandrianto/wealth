@@ -194,7 +194,28 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                   Dashboard
                 </Button>
               </Link>
-              {[...FINANCE_ITEMS, ...PORTFOLIO_ITEMS].map((item) => {
+              <div className="px-3 pt-3 pb-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                Finance
+              </div>
+              {FINANCE_ITEMS.map((item) => {
+                const Icon = item.icon
+                return (
+                  <Link key={item.href} href={item.href}>
+                    <Button
+                      variant={currentPath === item.href ? 'default' : 'ghost'}
+                      className="w-full justify-start gap-3"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      <Icon className="w-5 h-5" />
+                      {item.label}
+                    </Button>
+                  </Link>
+                )
+              })}
+              <div className="px-3 pt-3 pb-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                Portfolio
+              </div>
+              {PORTFOLIO_ITEMS.map((item) => {
                 const Icon = item.icon
                 return (
                   <Link key={item.href} href={item.href}>
