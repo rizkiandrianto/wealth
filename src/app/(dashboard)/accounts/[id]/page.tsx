@@ -214,25 +214,29 @@ export default function AccountDetailPage({
                 {sortedTransactions.map((tx) => {
                   const isIncoming = tx.toAccountId === account.id
                   const counterpartId = isIncoming ? tx.fromAccountId : tx.toAccountId
-                  const counterpartName = counterpartId
-                    ? accounts.find((a) => a.id === counterpartId)?.name ?? 'Unknown'
-                    : isIncoming
-                    ? 'Topup'
-                    : 'Withdrawal'
+                  let counterpartName: string;
+                  if (counterpartId) {
+                    counterpartName = accounts.find((a) => a.id === counterpartId)?.name ?? 'Unknown';
+                  } else {
+                    counterpartName = isIncoming ? 'Topup' : 'Withdrawal';
+                  }
+
+                  const isTopupOrWithdrawal = counterpartName === 'Topup' || counterpartName === 'Withdrawal';
 
                   const amountColor = isIncoming ? 'text-green-600' : 'text-orange-600'
-                  const amountPrefix = isIncoming ? '+' : '-'
+                  const amountPrefix = isIncoming ? '+' : '-';
                   const label = isIncoming
                     ? `From ${counterpartName}`
-                    : `To ${counterpartName}`
-
+                    : `To ${counterpartName}`;
+                  const finalLabel = isTopupOrWithdrawal ? counterpartName : label;
+                  
                   return (
                     <div
                       key={tx.id}
                       className="p-4 hover:bg-muted/50 transition-colors flex items-center justify-between"
                     >
                       <div className="flex-1">
-                        <p className="font-medium text-foreground">{label}</p>
+                        <p className="font-medium text-foreground">{finalLabel}</p>
                         <p className="text-sm text-muted-foreground">
                           {formatDateTime(tx.date)}
                           {tx.description && ` • ${tx.description}`}
