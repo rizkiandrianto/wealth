@@ -4,17 +4,26 @@ import { useState } from 'react'
 import DashboardLayout from '@/components/DashboardLayout'
 import AccountForm from '@/components/AccountForm'
 import AccountCard from '@/components/AccountCard'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Label } from '@/components/ui/label'
 import { useAssetStore } from '@/lib/useAssetStore'
 import { Wallet } from 'lucide-react'
 
 export default function AccountsPage() {
   const { accounts, addAccount, deleteAccount, getAccountBalance } = useAssetStore()
   const [showForm, setShowForm] = useState(false)
+  const [hideZeroBalance, setHideZeroBalance] = useState(false)
 
   const handleAddAccount = (data: any) => {
     addAccount(data)
     setShowForm(false)
   }
+
+  const visibleAccounts = hideZeroBalance
+    ? accounts.filter((account) => Math.max(getAccountBalance(account.id), 0) > 0)
+    : accounts
+
+  const hiddenCount = accounts.length - visibleAccounts.length
 
   return (
     <DashboardLayout>
@@ -31,17 +40,38 @@ export default function AccountsPage() {
         )}
 
         {!showForm && (
-          <button
-            onClick={() => setShowForm(true)}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
-          >
-            <Wallet className="w-4 h-4" />
-            Add New Account
-          </button>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <button
+              onClick={() => setShowForm(true)}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+            >
+              <Wallet className="w-4 h-4" />
+              Add New Account
+            </button>
+
+            {accounts.length > 0 && (
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  id="accounts-page-hide-zero"
+                  checked={hideZeroBalance}
+                  onCheckedChange={(checked) => setHideZeroBalance(checked === true)}
+                />
+                <Label
+                  htmlFor="accounts-page-hide-zero"
+                  className="text-sm font-normal cursor-pointer"
+                >
+                  Hide 0 balance
+                  {hiddenCount > 0 && hideZeroBalance && (
+                    <span className="text-muted-foreground"> ({hiddenCount})</span>
+                  )}
+                </Label>
+              </div>
+            )}
+          </div>
         )}
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {accounts.map((account) => (
+          {visibleAccounts.map((account) => (
             <AccountCard
               key={account.id}
               account={account}
@@ -50,6 +80,12 @@ export default function AccountsPage() {
             />
           ))}
         </div>
+
+        {accounts.length > 0 && visibleAccounts.length === 0 && (
+          <div className="text-center py-12 text-sm text-muted-foreground">
+            All accounts have a 0 balance. Uncheck &ldquo;Hide 0 balance&rdquo; to see them.
+          </div>
+        )}
 
         {accounts.length === 0 && !showForm && (
           <div className="text-center py-12">
