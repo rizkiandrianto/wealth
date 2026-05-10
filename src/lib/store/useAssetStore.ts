@@ -177,6 +177,7 @@ interface AssetStore extends AppState {
   updateStock: (id: string, updates: Partial<Omit<StockHolding, 'id' | 'createdAt'>>) => Promise<void>
   deleteStock: (id: string) => Promise<void>
   sellStock: (stockId: string, quantity: number, salePrice: number) => Promise<void>
+  sellStockBatch: (input: { ticker: string; locationId: string; quantity: number; salePrice: number; saleDate?: string }) => Promise<void>
 
   // Crypto Location operations
   addCryptoLocation: (location: Omit<CryptoLocation, 'id' | 'createdAt'>) => Promise<string>
@@ -461,6 +462,33 @@ export const useAssetStore = create<AssetStore>()(
           ? s.stocks.filter((st) => st.id !== stockId)
           : s.stocks.map((st) => st.id === stockId ? { ...st, quantity: st.quantity - quantity } : st),
         stockSales: [...s.stockSales, toStockSale(row)],
+        lastUpdated: Date.now(),
+      }))
+    },
+
+    sellStockBatch: async ({ ticker, locationId, quantity, salePrice, saleDate }) => {
+      if (quantity <= 0 || salePrice <= 0) return
+
+      const results: Array<{
+        sale: Row
+        holdingId: string
+        holdingFullyConsumed: boolean
+        remainingQty: number
+      }> = await apiFetch('/api/stocks/sell', {
+        method: 'POST',
+        body: JSON.stringify({ ticker, locationId, quantity, salePrice, saleDate }),
+      })
+
+      const fullyConsumed = new Set(results.filter((r) => r.holdingFullyConsumed).map((r) => r.holdingId))
+      const remainingByHolding = new Map(
+        results.filter((r) => !r.holdingFullyConsumed).map((r) => [r.holdingId, r.remainingQty])
+      )
+
+      set((s) => ({
+        stocks: s.stocks
+          .filter((st) => !fullyConsumed.has(st.id))
+          .map((st) => remainingByHolding.has(st.id) ? { ...st, quantity: remainingByHolding.get(st.id)! } : st),
+        stockSales: [...s.stockSales, ...results.map((r) => toStockSale(r.sale))],
         lastUpdated: Date.now(),
       }))
     },

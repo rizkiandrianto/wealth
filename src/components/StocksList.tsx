@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/accordion'
 import { Trash2, Edit2, TrendingUp, TrendingDown, DollarSign } from 'lucide-react'
 import StockSellDialog from './StockSellDialog'
+import StockSellLocationDialog from './StockSellLocationDialog'
 
 interface StocksListProps {
   stocks: StockHolding[]
@@ -21,7 +22,7 @@ interface StocksListProps {
 }
 
 export default function StocksList({ stocks, onEdit }: StocksListProps) {
-  const { deleteStock, getStockProfitLoss, sellStock, stockLocations, assetPrices } = useAssetStore()
+  const { deleteStock, sellStock, sellStockBatch, stockLocations, assetPrices } = useAssetStore()
   const formatCurrency = useFormatCurrency()
   const getLocationName = (locationId: string) =>
     stockLocations.find((l) => l.id === locationId)?.name ?? locationId
@@ -30,7 +31,11 @@ export default function StocksList({ stocks, onEdit }: StocksListProps) {
   const getName = (ticker: string) =>
     assetPrices.find((p) => p.ticker === ticker)?.name ?? ticker
   const [sellingStockId, setSellingStockId] = useState<string | null>(null)
-  const sellingStock = sellingStockId ? stocks.find(s => s.id === sellingStockId && stocks.some(x => x.id === sellingStockId)) : null
+  const [sellingLocation, setSellingLocation] = useState<{ ticker: string; locationId: string } | null>(null)
+  const sellingStock = sellingStockId ? stocks.find(s => s.id === sellingStockId) : null
+  const sellingLocationLots = sellingLocation
+    ? stocks.filter((s) => s.ticker === sellingLocation.ticker && s.locationId === sellingLocation.locationId)
+    : []
 
   // Group stocks by ticker
   const groupedByTicker = stocks.reduce(
@@ -109,74 +114,120 @@ export default function StocksList({ stocks, onEdit }: StocksListProps) {
                   </div>
                 </div>
 
-                {/* Individual holdings */}
-                {tickerStocks.length > 1 && (
-                  <div className="space-y-2">
-                    {tickerStocks.map((stock) => (
-                      <div
-                        key={stock.id}
-                        className="flex items-center justify-between text-sm p-2 bg-muted rounded border border-border"
-                      >
-                        <div className="flex-1">
-                          <p className="text-muted-foreground capitalize">
-                            {getLocationName(stock.locationId)} • {stock.quantity} lot
+                {/* Per-location groups */}
+                {Object.entries(
+                  tickerStocks.reduce<Record<string, StockHolding[]>>((acc, s) => {
+                    if (!acc[s.locationId]) acc[s.locationId] = []
+                    acc[s.locationId].push(s)
+                    return acc
+                  }, {})
+                ).map(([locationId, locLots]) => {
+                  const locShares = locLots.reduce((sum, l) => sum + stockShares(l), 0)
+                  const locCost = locLots.reduce((sum, l) => sum + stockShares(l) * l.averagePrice, 0)
+                  const locWeightedAvg = locShares > 0 ? locCost / locShares : 0
+                  const locTotalQty = locLots.reduce((sum, l) => sum + l.quantity, 0)
+                  const locValue = locShares * price
+                  const locPnl = locValue - locCost
+                  const locPnlPercent = locCost > 0 ? (locPnl / locCost) * 100 : 0
+                  const locPositive = locPnl >= 0
+
+                  return (
+                    <div key={locationId} className="border rounded-lg p-3 space-y-2 bg-muted/30">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-semibold text-sm">{getLocationName(locationId)}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {locTotalQty} lot • avg {formatCurrency(locWeightedAvg)}
                           </p>
                         </div>
-                        <div className="flex gap-2">
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => onEdit(stock.id)}
-                            className="h-7 w-7 p-0"
-                          >
-                            <Edit2 className="w-3 h-3" />
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => deleteStock(stock.id)}
-                            className="h-7 w-7 p-0 text-red-600 hover:text-red-700"
-                          >
-                            <Trash2 className="w-3 h-3" />
-                          </Button>
-                        </div>
+                        {price > 0 && (
+                          <p className={`text-xs font-medium ${locPositive ? 'text-green-600' : 'text-red-600'}`}>
+                            {formatCurrency(locPnl)} ({locPnlPercent.toFixed(2)}%)
+                          </p>
+                        )}
                       </div>
-                    ))}
-                  </div>
-                )}
 
-                {/* Actions for single holding */}
-                {tickerStocks.length === 1 && (
-                  <div className="flex gap-2">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => onEdit(tickerStocks[0].id)}
-                      className="flex-1 gap-2"
-                    >
-                      <Edit2 className="w-3 h-3" />
-                      Edit
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => setSellingStockId(tickerStocks[0].id)}
-                      className="flex-1 gap-2 bg-green-50 text-green-700 hover:bg-green-100"
-                    >
-                      <DollarSign className="w-3 h-3" />
-                      Sell
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => deleteStock(tickerStocks[0].id)}
-                      className="flex-1 gap-2 text-red-600 hover:text-red-700"
-                    >
-                      <Trash2 className="w-3 h-3" />
-                      Hapus
-                    </Button>
-                  </div>
-                )}
+                      {locLots.length > 1 && (
+                        <div className="space-y-1">
+                          {locLots.map((stock) => (
+                            <div
+                              key={stock.id}
+                              className="flex items-center justify-between text-xs p-2 bg-background rounded border border-border"
+                            >
+                              <div className="flex-1">
+                                <p className="text-muted-foreground">
+                                  {stock.quantity} lot @ {formatCurrency(stock.averagePrice)}
+                                </p>
+                              </div>
+                              <div className="flex gap-1">
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  onClick={() => onEdit(stock.id)}
+                                  className="h-6 w-6 p-0"
+                                >
+                                  <Edit2 className="w-3 h-3" />
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  onClick={() => deleteStock(stock.id)}
+                                  className="h-6 w-6 p-0 text-red-600 hover:text-red-700"
+                                >
+                                  <Trash2 className="w-3 h-3" />
+                                </Button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      <div className="flex gap-2">
+                        {locLots.length === 1 ? (
+                          <>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => onEdit(locLots[0].id)}
+                              className="flex-1 gap-2"
+                            >
+                              <Edit2 className="w-3 h-3" />
+                              Edit
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => setSellingStockId(locLots[0].id)}
+                              className="flex-1 gap-2 bg-green-50 text-green-700 hover:bg-green-100"
+                            >
+                              <DollarSign className="w-3 h-3" />
+                              Sell
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => deleteStock(locLots[0].id)}
+                              className="flex-1 gap-2 text-red-600 hover:text-red-700"
+                            >
+                              <Trash2 className="w-3 h-3" />
+                              Hapus
+                            </Button>
+                          </>
+                        ) : (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => setSellingLocation({ ticker, locationId })}
+                            className="flex-1 gap-2 bg-green-50 text-green-700 hover:bg-green-100"
+                          >
+                            <DollarSign className="w-3 h-3" />
+                            Sell from {getLocationName(locationId)} (FIFO)
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  )
+                })}
                 </div>
               </AccordionContent>
             </AccordionItem>
@@ -192,6 +243,25 @@ export default function StocksList({ stocks, onEdit }: StocksListProps) {
             setSellingStockId(null)
           }}
           onClose={() => setSellingStockId(null)}
+        />
+      )}
+
+      {sellingLocation && sellingLocationLots.length > 0 && (
+        <StockSellLocationDialog
+          ticker={sellingLocation.ticker}
+          locationId={sellingLocation.locationId}
+          locationName={getLocationName(sellingLocation.locationId)}
+          lots={sellingLocationLots}
+          onSell={({ quantity, salePrice }) => {
+            sellStockBatch({
+              ticker: sellingLocation.ticker,
+              locationId: sellingLocation.locationId,
+              quantity,
+              salePrice,
+            })
+            setSellingLocation(null)
+          }}
+          onClose={() => setSellingLocation(null)}
         />
       )}
     </>

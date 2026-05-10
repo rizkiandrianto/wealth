@@ -3,6 +3,8 @@ import { auth } from '@/lib/auth'
 import { db } from '@/db'
 import { and, eq } from 'drizzle-orm'
 import { stockHoldings, stockSales } from '@/db/schema'
+import { sharesFor } from '@/lib/stock'
+import type { StockMarket } from '@/lib/types'
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth()
@@ -31,8 +33,9 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     return NextResponse.json({ error: 'Insufficient quantity' }, { status: 400 })
   }
 
-  const realizedPnl = quantity * salePrice - quantity * avgPrice
-  const realizedPnlPercent = avgPrice > 0 ? (realizedPnl / (quantity * avgPrice)) * 100 : 0
+  const shares = sharesFor(holding.market as StockMarket, quantity)
+  const realizedPnl = shares * salePrice - shares * avgPrice
+  const realizedPnlPercent = avgPrice > 0 ? (realizedPnl / (shares * avgPrice)) * 100 : 0
 
   const result = await db.transaction(async (tx) => {
     if (quantity === currentQty) {
