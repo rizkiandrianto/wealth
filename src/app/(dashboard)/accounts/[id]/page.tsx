@@ -18,16 +18,7 @@ import { useAssetStore } from '@/lib/useAssetStore'
 import { formatCurrency, formatDateTime } from '@/lib/format'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog'
+import ConfirmDialog from '@/components/ConfirmDialog'
 import { AccountType } from '@/lib/types'
 
 const ACCOUNT_TYPE_ICONS = {
@@ -260,30 +251,17 @@ export default function AccountDetailPage({
         </div>
       </div>
 
-      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete {account.name}?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This will permanently delete this account and all of its transactions.
-              This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={isSubmitting}>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={(e) => {
-                e.preventDefault()
-                handleDelete()
-              }}
-              disabled={isSubmitting}
-              className="bg-red-600 hover:bg-red-700 focus-visible:ring-red-600"
-            >
-              {isSubmitting ? 'Deleting…' : 'Delete'}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <ConfirmDialog
+        open={showDeleteDialog}
+        onOpenChange={setShowDeleteDialog}
+        title={`Delete ${account.name}?`}
+        description="This will permanently delete this account and all of its transactions. This action cannot be undone."
+        confirmLabel="Delete"
+        loadingLabel="Deleting…"
+        isLoading={isSubmitting}
+        destructive
+        onConfirm={handleDelete}
+      />
     </DashboardLayout>
   )
 }
