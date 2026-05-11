@@ -3,7 +3,7 @@ import { auth } from '@/lib/auth'
 import { db } from '@/db'
 import { and, eq, sql } from 'drizzle-orm'
 import { transactions, users } from '@/db/schema'
-import { recomputeSnapshotsForward } from '@/lib/snapshot'
+import { appDateStr, recomputeSnapshotsForward } from '@/lib/snapshot'
 
 type AuthResult =
   | { mode: 'session'; userIds: string[] }
@@ -31,9 +31,6 @@ async function resolveAuth(req: NextRequest, bodyUserEmail?: string): Promise<Au
 }
 
 async function runForUser(userId: string, dateStr: string) {
-  const startOfDay = new Date(`${dateStr}T00:00:00.000Z`)
-  const endOfDay = new Date(`${dateStr}T23:59:59.999Z`)
-
   const txRows = await db
     .select({
       fromAccountId: transactions.fromAccountId,
@@ -43,8 +40,7 @@ async function runForUser(userId: string, dateStr: string) {
     .where(
       and(
         eq(transactions.userId, userId),
-        sql`${transactions.date} >= ${startOfDay}`,
-        sql`${transactions.date} <= ${endOfDay}`
+        sql`${transactions.date}::date = ${dateStr}::date`
       )
     )
 
@@ -78,7 +74,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const dateStr = body.date ?? new Date().toISOString().slice(0, 10)
+  const dateStr = body.date ?? appDateStr(new Date())
   if (!/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
     return NextResponse.json({ error: 'Invalid date (expected YYYY-MM-DD)' }, { status: 400 })
   }

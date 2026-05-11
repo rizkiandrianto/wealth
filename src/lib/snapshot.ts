@@ -6,9 +6,27 @@ import { accountBalanceSnapshots, transactions } from '@/db/schema'
 // the same query-builder surface. Use a structural type that accepts either.
 type DbOrTx = Pick<typeof db, 'select' | 'selectDistinct' | 'insert' | 'update' | 'delete'>
 
+const APP_TZ = 'Asia/Jakarta'
+const APP_DATE_FMT = new Intl.DateTimeFormat('en-CA', {
+  timeZone: APP_TZ,
+  year: 'numeric',
+  month: '2-digit',
+  day: '2-digit',
+})
+
+/**
+ * Format a JS Date as YYYY-MM-DD using the app's primary timezone (Asia/Jakarta).
+ * Mirrors how PG (with TimeZone=Asia/Jakarta) interprets the stored wall-clock
+ * date, so a snapshot row keyed on this date matches `transactions.date::date`.
+ */
+export function appDateStr(d: Date): string {
+  return APP_DATE_FMT.format(d)
+}
+
 /**
  * Compute running balance for an account as of end-of-day on `date` (inclusive).
- * = SUM(incoming) - SUM(outgoing) over all transactions for that account with tx.date <= date.
+ * Compares against the stored wall-clock date (PG TZ = Asia/Jakarta) by casting
+ * the timestamp column to date, so timezone offsets don't shift the range.
  */
 async function runningBalance(
   tx: DbOrTx,
@@ -16,7 +34,6 @@ async function runningBalance(
   accountId: string,
   date: string
 ): Promise<string> {
-  const endOfDay = new Date(`${date}T23:59:59.999Z`)
   const [row] = await tx
     .select({
       balance: sql<string>`COALESCE(SUM(
@@ -32,7 +49,7 @@ async function runningBalance(
       and(
         eq(transactions.userId, userId),
         or(eq(transactions.fromAccountId, accountId), eq(transactions.toAccountId, accountId)),
-        sql`${transactions.date} <= ${endOfDay}`
+        sql`${transactions.date}::date <= ${date}::date`
       )
     )
   return row?.balance ?? '0'

@@ -3,7 +3,7 @@ import { auth } from '@/lib/auth'
 import { db } from '@/db'
 import { desc, eq, sql } from 'drizzle-orm'
 import { transactions, wealthAccounts } from '@/db/schema'
-import { recomputeSnapshotsForward } from '@/lib/snapshot'
+import { appDateStr, recomputeSnapshotsForward } from '@/lib/snapshot'
 
 export async function GET() {
   const session = await auth()
@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
   if (!amount || !date) return NextResponse.json({ error: 'Missing fields' }, { status: 400 })
 
   const txDate = new Date(date)
-  const dateStr = txDate.toISOString().slice(0, 10)
+  const dateStr = appDateStr(txDate)
   const amountStr = String(amount)
 
   const result = await db.transaction(async (tx) => {

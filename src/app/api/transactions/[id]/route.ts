@@ -3,7 +3,7 @@ import { auth } from '@/lib/auth'
 import { db } from '@/db'
 import { and, eq, sql } from 'drizzle-orm'
 import { transactions, wealthAccounts } from '@/db/schema'
-import { recomputeSnapshotsForward } from '@/lib/snapshot'
+import { appDateStr, recomputeSnapshotsForward } from '@/lib/snapshot'
 
 export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth()
@@ -24,7 +24,7 @@ export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ 
       .delete(transactions)
       .where(and(eq(transactions.id, id), eq(transactions.userId, userId)))
 
-    const dateStr = new Date(existing.date).toISOString().slice(0, 10)
+    const dateStr = appDateStr(new Date(existing.date))
     const amountStr = existing.amount
 
     if (existing.fromAccountId) {
