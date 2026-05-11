@@ -7,6 +7,7 @@ import {
   integer,
   numeric,
   boolean,
+  uniqueIndex,
 } from "drizzle-orm/pg-core";
 import type { AdapterAccountType } from "next-auth/adapters";
 
@@ -70,6 +71,7 @@ export const wealthAccounts = pgTable("wealth_accounts", {
   name: text("name").notNull(),
   type: text("type").notNull(), // bank | deposit | cash
   currency: text("currency").notNull().default("IDR"),
+  balance: numeric("balance", { precision: 20, scale: 4 }).notNull().default("0"),
   createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
 });
 
@@ -216,12 +218,20 @@ export const goldSales = pgTable("gold_sales", {
   createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
 });
 
-export const dailyBalances = pgTable("daily_balances", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  userId: uuid("user_id")
-    .notNull()
-    .references(() => users.id, { onDelete: "cascade" }),
-  date: text("date").notNull(), // YYYY-MM-DD
-  totalBalance: numeric("total_balance", { precision: 20, scale: 4 }).notNull(),
-  createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
-});
+export const accountBalanceSnapshots = pgTable(
+  "account_balance_snapshots",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    accountId: uuid("account_id")
+      .notNull()
+      .references(() => wealthAccounts.id, { onDelete: "cascade" }),
+    date: text("date").notNull(), // YYYY-MM-DD
+    balance: numeric("balance", { precision: 20, scale: 4 }).notNull(),
+    createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { mode: "date" }).defaultNow().notNull(),
+  },
+  (t) => [uniqueIndex("uq_snapshot_user_account_date").on(t.userId, t.accountId, t.date)]
+);

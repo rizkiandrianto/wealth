@@ -28,7 +28,12 @@ const num = (v: unknown) => parseFloat(v as string)
 
 const toAccount = (r: Row): Account => ({
   id: r.id, name: r.name, type: r.type as AccountType,
-  currency: r.currency, createdAt: ts(r.createdAt),
+  currency: r.currency, balance: num(r.balance), createdAt: ts(r.createdAt),
+})
+
+type SnapshotRow = { accountId: string; date: string; balance: number }
+const toSnapshot = (r: Row): SnapshotRow => ({
+  accountId: r.accountId, date: r.date, balance: num(r.balance),
 })
 
 const toTransaction = (r: Row): Transaction => ({
@@ -113,39 +118,25 @@ async function apiFetch(path: string, init?: RequestInit) {
   return res.json()
 }
 
-function calculateDailyBalances(accounts: Account[], transactions: Transaction[]): DailyBalance[] {
-  const balancesByDate: Map<string, Map<string, number>> = new Map()
-  const sortedTransactions = [...transactions].sort((a, b) => a.date - b.date)
+// Reads sparse per-account snapshots and expands them into one row per snapshot date.
+// Each row carries forward the most recent known balance for every account.
+function buildDailyBalancesFromSnapshots(
+  accounts: Account[],
+  snapshots: SnapshotRow[]
+): DailyBalance[] {
+  const sorted = [...snapshots].sort((a, b) => a.date.localeCompare(b.date))
+  const lastKnown: Record<string, number> = {}
+  for (const a of accounts) lastKnown[a.id] = 0
 
-  for (const account of accounts) {
-    balancesByDate.set(account.id, new Map())
+  const byDate = new Map<string, Record<string, number>>()
+  for (const snap of sorted) {
+    lastKnown[snap.accountId] = snap.balance
+    byDate.set(snap.date, { ...lastKnown })
   }
 
-  for (const tx of sortedTransactions) {
-    const dateStr = new Date(tx.date).toISOString().split('T')[0]
-    const fromMap = (tx.fromAccountId ? balancesByDate.get(tx.fromAccountId) : undefined) || new Map()
-    const toMap = (tx.toAccountId ? balancesByDate.get(tx.toAccountId) : undefined) || new Map()
-
-    fromMap.set(dateStr, (fromMap.get(dateStr) ?? 0) - tx.amount)
-    toMap.set(dateStr, (toMap.get(dateStr) ?? 0) + tx.amount)
-
-    if (tx.fromAccountId) balancesByDate.set(tx.fromAccountId, fromMap)
-    if (tx.toAccountId) balancesByDate.set(tx.toAccountId, toMap)
-  }
-
-  const allDates = new Set<string>()
-  for (const dateMap of balancesByDate.values()) {
-    for (const date of dateMap.keys()) allDates.add(date)
-  }
-
-  return Array.from(allDates)
-    .sort()
-    .map((date) => ({
-      date,
-      balances: Object.fromEntries(
-        accounts.map((account) => [account.id, balancesByDate.get(account.id)?.get(date) ?? 0])
-      ),
-    }))
+  return Array.from(byDate.entries())
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([date, balances]) => ({ date, balances }))
 }
 
 // ─── Store interface ──────────────────────────────────────────────────────────
@@ -254,6 +245,7 @@ export const useAssetStore = create<AssetStore>()(
         const [
           accountRows,
           txRows,
+          snapshotRows,
           stockLocRows,
           cryptoLocRows,
           goldLocRows,
@@ -267,6 +259,7 @@ export const useAssetStore = create<AssetStore>()(
         ] = await Promise.all([
           apiFetch('/api/accounts'),
           apiFetch('/api/transactions'),
+          apiFetch('/api/account-snapshots'),
           apiFetch('/api/stock-locations'),
           apiFetch('/api/crypto-locations'),
           apiFetch('/api/gold-locations'),
@@ -281,6 +274,7 @@ export const useAssetStore = create<AssetStore>()(
 
         const accounts: Account[] = accountRows.map(toAccount)
         const transactions: Transaction[] = txRows.map(toTransaction)
+        const snapshots: SnapshotRow[] = snapshotRows.map(toSnapshot)
 
         // Seed default locations on first use
         let stockLocations: StockLocation[] = stockLocRows.map(toLocation)
@@ -312,7 +306,7 @@ export const useAssetStore = create<AssetStore>()(
         set({
           accounts,
           transactions,
-          dailyBalances: calculateDailyBalances(accounts, transactions),
+          dailyBalances: buildDailyBalancesFromSnapshots(accounts, snapshots),
           stockLocations,
           cryptoLocations,
           goldLocations: goldLocRows.map(toGoldLocation),
@@ -353,15 +347,21 @@ export const useAssetStore = create<AssetStore>()(
 
     deleteAccount: async (id) => {
       await apiFetch(`/api/accounts/${id}`, { method: 'DELETE' })
-      set((s) => {
-        const accounts = s.accounts.filter((a) => a.id !== id)
-        const transactions = s.transactions.filter((tx) => tx.fromAccountId !== id && tx.toAccountId !== id)
-        return {
-          accounts,
-          transactions,
-          dailyBalances: calculateDailyBalances(accounts, transactions),
-          lastUpdated: Date.now(),
-        }
+      // Cascade: account deletion drops transactions and snapshots via FK.
+      // Refetch the affected slices so dailyBalances stay in sync.
+      const [accountRows, txRows, snapshotRows] = await Promise.all([
+        apiFetch('/api/accounts'),
+        apiFetch('/api/transactions'),
+        apiFetch('/api/account-snapshots'),
+      ])
+      const accounts: Account[] = accountRows.map(toAccount)
+      const transactions: Transaction[] = txRows.map(toTransaction)
+      const snapshots: SnapshotRow[] = snapshotRows.map(toSnapshot)
+      set({
+        accounts,
+        transactions,
+        dailyBalances: buildDailyBalancesFromSnapshots(accounts, snapshots),
+        lastUpdated: Date.now(),
       })
     },
 
@@ -371,26 +371,36 @@ export const useAssetStore = create<AssetStore>()(
       const row = await apiFetch('/api/transactions', {
         method: 'POST', body: JSON.stringify(transaction),
       })
-      set((s) => {
-        const transactions = [...s.transactions, toTransaction(row)]
-        return {
-          transactions,
-          dailyBalances: calculateDailyBalances(s.accounts, transactions),
-          lastUpdated: Date.now(),
-        }
-      })
+      // Server already updated wealth_accounts.balance and snapshots.
+      // Refetch the slices that changed.
+      const [accountRows, snapshotRows] = await Promise.all([
+        apiFetch('/api/accounts'),
+        apiFetch('/api/account-snapshots'),
+      ])
+      const accounts: Account[] = accountRows.map(toAccount)
+      const snapshots: SnapshotRow[] = snapshotRows.map(toSnapshot)
+      set((s) => ({
+        accounts,
+        transactions: [...s.transactions, toTransaction(row)],
+        dailyBalances: buildDailyBalancesFromSnapshots(accounts, snapshots),
+        lastUpdated: Date.now(),
+      }))
     },
 
     deleteTransaction: async (id) => {
       await apiFetch(`/api/transactions/${id}`, { method: 'DELETE' })
-      set((s) => {
-        const transactions = s.transactions.filter((tx) => tx.id !== id)
-        return {
-          transactions,
-          dailyBalances: calculateDailyBalances(s.accounts, transactions),
-          lastUpdated: Date.now(),
-        }
-      })
+      const [accountRows, snapshotRows] = await Promise.all([
+        apiFetch('/api/accounts'),
+        apiFetch('/api/account-snapshots'),
+      ])
+      const accounts: Account[] = accountRows.map(toAccount)
+      const snapshots: SnapshotRow[] = snapshotRows.map(toSnapshot)
+      set((s) => ({
+        accounts,
+        transactions: s.transactions.filter((tx) => tx.id !== id),
+        dailyBalances: buildDailyBalancesFromSnapshots(accounts, snapshots),
+        lastUpdated: Date.now(),
+      }))
     },
 
     // ── Stock Location operations ────────────────────────────────────────────
@@ -671,16 +681,8 @@ export const useAssetStore = create<AssetStore>()(
     // ── Queries ──────────────────────────────────────────────────────────────
 
     getAccountBalance: (accountId) => {
-      const { accounts, transactions } = get()
-      const account = accounts.find((a) => a.id === accountId)
-      if (!account) return 0
-      const incoming = transactions
-        .filter((tx) => tx.toAccountId === accountId)
-        .reduce((sum, tx) => sum + tx.amount, 0)
-      const outgoing = transactions
-        .filter((tx) => tx.fromAccountId === accountId)
-        .reduce((sum, tx) => sum + tx.amount, 0)
-      return incoming - outgoing
+      const account = get().accounts.find((a) => a.id === accountId)
+      return account?.balance ?? 0
     },
 
     getTotalBalance: () => {

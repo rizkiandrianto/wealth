@@ -5,6 +5,7 @@ export interface Account {
   name: string;
   type: AccountType;
   currency: string;
+  balance: number;
   createdAt: number;
 }
 

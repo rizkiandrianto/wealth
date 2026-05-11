@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { db } from '@/db'
-import { desc, eq } from 'drizzle-orm'
-import { transactions } from '@/db/schema'
+import { desc, eq, sql } from 'drizzle-orm'
+import { transactions, wealthAccounts } from '@/db/schema'
+import { recomputeSnapshotsForward } from '@/lib/snapshot'
 
 export async function GET() {
   const session = await auth()
@@ -27,17 +28,40 @@ export async function POST(req: NextRequest) {
 
   if (!amount || !date) return NextResponse.json({ error: 'Missing fields' }, { status: 400 })
 
-  const [row] = await db
-    .insert(transactions)
-    .values({
-      userId,
-      fromAccountId: fromAccountId ?? null,
-      toAccountId: toAccountId ?? null,
-      amount: String(amount),
-      description: description ?? null,
-      date: new Date(date),
-    })
-    .returning()
+  const txDate = new Date(date)
+  const dateStr = txDate.toISOString().slice(0, 10)
+  const amountStr = String(amount)
 
-  return NextResponse.json(row, { status: 201 })
+  const result = await db.transaction(async (tx) => {
+    const [row] = await tx
+      .insert(transactions)
+      .values({
+        userId,
+        fromAccountId: fromAccountId ?? null,
+        toAccountId: toAccountId ?? null,
+        amount: amountStr,
+        description: description ?? null,
+        date: txDate,
+      })
+      .returning()
+
+    if (fromAccountId) {
+      await tx
+        .update(wealthAccounts)
+        .set({ balance: sql`${wealthAccounts.balance} - ${amountStr}::numeric` })
+        .where(eq(wealthAccounts.id, fromAccountId))
+      await recomputeSnapshotsForward(tx, userId, fromAccountId, dateStr)
+    }
+    if (toAccountId) {
+      await tx
+        .update(wealthAccounts)
+        .set({ balance: sql`${wealthAccounts.balance} + ${amountStr}::numeric` })
+        .where(eq(wealthAccounts.id, toAccountId))
+      await recomputeSnapshotsForward(tx, userId, toAccountId, dateStr)
+    }
+
+    return row
+  })
+
+  return NextResponse.json(result, { status: 201 })
 }
