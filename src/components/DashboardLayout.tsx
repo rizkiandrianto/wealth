@@ -27,6 +27,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { cn } from '@/lib/utils'
+import PriceTicker from '@/components/PriceTicker'
 
 interface DashboardLayoutProps {
   children: React.ReactNode
@@ -253,6 +254,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             </nav>
           )}
         </div>
+        <PriceTicker />
       </header>
 
       {/* Main Content */}
