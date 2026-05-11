@@ -30,11 +30,6 @@ export default function Home() {
           accountCount={store.accounts.length}
           transactionCount={store.transactions.length}
         />
-        
-        <AccountsList 
-          accounts={store.accounts}
-          getBalance={store.getAccountBalance}
-        />
 
         {(store.stockSales.length > 0 || store.cryptoSales.length > 0) && (
           <Card className="p-6 border-l-4 border-l-yellow-500 bg-gradient-to-r from-yellow-50 to-transparent">
@@ -65,6 +60,12 @@ export default function Home() {
             </div>
           </Card>
         )}
+        
+        <AccountsList 
+          accounts={store.accounts}
+          getBalance={store.getAccountBalance}
+          hideToolBar
+        />
         
         <RecentTransactions transactions={store.transactions.slice(0, 5)} />
       </div>
