@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -11,7 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { X } from 'lucide-react'
+import FormShell from '@/components/FormShell'
 import { useAssetStore } from '@/lib/useAssetStore'
 import LocationPickerSelect from '@/components/LocationPickerSelect'
 import type { StockMarket } from '@/lib/types'
@@ -92,56 +91,50 @@ export default function StockForm({ editingId, onClose }: StockFormProps) {
   }
 
   return (
-    <Card className="p-6 border border-blue-200 bg-blue-50">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-semibold">
-          {editingId ? 'Edit Saham' : 'Tambah Saham Baru'}
-        </h3>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={onClose}
-          className="h-8 w-8 p-0"
-        >
-          <X className="w-4 h-4" />
-        </Button>
-      </div>
-
+    <FormShell
+      title={editingId ? 'Edit Saham' : 'Tambah Saham Baru'}
+      theme="blue"
+      onClose={onClose}
+    >
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label className="text-sm font-medium">Ticker</label>
-          <Input
-            placeholder="BBRI"
-            value={formData.ticker}
-            onChange={(e) => setFormData({ ...formData, ticker: e.target.value })}
-            className="mt-1"
-          />
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="text-sm font-medium">Ticker</label>
+            <Input
+              placeholder="BBRI"
+              value={formData.ticker}
+              onChange={(e) => setFormData({ ...formData, ticker: e.target.value })}
+              className="mt-1"
+            />
+          </div>
+
+          <div className='flex flex-col'>
+            <label className="text-sm font-medium flex-1">Pasar</label>
+            <Select
+              value={formData.market}
+              onValueChange={(v) => setFormData({ ...formData, market: v as StockMarket })}
+            >
+              <SelectTrigger className="mt-1 w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="IDX">Indonesia (IDX)</SelectItem>
+                <SelectItem value="US">US (NASDAQ/NYSE)</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
 
-        <div>
-          <label className="text-sm font-medium">Pasar</label>
-          <Select
-            value={formData.market}
-            onValueChange={(v) => setFormData({ ...formData, market: v as StockMarket })}
-          >
-            <SelectTrigger className="mt-1">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="IDX">Indonesia (IDX)</SelectItem>
-              <SelectItem value="US">US (NASDAQ/NYSE)</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div>
-          <label className="text-sm font-medium">Lokasi Pembelian</label>
-          <LocationPickerSelect
-            locations={stockLocations}
-            value={formData.locationId}
-            onChange={(id) => setFormData({ ...formData, locationId: id })}
-            onAddLocation={(name) => addStockLocation({ name })}
-          />
+        <div className="grid grid-cols-1">
+          <div>
+            <label className="text-sm font-medium flex-1">Lokasi Pembelian</label>
+            <LocationPickerSelect
+              locations={stockLocations}
+              value={formData.locationId}
+              onChange={(id) => setFormData({ ...formData, locationId: id })}
+              onAddLocation={(name) => addStockLocation({ name })}
+            />
+          </div>
         </div>
 
         <div className="grid grid-cols-2 gap-4">
@@ -172,15 +165,15 @@ export default function StockForm({ editingId, onClose }: StockFormProps) {
           </div>
         </div>
 
-        <div className="flex gap-2">
-          <Button type="submit" className="flex-1">
-            {editingId ? 'Update Saham' : 'Tambah Saham'}
-          </Button>
+        <div className="flex gap-2 justify-end pt-2">
           <Button type="button" variant="outline" onClick={onClose}>
             Batal
           </Button>
+          <Button type="submit" className="bg-blue-600 hover:bg-blue-700">
+            {editingId ? 'Update Saham' : 'Tambah Saham'}
+          </Button>
         </div>
       </form>
-    </Card>
+    </FormShell>
   )
 }

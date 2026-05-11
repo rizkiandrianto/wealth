@@ -5,7 +5,7 @@ import { Plus } from 'lucide-react'
 import DashboardLayout from '@/components/DashboardLayout'
 import PageLoader from '@/components/PageLoader'
 import { Button } from '@/components/ui/button'
-import GoldForm from '@/components/GoldForm'
+import AssetFormSheet from '@/components/AssetFormSheet'
 import GoldList from '@/components/GoldList'
 import GoldSummary from '@/components/GoldSummary'
 import { useAssetStore } from '@/lib/useAssetStore'
@@ -33,7 +33,7 @@ export default function GoldPage() {
           <Button
             onClick={() => {
               setEditingId(null)
-              setShowForm(!showForm)
+              setShowForm(true)
             }}
             className="gap-2 bg-yellow-600 hover:bg-yellow-700"
           >
@@ -42,15 +42,15 @@ export default function GoldPage() {
           </Button>
         </div>
 
-        {showForm && (
-          <GoldForm
-            editingId={editingId}
-            onClose={() => {
-              setShowForm(false)
-              setEditingId(null)
-            }}
-          />
-        )}
+        <AssetFormSheet
+          type="gold"
+          open={showForm}
+          onOpenChange={(open) => {
+            setShowForm(open)
+            if (!open) setEditingId(null)
+          }}
+          editingId={editingId}
+        />
 
         {golds.length > 0 && <GoldSummary />}
 
@@ -65,11 +65,14 @@ export default function GoldPage() {
           />
         )}
 
-        {golds.length === 0 && !showForm && (
+        {golds.length === 0 && (
           <div className="text-center py-12 border border-dashed rounded-lg">
             <p className="text-muted-foreground mb-4">Belum ada emas</p>
             <Button
-              onClick={() => setShowForm(true)}
+              onClick={() => {
+                setEditingId(null)
+                setShowForm(true)
+              }}
               variant="outline"
               className="gap-2"
             >

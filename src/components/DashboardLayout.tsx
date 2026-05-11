@@ -12,11 +12,12 @@ import {
   Menu,
   X,
   PieChart,
-  Coins,
   Gem,
   ChevronDown,
   LogOut,
   User,
+  Bitcoin,
+  ArrowLeftRight,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
@@ -35,12 +36,12 @@ interface DashboardLayoutProps {
 
 const FINANCE_ITEMS = [
   { href: '/accounts', label: 'Accounts', icon: Wallet },
-  { href: '/transactions', label: 'Transactions', icon: TrendingUp },
+  { href: '/transactions', label: 'Transactions', icon: ArrowLeftRight },
 ]
 
 const PORTFOLIO_ITEMS = [
-  { href: '/stocks', label: 'Stocks', icon: PieChart },
-  { href: '/crypto', label: 'Crypto', icon: Coins },
+  { href: '/stocks', label: 'Stocks', icon: TrendingUp },
+  { href: '/crypto', label: 'Crypto', icon: Bitcoin },
   { href: '/gold', label: 'Gold', icon: Gem },
 ]
 

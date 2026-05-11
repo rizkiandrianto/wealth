@@ -6,7 +6,7 @@ import DashboardLayout from '@/components/DashboardLayout'
 import PageLoader from '@/components/PageLoader'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import StockForm from '@/components/StockForm'
+import AssetFormSheet from '@/components/AssetFormSheet'
 import StocksList from '@/components/StocksList'
 import StocksByLocation from '@/components/StocksByLocation'
 import StocksSummary from '@/components/StocksSummary'
@@ -35,7 +35,7 @@ export default function StocksPage() {
           <Button
             onClick={() => {
               setEditingId(null)
-              setShowForm(!showForm)
+              setShowForm(true)
             }}
             className="gap-2"
           >
@@ -44,15 +44,15 @@ export default function StocksPage() {
           </Button>
         </div>
 
-        {showForm && (
-          <StockForm
-            editingId={editingId}
-            onClose={() => {
-              setShowForm(false)
-              setEditingId(null)
-            }}
-          />
-        )}
+        <AssetFormSheet
+          type="stock"
+          open={showForm}
+          onOpenChange={(open) => {
+            setShowForm(open)
+            if (!open) setEditingId(null)
+          }}
+          editingId={editingId}
+        />
 
         {stocks.length > 0 && <StocksSummary />}
 
@@ -86,11 +86,14 @@ export default function StocksPage() {
           </Tabs>
         )}
 
-        {stocks.length === 0 && !showForm && (
+        {stocks.length === 0 && (
           <div className="text-center py-12 border border-dashed rounded-lg">
             <p className="text-muted-foreground mb-4">Belum ada saham</p>
             <Button
-              onClick={() => setShowForm(true)}
+              onClick={() => {
+                setEditingId(null)
+                setShowForm(true)
+              }}
               variant="outline"
               className="gap-2"
             >
