@@ -11,9 +11,10 @@ import { useFormatCurrency } from '@/lib/format'
 import { Banknote, PiggyBank, Wallet, ChevronRight, Plus } from 'lucide-react'
 
 interface AccountsListProps {
-  accounts: Account[]
-  getBalance: (accountId: string) => number
-  defaultHideZeroBalance?: boolean
+  accounts: Account[];
+  getBalance: (accountId: string) => number;
+  defaultHideZeroBalance?: boolean;
+  hideToolBar?: boolean;
 }
 
 const ACCOUNT_TYPE_ICONS = {
@@ -32,6 +33,7 @@ export default function AccountsList({
   accounts,
   getBalance,
   defaultHideZeroBalance = true,
+  hideToolBar = false,
 }: AccountsListProps) {
   const [hideZeroBalance, setHideZeroBalance] = useState(defaultHideZeroBalance)
   const formatCurrency = useFormatCurrency()
@@ -64,27 +66,31 @@ export default function AccountsList({
     <div>
       <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
         <h2 className="text-2xl font-bold text-foreground">Your Accounts</h2>
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2">
-            <Checkbox
-              id="accounts-list-hide-zero"
-              checked={hideZeroBalance}
-              onCheckedChange={(checked) => setHideZeroBalance(checked === true)}
-            />
-            <Label htmlFor="accounts-list-hide-zero" className="text-sm font-normal cursor-pointer">
-              Hide 0 balance
-              {hiddenCount > 0 && hideZeroBalance && (
-                <span className="text-muted-foreground"> ({hiddenCount})</span>
-              )}
-            </Label>
-          </div>
-          <Link href="/accounts">
-            <Button size="sm" variant="outline">
-              <Plus className="w-4 h-4 mr-2" />
-              Add Account
-            </Button>
-          </Link>
-        </div>
+        {
+          !hideToolBar && (
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  id="accounts-list-hide-zero"
+                  checked={hideZeroBalance}
+                  onCheckedChange={(checked) => setHideZeroBalance(checked === true)}
+                />
+                <Label htmlFor="accounts-list-hide-zero" className="text-sm font-normal cursor-pointer">
+                  Hide 0 balance
+                  {hiddenCount > 0 && hideZeroBalance && (
+                    <span className="text-muted-foreground"> ({hiddenCount})</span>
+                  )}
+                </Label>
+              </div>
+              <Link href="/accounts">
+                <Button size="sm" variant="outline">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Account
+                </Button>
+              </Link>
+            </div>
+          )
+        }
       </div>
 
       {visibleAccounts.length === 0 ? (
