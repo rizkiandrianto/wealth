@@ -6,6 +6,7 @@ import DashboardSummary from '@/components/DashboardSummary'
 import AccountsList from '@/components/AccountsList'
 import RecentTransactions from '@/components/RecentTransactions'
 import PageLoader from '@/components/PageLoader'
+import QuickAddFab from '@/components/QuickAddFab'
 import { Card } from '@/components/ui/card'
 import { useFormatCurrency } from '@/lib/format'
 
@@ -69,6 +70,8 @@ export default function Home() {
         
         <RecentTransactions transactions={store.transactions.slice(0, 5)} />
       </div>
+
+      <QuickAddFab />
     </DashboardLayout>
   )
 }

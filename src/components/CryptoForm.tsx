@@ -1,10 +1,10 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Loader2, X } from 'lucide-react'
+import { Loader2 } from 'lucide-react'
+import FormShell from '@/components/FormShell'
 import { useAssetStore } from '@/lib/useAssetStore'
 import LocationPickerSelect from '@/components/LocationPickerSelect'
 
@@ -101,17 +101,11 @@ export default function CryptoForm({ editingId, onClose }: CryptoFormProps) {
   }
 
   return (
-    <Card className="p-6 border-l-4 border-l-purple-500 bg-purple-50">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-bold">{editingId ? 'Edit Crypto' : 'Tambah Crypto'}</h2>
-        <button
-          onClick={onClose}
-          className="p-1 hover:bg-black/5 rounded-lg transition-colors"
-        >
-          <X className="w-5 h-5" />
-        </button>
-      </div>
-
+    <FormShell
+      title={editingId ? 'Edit Crypto' : 'Tambah Crypto'}
+      theme="purple"
+      onClose={onClose}
+    >
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="grid grid-cols-2 gap-4">
           <div>
@@ -179,15 +173,15 @@ export default function CryptoForm({ editingId, onClose }: CryptoFormProps) {
           </div>
         </div>
 
-        <div className="flex gap-2 justify-end">
+        <div className="flex gap-2 justify-end pt-2">
           <Button type="button" variant="outline" onClick={onClose}>
             Batal
           </Button>
-          <Button type="submit">
+          <Button type="submit" className="bg-purple-600 hover:bg-purple-700">
             {editingId ? 'Update' : 'Tambah'} Crypto
           </Button>
         </div>
       </form>
-    </Card>
+    </FormShell>
   )
 }

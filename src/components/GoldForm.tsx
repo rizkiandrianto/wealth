@@ -1,10 +1,9 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { X } from 'lucide-react'
+import FormShell from '@/components/FormShell'
 import { useAssetStore } from '@/lib/useAssetStore'
 import LocationPickerSelect from '@/components/LocationPickerSelect'
 
@@ -73,17 +72,11 @@ export default function GoldForm({ editingId, onClose }: GoldFormProps) {
   }
 
   return (
-    <Card className="p-6 border-l-4 border-l-yellow-500 bg-yellow-50">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-bold">{editingId ? 'Edit Emas' : 'Tambah Emas'}</h2>
-        <button
-          onClick={onClose}
-          className="p-1 hover:bg-black/5 rounded-lg transition-colors"
-        >
-          <X className="w-5 h-5" />
-        </button>
-      </div>
-
+    <FormShell
+      title={editingId ? 'Edit Emas' : 'Tambah Emas'}
+      theme="yellow"
+      onClose={onClose}
+    >
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label className="text-sm font-medium">Lokasi Penyimpanan</label>
@@ -131,7 +124,7 @@ export default function GoldForm({ editingId, onClose }: GoldFormProps) {
           />
         </div>
 
-        <div className="flex gap-2 justify-end">
+        <div className="flex gap-2 justify-end pt-2">
           <Button type="button" variant="outline" onClick={onClose}>
             Batal
           </Button>
@@ -140,6 +133,6 @@ export default function GoldForm({ editingId, onClose }: GoldFormProps) {
           </Button>
         </div>
       </form>
-    </Card>
+    </FormShell>
   )
 }

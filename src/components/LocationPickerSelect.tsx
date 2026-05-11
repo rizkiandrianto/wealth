@@ -52,7 +52,7 @@ export default function LocationPickerSelect({
   return (
     <>
       <Select open={selectOpen} onOpenChange={setSelectOpen} value={value} onValueChange={onChange}>
-        <SelectTrigger className="mt-1">
+        <SelectTrigger className="mt-1 w-full">
           <SelectValue />
         </SelectTrigger>
         <SelectContent>

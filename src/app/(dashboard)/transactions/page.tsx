@@ -2,20 +2,16 @@
 
 import { useState } from 'react'
 import DashboardLayout from '@/components/DashboardLayout'
-import TransactionForm from '@/components/TransactionForm'
+import AssetFormSheet from '@/components/AssetFormSheet'
 import TransactionList from '@/components/TransactionList'
 import PageLoader from '@/components/PageLoader'
 import { useAssetStore } from '@/lib/useAssetStore'
 import { ArrowRight } from 'lucide-react'
 
 export default function TransactionsPage() {
-  const { accounts, transactions, addTransaction, deleteTransaction } = useAssetStore()
+  const { accounts, transactions, deleteTransaction } = useAssetStore()
   const hasHydrated = useAssetStore((s) => s.hasHydrated)
   const [showForm, setShowForm] = useState(false)
-
-  const handleAddTransaction = () => {
-    setShowForm(false)
-  }
 
   if (!hasHydrated) {
     return <PageLoader />
@@ -45,33 +41,25 @@ export default function TransactionsPage() {
   return (
     <DashboardLayout>
       <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground mb-2">Transactions</h1>
-          <p className="text-muted-foreground">Record and track money transfers between accounts</p>
-        </div>
-
-        {showForm && (
-          <div className="bg-muted p-6 rounded-lg border border-border">
-            <TransactionForm
-              accounts={accounts}
-              onSubmit={(data) => {
-                addTransaction(data)
-                handleAddTransaction()
-              }}
-              onCancel={() => setShowForm(false)}
-            />
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-bold text-foreground mb-2">Transactions</h1>
+            <p className="text-muted-foreground">Record and track money transfers between accounts</p>
           </div>
-        )}
-
-        {!showForm && (
           <button
             onClick={() => setShowForm(true)}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium whitespace-nowrap"
           >
             <ArrowRight className="w-4 h-4" />
             Record Transaction
           </button>
-        )}
+        </div>
+
+        <AssetFormSheet
+          type="transaction"
+          open={showForm}
+          onOpenChange={setShowForm}
+        />
 
         <TransactionList
           transactions={transactions}
