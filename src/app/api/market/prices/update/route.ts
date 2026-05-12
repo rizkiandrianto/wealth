@@ -103,11 +103,12 @@ async function fetchGoldPriceIDR(): Promise<number | null> {
   return null
 }
 
-export async function POST(req: NextRequest) {
+export async function POST(req: NextRequest, { params }: { params: Promise<{ excludeGold: boolean }> }) {
   if (!checkApiKey(req)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
+  const { excludeGold } = await params
   const { stocks, cryptos, hasGold } = await getUniqueTickers()
 
   const updated = { stock: 0, crypto: 0, gold: 0 }
@@ -188,7 +189,7 @@ export async function POST(req: NextRequest) {
   )
 
   // --- Gold ---
-  if (hasGold) {
+  if (hasGold && !excludeGold) {
     const goldPrice = await fetchGoldPriceIDR()
     if (goldPrice === null) {
       console.warn('[price-update] gold XAU fetch failed')
