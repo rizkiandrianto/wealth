@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { after } from 'next/server'
 import { db } from '@/db'
 import { stockHoldings, cryptoHoldings, goldHoldings, assetPrices } from '@/db/schema'
 import { sql } from 'drizzle-orm'
@@ -212,5 +213,23 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ exc
     }
   }
 
-  return NextResponse.json({ updated, failed, updatedAt: new Date().toISOString() })
+  // --- Portfolio snapshot trigger (runs after response via next/server `after`) ---
+  const excludeUpdatePortfolio = req.nextUrl.searchParams.get('excludeUpdatePortfolio') === '1'
+  let portfolioTriggered = false
+  if (!excludeUpdatePortfolio) {
+    const triggerUrl = new URL('/api/portfolio-snapshots/update', req.nextUrl.origin)
+    after(async () => {
+      try {
+        await fetch(triggerUrl, {
+          method: 'POST',
+          headers: { 'x-api-key': process.env.INTERNAL_API_KEY ?? '' },
+        })
+      } catch (e) {
+        console.warn('[price-update] portfolio snapshot trigger failed', e)
+      }
+    })
+    portfolioTriggered = true
+  }
+
+  return NextResponse.json({ updated, failed, portfolioTriggered, updatedAt: new Date().toISOString() })
 }
