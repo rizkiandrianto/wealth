@@ -235,3 +235,22 @@ export const accountBalanceSnapshots = pgTable(
   },
   (t) => [uniqueIndex("uq_snapshot_user_account_date").on(t.userId, t.accountId, t.date)]
 );
+
+export const portfolioValueSnapshots = pgTable(
+  "portfolio_value_snapshots",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    date: text("date").notNull(), // YYYY-MM-DD (Asia/Jakarta)
+    cashValue: numeric("cash_value", { precision: 20, scale: 4 }).notNull().default("0"),
+    stockValue: numeric("stock_value", { precision: 20, scale: 4 }).notNull().default("0"),
+    cryptoValue: numeric("crypto_value", { precision: 20, scale: 4 }).notNull().default("0"),
+    goldValue: numeric("gold_value", { precision: 20, scale: 4 }).notNull().default("0"),
+    totalValue: numeric("total_value", { precision: 20, scale: 4 }).notNull(),
+    createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { mode: "date" }).defaultNow().notNull(),
+  },
+  (t) => [uniqueIndex("uq_portfolio_snapshot_user_date").on(t.userId, t.date)]
+);
