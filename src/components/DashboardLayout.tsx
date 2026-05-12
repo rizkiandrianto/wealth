@@ -48,8 +48,8 @@ const PORTFOLIO_ITEMS = [
 // Bottom nav: 4 items — Finance goes to /accounts, Portfolio goes to /stocks
 const BOTTOM_NAV = [
   { href: '/', label: 'Overview', icon: LayoutDashboard },
-  { href: '/accounts', label: 'Finance', icon: Wallet },
-  { href: '/stocks', label: 'Portfolio', icon: PieChart },
+  { href: '/crypto', label: 'Crypto', icon: Bitcoin },
+  { href: '/stocks', label: 'Stocks', icon: TrendingUp },
   { href: '/history', label: 'History', icon: Calendar },
 ]
 
@@ -264,7 +264,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       </main>
 
       {/* Mobile Bottom Navigation — 4 items */}
-      <nav className="fixed bottom-0 left-0 right-0 md:hidden border-t border-border bg-background">
+      <nav className="fixed bottom-0 left-0 right-0 md:hidden border-t border-border bg-background rounded-t-3xl">
         <div className="flex items-center justify-around h-16">
           {BOTTOM_NAV.map((nav) => {
             const Icon = nav.icon
