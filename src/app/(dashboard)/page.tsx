@@ -46,7 +46,7 @@ export default function Home() {
 
   return (
     <DashboardLayout>
-      <div className="-mx-4 sm:-mx-6 lg:-mx-8 -mt-4 sm:-mt-6 lg:-mt-8 mb-6">
+      <div className="-mx-4 sm:-mx-6 lg:-mx-8 -mt-4 sm:-mt-6 lg:-mt-8 mb-6 sticky top-16.25">
         <PriceTicker />
       </div>
 
