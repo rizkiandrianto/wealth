@@ -3,7 +3,10 @@
 import { useMemo } from 'react'
 import Link from 'next/link'
 import { TrendingDown, TrendingUp, Minus } from 'lucide-react'
-import { useAssetStore } from '@/lib/useAssetStore'
+import { useStocksQuery } from '@/lib/queries/stocks'
+import { useCryptosQuery } from '@/lib/queries/crypto'
+import { useGoldsQuery } from '@/lib/queries/gold'
+import { useAssetPricesQuery } from '@/lib/queries/prices'
 import { formatCurrency, useFormatCurrency } from '@/lib/format'
 import { stockShares } from '@/lib/stock'
 
@@ -29,7 +32,11 @@ function formatPrice(value: number, currency: string, format: (v: number, c?: st
 }
 
 export default function PriceTicker() {
-  const { stocks, cryptos, golds, assetPrices } = useAssetStore()
+  useFormatCurrency() // initialize hook for SSR locale (kept for parity)
+  const { data: stocks = [] } = useStocksQuery()
+  const { data: cryptos = [] } = useCryptosQuery()
+  const { data: golds = [] } = useGoldsQuery()
+  const { data: assetPrices = [] } = useAssetPricesQuery()
 
   const items: TickerItem[] = useMemo(() => {
     const result: TickerItem[] = []
