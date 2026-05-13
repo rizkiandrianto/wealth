@@ -46,11 +46,11 @@ export default function Home() {
 
   return (
     <DashboardLayout>
-      <div className="-mx-4 sm:-mx-6 lg:-mx-8 -mt-4 sm:-mt-6 lg:-mt-8 mb-6 sticky top-16.25">
+      <div className="fixed top-16.25 w-full left-0 z-1">
         <PriceTicker />
       </div>
 
-      <div className="space-y-6">
+      <div className="space-y-6 pt-7">
         <DashboardSummary />
 
         <RealizedPnLCard />
