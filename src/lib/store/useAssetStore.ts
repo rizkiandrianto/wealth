@@ -17,6 +17,7 @@ import {
   Transaction,
 } from '@/lib/types'
 import { stockShares } from '@/lib/stock'
+import { apiFetch } from '@/lib/apiFetch'
 
 // ─── DB row → store type normalizers ────────────────────────────────────────
 
@@ -107,16 +108,6 @@ const toGoldSale = (r: Row): GoldSale => ({
 
 const DEFAULT_STOCK_LOCATIONS = ['Nanovest', 'Ajaib', 'Pluang']
 const DEFAULT_CRYPTO_LOCATIONS = ['Binance', 'Indodax', 'Cold Wallet']
-
-async function apiFetch(path: string, init?: RequestInit) {
-  const res = await fetch(path, {
-    ...init,
-    headers: { 'Content-Type': 'application/json', ...init?.headers },
-  })
-  if (!res.ok) throw new Error(`${init?.method ?? 'GET'} ${path} → ${res.status}`)
-  if (res.status === 204) return null
-  return res.json()
-}
 
 // Reads sparse per-account snapshots and expands them into one row per snapshot date.
 // Each row carries forward the most recent known balance for every account.
