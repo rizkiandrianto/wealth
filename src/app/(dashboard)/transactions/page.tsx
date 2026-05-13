@@ -1,20 +1,35 @@
 'use client'
 
+// Required APIs:
+//   GET    /api/accounts
+//   GET    /api/transactions
+//   DELETE /api/transactions/[id]
+//   (POST  /api/transactions via AssetFormSheet → TransactionForm)
+
 import { useState } from 'react'
 import DashboardLayout from '@/components/DashboardLayout'
 import AssetFormSheet from '@/components/AssetFormSheet'
 import TransactionList from '@/components/TransactionList'
-import PageLoader from '@/components/PageLoader'
-import { useAssetStore } from '@/lib/useAssetStore'
+import { Skeleton } from '@/components/ui/skeleton'
+import { useAccountsQuery } from '@/lib/queries/accounts'
+import { useTransactionsQuery, useDeleteTransaction } from '@/lib/queries/transactions'
 import { ArrowRight } from 'lucide-react'
 
 export default function TransactionsPage() {
-  const { accounts, transactions, deleteTransaction } = useAssetStore()
-  const hasHydrated = useAssetStore((s) => s.hasHydrated)
+  const { data: accounts = [], isLoading: accountsLoading } = useAccountsQuery()
+  const { data: transactions = [], isLoading: txLoading } = useTransactionsQuery()
+  const deleteTransaction = useDeleteTransaction()
   const [showForm, setShowForm] = useState(false)
 
-  if (!hasHydrated) {
-    return <PageLoader />
+  if (accountsLoading) {
+    return (
+      <DashboardLayout>
+        <div className="space-y-6">
+          <Skeleton className="h-10 w-64" />
+          <Skeleton className="h-40 w-full" />
+        </div>
+      </DashboardLayout>
+    )
   }
 
   if (accounts.length < 2) {
@@ -61,11 +76,19 @@ export default function TransactionsPage() {
           onOpenChange={setShowForm}
         />
 
-        <TransactionList
-          transactions={transactions}
-          accounts={accounts}
-          onDelete={deleteTransaction}
-        />
+        {txLoading ? (
+          <div className="space-y-3">
+            <Skeleton className="h-20 w-full" />
+            <Skeleton className="h-20 w-full" />
+            <Skeleton className="h-20 w-full" />
+          </div>
+        ) : (
+          <TransactionList
+            transactions={transactions}
+            accounts={accounts}
+            onDelete={(id) => { deleteTransaction.mutate(id) }}
+          />
+        )}
       </div>
     </DashboardLayout>
   )
