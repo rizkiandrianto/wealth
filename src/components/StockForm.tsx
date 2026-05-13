@@ -11,9 +11,10 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import FormShell from '@/components/FormShell'
-import { useAssetStore } from '@/lib/useAssetStore'
 import LocationPickerSelect from '@/components/LocationPickerSelect'
 import type { StockMarket } from '@/lib/types'
+import { useStocksQuery, useAddStock, useUpdateStock } from '@/lib/queries/stocks'
+import { useStockLocationsQuery, useAddStockLocation } from '@/lib/queries/stockLocations'
 
 interface StockFormProps {
   editingId: string | null
@@ -21,7 +22,11 @@ interface StockFormProps {
 }
 
 export default function StockForm({ editingId, onClose }: StockFormProps) {
-  const { stocks, stockLocations, addStock, updateStock, addStockLocation } = useAssetStore()
+  const { data: stocks = [] } = useStocksQuery()
+  const { data: stockLocations = [] } = useStockLocationsQuery()
+  const addStock = useAddStock()
+  const updateStock = useUpdateStock()
+  const addStockLocation = useAddStockLocation()
   const editingStock = editingId ? stocks.find((s) => s.id === editingId) : null
 
   const [formData, setFormData] = useState<{
@@ -57,7 +62,7 @@ export default function StockForm({ editingId, onClose }: StockFormProps) {
     }
   }, [editingStock, stockLocations])
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
     if (!formData.ticker || !formData.locationId || !formData.quantity || !formData.averagePrice) {
@@ -75,9 +80,9 @@ export default function StockForm({ editingId, onClose }: StockFormProps) {
     }
 
     if (editingId) {
-      updateStock(editingId, stockData)
+      await updateStock.mutateAsync({ id: editingId, updates: stockData })
     } else {
-      addStock(stockData)
+      await addStock.mutateAsync(stockData)
     }
 
     setFormData({
@@ -132,7 +137,7 @@ export default function StockForm({ editingId, onClose }: StockFormProps) {
               locations={stockLocations}
               value={formData.locationId}
               onChange={(id) => setFormData({ ...formData, locationId: id })}
-              onAddLocation={(name) => addStockLocation({ name })}
+              onAddLocation={async (name) => (await addStockLocation.mutateAsync({ name })).id}
             />
           </div>
         </div>

@@ -1,17 +1,39 @@
 'use client'
 
-import { useAssetStore } from '@/lib/useAssetStore'
 import { useFormatCurrency } from '@/lib/format'
 import { stockShares } from '@/lib/stock'
 import { Card } from '@/components/ui/card'
+import { Skeleton } from '@/components/ui/skeleton'
 import { TrendingUp, TrendingDown } from 'lucide-react'
+import { useStocksQuery } from '@/lib/queries/stocks'
+import { useAssetPricesQuery } from '@/lib/queries/prices'
 
 export default function StocksSummary() {
-  const { stocks, getStockValue, getStockProfitLoss, getTotalStockValue } = useAssetStore()
+  const { data: stocks = [], isLoading: stocksLoading } = useStocksQuery()
+  const { data: prices = [], isLoading: pricesLoading } = useAssetPricesQuery()
   const formatCurrency = useFormatCurrency()
 
-  const totalValue = getTotalStockValue()
-  const totalCost = stocks.reduce((sum, stock) => sum + stockShares(stock) * stock.averagePrice, 0)
+  if (stocksLoading || pricesLoading) {
+    return (
+      <div className="grid gap-4 md:grid-cols-3">
+        <Skeleton className="h-24 rounded-xl" />
+        <Skeleton className="h-24 rounded-xl" />
+        <Skeleton className="h-24 rounded-xl" />
+      </div>
+    )
+  }
+
+  const getPrice = (ticker: string) =>
+    prices.find((p) => p.ticker === ticker)?.price ?? 0
+
+  const totalValue = stocks.reduce(
+    (sum, stock) => sum + stockShares(stock) * getPrice(stock.ticker),
+    0
+  )
+  const totalCost = stocks.reduce(
+    (sum, stock) => sum + stockShares(stock) * stock.averagePrice,
+    0
+  )
   const totalProfit = totalValue - totalCost
   const totalProfitPercentage = totalCost > 0 ? (totalProfit / totalCost) * 100 : 0
   const isPositive = totalProfit >= 0
