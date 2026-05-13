@@ -3,7 +3,7 @@
 import { useMemo, useState } from 'react'
 import { CryptoHolding } from '@/lib/types'
 import { useFormatCurrency } from '@/lib/format'
-import { useAssetStore } from '@/lib/useAssetStore'
+import { useAssetPricesQuery } from '@/lib/queries/prices'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card } from '@/components/ui/card'
@@ -25,7 +25,7 @@ export default function CryptoSellLocationDialog({
   onSell,
   onClose,
 }: CryptoSellLocationDialogProps) {
-  const { assetPrices } = useAssetStore()
+  const { data: assetPrices = [] } = useAssetPricesQuery()
   const formatCurrency = useFormatCurrency()
   const currentPrice = assetPrices.find((p) => p.ticker === symbol)?.price ?? 0
 

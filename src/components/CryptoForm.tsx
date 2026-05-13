@@ -5,8 +5,9 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Loader2 } from 'lucide-react'
 import FormShell from '@/components/FormShell'
-import { useAssetStore } from '@/lib/useAssetStore'
 import LocationPickerSelect from '@/components/LocationPickerSelect'
+import { useCryptosQuery, useAddCrypto, useUpdateCrypto } from '@/lib/queries/crypto'
+import { useCryptoLocationsQuery, useAddCryptoLocation } from '@/lib/queries/cryptoLocations'
 
 interface CryptoFormProps {
   editingId: string | null
@@ -14,7 +15,11 @@ interface CryptoFormProps {
 }
 
 export default function CryptoForm({ editingId, onClose }: CryptoFormProps) {
-  const { cryptos, cryptoLocations, addCrypto, updateCrypto, addCryptoLocation } = useAssetStore()
+  const { data: cryptos = [] } = useCryptosQuery()
+  const { data: cryptoLocations = [] } = useCryptoLocationsQuery()
+  const addCrypto = useAddCrypto()
+  const updateCrypto = useUpdateCrypto()
+  const addCryptoLocation = useAddCryptoLocation()
   const editingCrypto = editingId ? cryptos.find((c) => c.id === editingId) : null
 
   const [formData, setFormData] = useState({
@@ -61,7 +66,7 @@ export default function CryptoForm({ editingId, onClose }: CryptoFormProps) {
     }
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
     if (
@@ -85,9 +90,9 @@ export default function CryptoForm({ editingId, onClose }: CryptoFormProps) {
     }
 
     if (editingId) {
-      updateCrypto(editingId, cryptoData)
+      await updateCrypto.mutateAsync({ id: editingId, updates: cryptoData })
     } else {
-      addCrypto(cryptoData)
+      await addCrypto.mutateAsync(cryptoData)
     }
 
     setFormData({
@@ -143,7 +148,7 @@ export default function CryptoForm({ editingId, onClose }: CryptoFormProps) {
             locations={cryptoLocations}
             value={formData.locationId}
             onChange={(id) => setFormData({ ...formData, locationId: id })}
-            onAddLocation={(name) => addCryptoLocation({ name })}
+            onAddLocation={async (name) => (await addCryptoLocation.mutateAsync({ name })).id}
           />
         </div>
 

@@ -4,7 +4,7 @@ import { useMemo, useState } from 'react'
 import { StockHolding } from '@/lib/types'
 import { useFormatCurrency } from '@/lib/format'
 import { sharesFor } from '@/lib/stock'
-import { useAssetStore } from '@/lib/useAssetStore'
+import { useAssetPricesQuery } from '@/lib/queries/prices'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card } from '@/components/ui/card'
@@ -26,7 +26,7 @@ export default function StockSellLocationDialog({
   onSell,
   onClose,
 }: StockSellLocationDialogProps) {
-  const { assetPrices } = useAssetStore()
+  const { data: assetPrices = [] } = useAssetPricesQuery()
   const formatCurrency = useFormatCurrency()
   const currentPrice = assetPrices.find((p) => p.ticker === ticker)?.price ?? 0
 

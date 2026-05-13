@@ -3,7 +3,9 @@
 import { useState } from 'react'
 import { CryptoHolding } from '@/lib/types'
 import { useFormatCurrency } from '@/lib/format'
-import { useAssetStore } from '@/lib/useAssetStore'
+import { useDeleteCrypto, useSellCrypto, useSellCryptoBatch } from '@/lib/queries/crypto'
+import { useCryptoLocationsQuery } from '@/lib/queries/cryptoLocations'
+import { useAssetPricesQuery } from '@/lib/queries/prices'
 import { Button } from '@/components/ui/button'
 import {
   Accordion,
@@ -21,7 +23,11 @@ interface CryptosListProps {
 }
 
 export default function CryptosList({ cryptos, onEdit }: CryptosListProps) {
-  const { deleteCrypto, sellCrypto, sellCryptoBatch, cryptoLocations, assetPrices } = useAssetStore()
+  const { data: cryptoLocations = [] } = useCryptoLocationsQuery()
+  const { data: assetPrices = [] } = useAssetPricesQuery()
+  const deleteCrypto = useDeleteCrypto()
+  const sellCrypto = useSellCrypto()
+  const sellCryptoBatch = useSellCryptoBatch()
   const formatCurrency = useFormatCurrency()
   const getPrice = (symbol: string) =>
     assetPrices.find((p) => p.ticker === symbol)?.price ?? 0
@@ -92,7 +98,7 @@ export default function CryptosList({ cryptos, onEdit }: CryptosListProps) {
               </AccordionTrigger>
               <AccordionContent>
                 <div className="space-y-3">
-                  <div className="grid grid-cols-4 gap-2 text-sm bg-muted/50 p-2 rounded">
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm bg-muted/50 p-2 rounded">
                     <div>
                       <p className="text-muted-foreground text-xs">Quantity</p>
                       <p className="font-semibold">{totalQuantity.toFixed(8)}</p>
@@ -167,7 +173,7 @@ export default function CryptosList({ cryptos, onEdit }: CryptosListProps) {
                                     variant="ghost"
                                     onClick={() => {
                                       if (confirm('Delete this crypto holding?')) {
-                                        deleteCrypto(lot.id)
+                                        deleteCrypto.mutate(lot.id)
                                       }
                                     }}
                                     className="h-6 w-6 p-0 text-red-600 hover:text-red-700"
@@ -206,7 +212,7 @@ export default function CryptosList({ cryptos, onEdit }: CryptosListProps) {
                                 variant="outline"
                                 onClick={() => {
                                   if (confirm('Delete this crypto holding?')) {
-                                    deleteCrypto(locLots[0].id)
+                                    deleteCrypto.mutate(locLots[0].id)
                                   }
                                 }}
                                 className="flex-1 gap-2 text-red-600 hover:text-red-700"
@@ -241,7 +247,7 @@ export default function CryptosList({ cryptos, onEdit }: CryptosListProps) {
         <CryptoSellDialog
           crypto={sellingCrypto}
           onSell={(quantity, salePrice) => {
-            sellCrypto(sellingCrypto.id, quantity, salePrice)
+            sellCrypto.mutate({ cryptoId: sellingCrypto.id, quantity, salePrice })
             setSellingCryptoId(null)
           }}
           onClose={() => setSellingCryptoId(null)}
@@ -255,7 +261,7 @@ export default function CryptosList({ cryptos, onEdit }: CryptosListProps) {
           locationName={getLocationName(sellingLocation.locationId)}
           lots={sellingLocationLots}
           onSell={({ quantity, salePrice }) => {
-            sellCryptoBatch({
+            sellCryptoBatch.mutate({
               symbol: sellingLocation.symbol,
               locationId: sellingLocation.locationId,
               quantity,

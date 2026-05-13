@@ -12,7 +12,6 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import FormShell from '@/components/FormShell'
-import { useAssetStore } from '@/lib/useAssetStore'
 import { useFormatCurrency } from '@/lib/format'
 import { cn } from '@/lib/utils'
 
@@ -44,7 +43,6 @@ export default function TransactionForm({
   onSubmit,
   onCancel,
 }: TransactionFormProps) {
-  const { getAccountBalance } = useAssetStore()
   const formatCurrency = useFormatCurrency()
   const [fromAccountId, setFromAccountId] = useState('')
   const [toAccountId, setToAccountId] = useState('')
@@ -54,7 +52,9 @@ export default function TransactionForm({
   const [date, setDate] = useState(new Date().toISOString().split('T')[0])
   const [errors, setErrors] = useState<Record<string, string>>({})
 
-  const fromBalance = fromAccountId ? getAccountBalance(fromAccountId) : null
+  const fromBalance = fromAccountId
+    ? accounts.find((a) => a.id === fromAccountId)?.balance ?? 0
+    : null
 
   const validate = () => {
     const newErrors: Record<string, string> = {}

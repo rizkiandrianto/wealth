@@ -4,7 +4,8 @@ import { useState } from 'react'
 import { StockHolding, StockLocation } from '@/lib/types'
 import { useFormatCurrency } from '@/lib/format'
 import { stockShares } from '@/lib/stock'
-import { useAssetStore } from '@/lib/useAssetStore'
+import { useDeleteStock, useSellStock, useSellStockBatch } from '@/lib/queries/stocks'
+import { useAssetPricesQuery } from '@/lib/queries/prices'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import {
@@ -24,7 +25,10 @@ interface StocksByLocationProps {
 }
 
 export default function StocksByLocation({ stocks, locations, onEdit }: StocksByLocationProps) {
-  const { deleteStock, sellStock, sellStockBatch, assetPrices } = useAssetStore()
+  const { data: assetPrices = [] } = useAssetPricesQuery()
+  const deleteStock = useDeleteStock()
+  const sellStock = useSellStock()
+  const sellStockBatch = useSellStockBatch()
   const formatCurrency = useFormatCurrency()
   const getPrice = (ticker: string) =>
     assetPrices.find((p) => p.ticker === ticker)?.price ?? 0
@@ -172,7 +176,7 @@ export default function StocksByLocation({ stocks, locations, onEdit }: StocksBy
                                     <Button
                                       size="sm"
                                       variant="ghost"
-                                      onClick={() => deleteStock(lot.id)}
+                                      onClick={() => deleteStock.mutate(lot.id)}
                                       className="h-6 w-6 p-0 text-red-600 hover:text-red-700"
                                     >
                                       <Trash2 className="w-3 h-3" />
@@ -207,7 +211,7 @@ export default function StocksByLocation({ stocks, locations, onEdit }: StocksBy
                                 <Button
                                   size="sm"
                                   variant="outline"
-                                  onClick={() => deleteStock(lots[0].id)}
+                                  onClick={() => deleteStock.mutate(lots[0].id)}
                                   className="flex-1 gap-2 text-red-600 hover:text-red-700"
                                 >
                                   <Trash2 className="w-3 h-3" />
@@ -240,7 +244,7 @@ export default function StocksByLocation({ stocks, locations, onEdit }: StocksBy
         <StockSellDialog
           stock={sellingStock}
           onSell={(quantity, salePrice) => {
-            sellStock(sellingStock.id, quantity, salePrice)
+            sellStock.mutate({ stockId: sellingStock.id, quantity, salePrice })
             setSellingStockId(null)
           }}
           onClose={() => setSellingStockId(null)}
@@ -254,7 +258,7 @@ export default function StocksByLocation({ stocks, locations, onEdit }: StocksBy
           locationName={sellingLocationName}
           lots={sellingLocationLots}
           onSell={({ quantity, salePrice }) => {
-            sellStockBatch({
+            sellStockBatch.mutate({
               ticker: sellingLocation.ticker,
               locationId: sellingLocation.locationId,
               quantity,

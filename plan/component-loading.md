@@ -162,32 +162,32 @@ Gunakan `Skeleton` dari `src/components/ui/skeleton.tsx` (shadcn, sudah ada). In
 ## Tracker
 
 ### Phase 1.1 — Foundation
-- [ ] **1.1.1** Extract `apiFetch` ke `src/lib/apiFetch.ts`, refactor useAssetStore import
-- [ ] **1.1.2** Install `@tanstack/react-query` + devtools
-- [ ] **1.1.3** Create `QueryProvider`, wrap root layout
-- [ ] **1.1.4** Smoke test: app jalan, devtools panel visible, no regression
+- [x] **1.1.1** Extract `apiFetch` ke `src/lib/apiFetch.ts`, refactor useAssetStore import
+- [x] **1.1.2** Install `@tanstack/react-query` + devtools
+- [x] **1.1.3** Create `QueryProvider`, wrap root layout
+- [x] **1.1.4** Smoke test: app jalan, devtools panel visible, no regression (deferred ke 1.4.2 final build)
 
 ### Phase 1.2 — Query hooks
-- [ ] **1.2.1** Create `src/lib/queries/keys.ts`
-- [ ] **1.2.2** Create query + mutation hooks: accounts
-- [ ] **1.2.3** Create query + mutation hooks: transactions
-- [ ] **1.2.4** Create query + mutation hooks: stocks + stockLocations + stockSales
-- [ ] **1.2.5** Create query + mutation hooks: crypto + cryptoLocations + cryptoSales
-- [ ] **1.2.6** Create query + mutation hooks: gold + goldLocations + goldSales
-- [ ] **1.2.7** Create query hooks: prices (refetchOnWindowFocus override), accountSnapshots, portfolioSnapshots (kalau sudah ada)
+- [x] **1.2.1** Create `src/lib/queries/keys.ts`
+- [x] **1.2.2** Create query + mutation hooks: accounts
+- [x] **1.2.3** Create query + mutation hooks: transactions
+- [x] **1.2.4** Create query + mutation hooks: stocks + stockLocations + stockSales
+- [x] **1.2.5** Create query + mutation hooks: crypto + cryptoLocations + cryptoSales
+- [x] **1.2.6** Create query + mutation hooks: gold + goldLocations + goldSales
+- [x] **1.2.7** Create query hooks: prices (refetchOnWindowFocus override), accountSnapshots, portfolioSnapshots (kalau sudah ada)
 
 ### Phase 1.3 — Component migration
-- [ ] **1.3.1** Migrate Accounts (list, card, pages)
-- [ ] **1.3.2** Migrate Transactions (list, form, page)
-- [ ] **1.3.3** Migrate Stocks (list, by-location, summary, form, dialogs, page)
-- [ ] **1.3.4** Migrate Crypto (mirror stocks)
-- [ ] **1.3.5** Migrate Gold (mirror stocks)
-- [ ] **1.3.6** Split DashboardSummary per asset class + migrate
-- [ ] **1.3.7** Migrate History (chart, table, page)
+- [x] **1.3.1** Migrate Accounts (list, card, pages)
+- [x] **1.3.2** Migrate Transactions (list, form, page)
+- [x] **1.3.3** Migrate Stocks (list, by-location, summary, form, dialogs, page)
+- [x] **1.3.4** Migrate Crypto (mirror stocks)
+- [x] **1.3.5** Migrate Gold (mirror stocks)
+- [x] **1.3.6** Split DashboardSummary per asset class + migrate
+- [x] **1.3.7** Migrate History (chart, table, page)
 
 ### Phase 1.4 — Polish
-- [ ] **1.4.1** Inline skeleton di semua list & summary components
-- [ ] **1.4.2** Final smoke test + `pnpm build` clean
+- [x] **1.4.1** Inline skeleton di semua list & summary components
+- [x] **1.4.2** Final smoke test + `pnpm build` clean
 
 ### Phase 1.5 — Wrap up
 - [ ] **1.5.1** Open PR ke `develop`

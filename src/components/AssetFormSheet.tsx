@@ -4,7 +4,8 @@ import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
 import { Drawer, DrawerContent, DrawerTitle } from '@/components/ui/drawer'
 import { useIsMobile } from '@/components/ui/use-mobile'
 import { Button } from '@/components/ui/button'
-import { useAssetStore } from '@/lib/useAssetStore'
+import { useAccountsQuery } from '@/lib/queries/accounts'
+import { useAddTransaction } from '@/lib/queries/transactions'
 import StockForm from '@/components/StockForm'
 import CryptoForm from '@/components/CryptoForm'
 import GoldForm from '@/components/GoldForm'
@@ -26,6 +27,38 @@ const TITLE: Record<AssetFormType, string> = {
   transaction: 'Catat Transaksi',
 }
 
+// Isolates accounts + transaction hooks so they only fire when the
+// transaction sheet is actually mounted (sheet open + type === 'transaction').
+function TransactionBody({ close }: { close: () => void }) {
+  const { data: accounts = [] } = useAccountsQuery()
+  const addTransaction = useAddTransaction()
+
+  if (accounts.length === 0) {
+    return (
+      <div className="p-6 text-center space-y-4">
+        <h3 className="text-lg font-semibold">Belum ada akun</h3>
+        <p className="text-sm text-muted-foreground">
+          Buat akun dulu sebelum mencatat transaksi.
+        </p>
+        <Button onClick={close} variant="outline">
+          Tutup
+        </Button>
+      </div>
+    )
+  }
+
+  return (
+    <TransactionForm
+      accounts={accounts}
+      onSubmit={async (data) => {
+        await addTransaction.mutateAsync(data)
+        close()
+      }}
+      onCancel={close}
+    />
+  )
+}
+
 export default function AssetFormSheet({
   type,
   open,
@@ -33,9 +66,6 @@ export default function AssetFormSheet({
   editingId = null,
 }: AssetFormSheetProps) {
   const isMobile = useIsMobile()
-  const accounts = useAssetStore((s) => s.accounts)
-  const addTransaction = useAssetStore((s) => s.addTransaction)
-
   const close = () => onOpenChange(false)
 
   const body = (() => {
@@ -48,29 +78,7 @@ export default function AssetFormSheet({
     if (type === 'gold') {
       return <GoldForm editingId={editingId} onClose={close} />
     }
-    if (accounts.length === 0) {
-      return (
-        <div className="p-6 text-center space-y-4">
-          <h3 className="text-lg font-semibold">Belum ada akun</h3>
-          <p className="text-sm text-muted-foreground">
-            Buat akun dulu sebelum mencatat transaksi.
-          </p>
-          <Button onClick={close} variant="outline">
-            Tutup
-          </Button>
-        </div>
-      )
-    }
-    return (
-      <TransactionForm
-        accounts={accounts}
-        onSubmit={(data) => {
-          addTransaction(data)
-          close()
-        }}
-        onCancel={close}
-      />
-    )
+    return <TransactionBody close={close} />
   })()
 
   if (isMobile) {
