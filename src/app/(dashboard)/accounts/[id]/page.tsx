@@ -6,7 +6,8 @@
 //   PATCH  /api/accounts/[id]
 //   DELETE /api/accounts/[id]
 
-import { useMemo, useState, use } from 'react'
+import { useEffect, useMemo, useState, use } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import {
@@ -26,8 +27,13 @@ import { Card } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import ConfirmDialog from '@/components/ConfirmDialog'
 import { AccountType } from '@/lib/types'
-import { useAccountsQuery, useUpdateAccount, useDeleteAccount } from '@/lib/queries/accounts'
-import { useTransactionsQuery } from '@/lib/queries/transactions'
+import {
+  accountsQueryOptions,
+  useAccountsQuery,
+  useUpdateAccount,
+  useDeleteAccount,
+} from '@/lib/queries/accounts'
+import { transactionsQueryOptions, useTransactionsQuery } from '@/lib/queries/transactions'
 
 const ACCOUNT_TYPE_ICONS = {
   bank: Banknote,
@@ -49,6 +55,11 @@ export default function AccountDetailPage({
   const { id } = use(params)
   const router = useRouter()
   const formatCurrency = useFormatCurrency()
+  const qc = useQueryClient()
+  useEffect(() => {
+    qc.prefetchQuery(accountsQueryOptions())
+    qc.prefetchQuery(transactionsQueryOptions())
+  }, [qc])
 
   const { data: accounts = [], isLoading: accountsLoading } = useAccountsQuery()
   const { data: transactions = [], isLoading: txLoading } = useTransactionsQuery()
