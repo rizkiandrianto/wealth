@@ -1,15 +1,29 @@
 'use client'
 
-import { useAssetStore } from '@/lib/useAssetStore'
 import { useFormatCurrency } from '@/lib/format'
 import { Card } from '@/components/ui/card'
+import { Skeleton } from '@/components/ui/skeleton'
 import { TrendingUp, TrendingDown } from 'lucide-react'
+import { useCryptosQuery } from '@/lib/queries/crypto'
+import { useAssetPricesQuery } from '@/lib/queries/prices'
 
 export default function CryptosSummary() {
-  const { cryptos, assetPrices } = useAssetStore()
+  const { data: cryptos = [], isLoading: cryptosLoading } = useCryptosQuery()
+  const { data: prices = [], isLoading: pricesLoading } = useAssetPricesQuery()
   const formatCurrency = useFormatCurrency()
+
+  if (cryptosLoading || pricesLoading) {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Skeleton className="h-28 rounded-xl" />
+        <Skeleton className="h-28 rounded-xl" />
+        <Skeleton className="h-28 rounded-xl" />
+      </div>
+    )
+  }
+
   const getPrice = (symbol: string) =>
-    assetPrices.find((p) => p.ticker === symbol)?.price ?? 0
+    prices.find((p) => p.ticker === symbol)?.price ?? 0
 
   const totalValue = cryptos.reduce((sum, c) => sum + c.quantity * getPrice(c.symbol), 0)
   const totalCost = cryptos.reduce((sum, c) => sum + c.quantity * c.averagePrice, 0)
