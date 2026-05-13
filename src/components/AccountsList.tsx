@@ -6,13 +6,12 @@ import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
-import { Account } from '@/lib/types'
+import { Skeleton } from '@/components/ui/skeleton'
 import { useFormatCurrency } from '@/lib/format'
+import { useAccountsQuery } from '@/lib/queries/accounts'
 import { Banknote, PiggyBank, Wallet, ChevronRight, Plus } from 'lucide-react'
 
 interface AccountsListProps {
-  accounts: Account[];
-  getBalance: (accountId: string) => number;
   defaultHideZeroBalance?: boolean;
   hideToolBar?: boolean;
 }
@@ -30,13 +29,24 @@ const ACCOUNT_TYPE_COLORS = {
 }
 
 export default function AccountsList({
-  accounts,
-  getBalance,
   defaultHideZeroBalance = true,
   hideToolBar = false,
 }: AccountsListProps) {
+  const { data: accounts = [], isLoading } = useAccountsQuery()
   const [hideZeroBalance, setHideZeroBalance] = useState(defaultHideZeroBalance)
   const formatCurrency = useFormatCurrency()
+
+  if (isLoading) {
+    return (
+      <div>
+        <Skeleton className="h-8 w-48 mb-4" />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Skeleton className="h-32 rounded-xl" />
+          <Skeleton className="h-32 rounded-xl" />
+        </div>
+      </div>
+    )
+  }
 
   if (accounts.length === 0) {
     return (
@@ -57,7 +67,7 @@ export default function AccountsList({
   }
 
   const visibleAccounts = hideZeroBalance
-    ? accounts.filter((account) => Math.max(getBalance(account.id), 0) > 0)
+    ? accounts.filter((account) => Math.max(account.balance, 0) > 0)
     : accounts
 
   const hiddenCount = accounts.length - visibleAccounts.length
@@ -102,7 +112,7 @@ export default function AccountsList({
           {visibleAccounts.map((account) => {
             const Icon = ACCOUNT_TYPE_ICONS[account.type]
             const colorClass = ACCOUNT_TYPE_COLORS[account.type]
-            const balance = getBalance(account.id)
+            const balance = account.balance
 
             return (
               <Link key={account.id} href={`/accounts/${account.id}`}>

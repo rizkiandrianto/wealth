@@ -1,32 +1,36 @@
 'use client'
 
+// Required APIs:
+//   GET    /api/accounts
+//   POST   /api/accounts
+//   DELETE /api/accounts/[id]
+
 import { useState } from 'react'
 import DashboardLayout from '@/components/DashboardLayout'
 import AccountForm from '@/components/AccountForm'
 import AccountCard from '@/components/AccountCard'
-import PageLoader from '@/components/PageLoader'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
-import { useAssetStore } from '@/lib/useAssetStore'
+import { Skeleton } from '@/components/ui/skeleton'
+import { AccountType } from '@/lib/types'
+import { useAccountsQuery, useAddAccount, useDeleteAccount } from '@/lib/queries/accounts'
 import { Wallet } from 'lucide-react'
 
 export default function AccountsPage() {
-  const { accounts, addAccount, deleteAccount, getAccountBalance } = useAssetStore()
-  const hasHydrated = useAssetStore((s) => s.hasHydrated)
+  const { data: accounts = [], isLoading } = useAccountsQuery()
+  const addAccount = useAddAccount()
+  const deleteAccount = useDeleteAccount()
+
   const [showForm, setShowForm] = useState(false)
   const [hideZeroBalance, setHideZeroBalance] = useState(false)
 
-  if (!hasHydrated) {
-    return <PageLoader />
-  }
-
-  const handleAddAccount = (data: any) => {
-    addAccount(data)
+  const handleAddAccount = async (data: { name: string; type: AccountType; currency: string }) => {
+    await addAccount.mutateAsync(data)
     setShowForm(false)
   }
 
   const visibleAccounts = hideZeroBalance
-    ? accounts.filter((account) => Math.max(getAccountBalance(account.id), 0) > 0)
+    ? accounts.filter((account) => Math.max(account.balance, 0) > 0)
     : accounts
 
   const hiddenCount = accounts.length - visibleAccounts.length
@@ -76,24 +80,32 @@ export default function AccountsPage() {
           </div>
         )}
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {visibleAccounts.map((account) => (
-            <AccountCard
-              key={account.id}
-              account={account}
-              balance={getAccountBalance(account.id)}
-              onDelete={deleteAccount}
-            />
-          ))}
-        </div>
+        {isLoading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {[0, 1, 2].map((i) => (
+              <Skeleton key={i} className="h-36 rounded-xl" />
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {visibleAccounts.map((account) => (
+              <AccountCard
+                key={account.id}
+                account={account}
+                balance={account.balance}
+                onDelete={async (id) => { await deleteAccount.mutateAsync(id) }}
+              />
+            ))}
+          </div>
+        )}
 
-        {accounts.length > 0 && visibleAccounts.length === 0 && (
+        {!isLoading && accounts.length > 0 && visibleAccounts.length === 0 && (
           <div className="text-center py-12 text-sm text-muted-foreground">
             All accounts have a 0 balance. Uncheck &ldquo;Hide 0 balance&rdquo; to see them.
           </div>
         )}
 
-        {accounts.length === 0 && !showForm && (
+        {!isLoading && accounts.length === 0 && !showForm && (
           <div className="text-center py-12">
             <Wallet className="w-16 h-16 mx-auto text-muted-foreground mb-4 opacity-30" />
             <h3 className="text-xl font-semibold mb-2">No accounts yet</h3>

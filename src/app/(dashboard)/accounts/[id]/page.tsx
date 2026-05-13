@@ -1,5 +1,11 @@
 'use client'
 
+// Required APIs:
+//   GET    /api/accounts
+//   GET    /api/transactions
+//   PATCH  /api/accounts/[id]
+//   DELETE /api/accounts/[id]
+
 import { useMemo, useState, use } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
@@ -14,13 +20,14 @@ import {
 } from 'lucide-react'
 import DashboardLayout from '@/components/DashboardLayout'
 import AccountForm from '@/components/AccountForm'
-import PageLoader from '@/components/PageLoader'
-import { useAssetStore } from '@/lib/useAssetStore'
 import { useFormatCurrency, formatDateTime } from '@/lib/format'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
+import { Skeleton } from '@/components/ui/skeleton'
 import ConfirmDialog from '@/components/ConfirmDialog'
 import { AccountType } from '@/lib/types'
+import { useAccountsQuery, useUpdateAccount, useDeleteAccount } from '@/lib/queries/accounts'
+import { useTransactionsQuery } from '@/lib/queries/transactions'
 
 const ACCOUNT_TYPE_ICONS = {
   bank: Banknote,
@@ -41,25 +48,22 @@ export default function AccountDetailPage({
 }) {
   const { id } = use(params)
   const router = useRouter()
-  const {
-    accounts,
-    updateAccount,
-    deleteAccount,
-    getAccountBalance,
-    getAccountTransactions,
-  } = useAssetStore()
-  const hasHydrated = useAssetStore((s) => s.hasHydrated)
   const formatCurrency = useFormatCurrency()
 
-  const account = useMemo(() => accounts.find((a) => a.id === id), [accounts, id])
-  const transactions = useMemo(
-    () => (account ? getAccountTransactions(account.id) : []),
-    [account, getAccountTransactions]
-  )
+  const { data: accounts = [], isLoading: accountsLoading } = useAccountsQuery()
+  const { data: transactions = [], isLoading: txLoading } = useTransactionsQuery()
+  const updateAccount = useUpdateAccount()
+  const deleteAccount = useDeleteAccount()
 
+  const account = useMemo(() => accounts.find((a) => a.id === id), [accounts, id])
   const sortedTransactions = useMemo(
-    () => [...transactions].sort((a, b) => b.date - a.date),
-    [transactions]
+    () =>
+      account
+        ? transactions
+            .filter((tx) => tx.fromAccountId === account.id || tx.toAccountId === account.id)
+            .sort((a, b) => b.date - a.date)
+        : [],
+    [account, transactions]
   )
 
   const [isEditing, setIsEditing] = useState(false)
@@ -74,7 +78,7 @@ export default function AccountDetailPage({
     if (!account) return
     setIsSubmitting(true)
     try {
-      await updateAccount(account.id, data)
+      await updateAccount.mutateAsync({ id: account.id, updates: data })
       setIsEditing(false)
     } finally {
       setIsSubmitting(false)
@@ -85,7 +89,7 @@ export default function AccountDetailPage({
     if (!account) return
     setIsSubmitting(true)
     try {
-      await deleteAccount(account.id)
+      await deleteAccount.mutateAsync(account.id)
       setShowDeleteDialog(false)
       router.push('/accounts')
     } finally {
@@ -93,8 +97,17 @@ export default function AccountDetailPage({
     }
   }
 
-  if (!hasHydrated) {
-    return <PageLoader />
+  if (accountsLoading) {
+    return (
+      <DashboardLayout>
+        <div className="space-y-6">
+          <Skeleton className="h-5 w-32" />
+          <Skeleton className="h-40 w-full rounded-xl" />
+          <Skeleton className="h-6 w-48" />
+          <Skeleton className="h-40 w-full rounded-xl" />
+        </div>
+      </DashboardLayout>
+    )
   }
 
   if (!account) {
@@ -125,7 +138,7 @@ export default function AccountDetailPage({
 
   const Icon = ACCOUNT_TYPE_ICONS[account.type]
   const colorClass = ACCOUNT_TYPE_COLORS[account.type]
-  const balance = getAccountBalance(account.id)
+  const balance = account.balance
 
   return (
     <DashboardLayout>
@@ -201,7 +214,13 @@ export default function AccountDetailPage({
 
         <div>
           <h2 className="text-lg font-semibold mb-3">Recent Transactions</h2>
-          {sortedTransactions.length === 0 ? (
+          {txLoading ? (
+            <Card className="p-4 space-y-3">
+              {[0, 1, 2].map((i) => (
+                <Skeleton key={i} className="h-12 w-full" />
+              ))}
+            </Card>
+          ) : sortedTransactions.length === 0 ? (
             <Card className="p-8 text-center">
               <ArrowRight className="w-12 h-12 mx-auto text-muted-foreground mb-4 opacity-50" />
               <p className="text-muted-foreground">No transactions for this account yet</p>
@@ -227,7 +246,7 @@ export default function AccountDetailPage({
                     ? `From ${counterpartName}`
                     : `To ${counterpartName}`;
                   const finalLabel = isTopupOrWithdrawal ? counterpartName : label;
-                  
+
                   return (
                     <div
                       key={tx.id}
