@@ -1,14 +1,20 @@
 'use client'
 
+// Required APIs:
+//   GET /api/accounts
+//   GET /api/account-snapshots
+
 import { useMemo, useState } from 'react'
 import DashboardLayout from '@/components/DashboardLayout'
 import BalanceChart from '@/components/BalanceChart'
 import HistoryTable from '@/components/HistoryTable'
-import PageLoader from '@/components/PageLoader'
-import { useAssetStore } from '@/lib/useAssetStore'
+import { useAccountsQuery } from '@/lib/queries/accounts'
+import { useAccountSnapshotsQuery } from '@/lib/queries/accountSnapshots'
+import { buildDailyBalancesFromSnapshots } from '@/lib/calculations/dailyBalances'
 import { getMonthFromDate, getYearFromDate } from '@/lib/format'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { Skeleton } from '@/components/ui/skeleton'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Calendar as CalendarPicker } from '@/components/ui/calendar'
 import { Calendar, X } from 'lucide-react'
@@ -25,10 +31,15 @@ function toIsoDate(date: Date): string {
 }
 
 export default function HistoryPage() {
-  const { accounts, dailyBalances } = useAssetStore()
-  const hasHydrated = useAssetStore((s) => s.hasHydrated)
+  const { data: accounts = [], isLoading: accountsLoading } = useAccountsQuery()
+  const { data: snapshots = [], isLoading: snapshotsLoading } = useAccountSnapshotsQuery()
   const [viewType, setViewType] = useState<ViewType>('month')
   const [range, setRange] = useState<DateRange | undefined>(undefined)
+
+  const dailyBalances = useMemo(
+    () => buildDailyBalancesFromSnapshots(accounts, snapshots),
+    [accounts, snapshots]
+  )
 
   const rangedBalances = useMemo(() => {
     if (!range?.from && !range?.to) return dailyBalances
@@ -75,8 +86,16 @@ export default function HistoryPage() {
     return 'All dates'
   }, [range])
 
-  if (!hasHydrated) {
-    return <PageLoader />
+  if (accountsLoading) {
+    return (
+      <DashboardLayout>
+        <div className="space-y-6">
+          <Skeleton className="h-10 w-64" />
+          <Skeleton className="h-96 w-full rounded-xl" />
+          <Skeleton className="h-64 w-full rounded-xl" />
+        </div>
+      </DashboardLayout>
+    )
   }
 
   if (accounts.length === 0) {
@@ -157,7 +176,9 @@ export default function HistoryPage() {
           </div>
         </div>
 
-        {filteredData.length > 0 ? (
+        {snapshotsLoading ? (
+          <Skeleton className="h-96 w-full rounded-xl" />
+        ) : filteredData.length > 0 ? (
           <BalanceChart data={filteredData} accounts={accounts} viewType={viewType} />
         ) : (
           <Card className="p-8 text-center">
@@ -165,7 +186,11 @@ export default function HistoryPage() {
           </Card>
         )}
 
-        <HistoryTable data={filteredData} accounts={accounts} viewType={viewType} />
+        {snapshotsLoading ? (
+          <Skeleton className="h-64 w-full rounded-xl" />
+        ) : (
+          <HistoryTable data={filteredData} accounts={accounts} viewType={viewType} />
+        )}
       </div>
     </DashboardLayout>
   )
