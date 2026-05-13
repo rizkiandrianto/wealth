@@ -214,9 +214,9 @@ export async function POST(req: NextRequest) {
   }
 
   // --- Portfolio snapshot trigger (runs after response via next/server `after`) ---
-  const excludeUpdatePortfolio = req.nextUrl.searchParams.get('excludeUpdatePortfolio') === '1'
+  const updatePortfolio = req.nextUrl.searchParams.get('updatePortfolio') === 'true'
   let portfolioTriggered = false
-  if (!excludeUpdatePortfolio) {
+  if (updatePortfolio) {
     const triggerUrl = new URL('/api/portfolio-snapshots/update', req.nextUrl.origin)
     after(async () => {
       try {
