@@ -3,25 +3,29 @@
 import { Card } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useFormatCurrency } from '@/lib/format'
-import { useStockSalesQuery } from '@/lib/queries/stocks'
-import { useCryptoSalesQuery } from '@/lib/queries/crypto'
-import { useGoldSalesQuery } from '@/lib/queries/gold'
+import { useStockSalesSummaryQuery } from '@/lib/queries/stocks'
+import { useCryptoSalesSummaryQuery } from '@/lib/queries/crypto'
+import { useGoldSalesSummaryQuery } from '@/lib/queries/gold'
 
 export default function RealizedPnLCard() {
   const formatCurrency = useFormatCurrency()
-  const { data: stockSales = [], isLoading: stockLoading } = useStockSalesQuery()
-  const { data: cryptoSales = [], isLoading: cryptoLoading } = useCryptoSalesQuery()
-  const { data: goldSales = [], isLoading: goldLoading } = useGoldSalesQuery()
+  const { data: stockSummary, isLoading: stockLoading } = useStockSalesSummaryQuery()
+  const { data: cryptoSummary, isLoading: cryptoLoading } = useCryptoSalesSummaryQuery()
+  const { data: goldSummary, isLoading: goldLoading } = useGoldSalesSummaryQuery()
 
   if (stockLoading || cryptoLoading || goldLoading) {
     return <Skeleton className="h-32 w-full rounded-xl" />
   }
 
-  if (stockSales.length === 0 && cryptoSales.length === 0 && goldSales.length === 0) return null
+  const stockCount = stockSummary?.count ?? 0
+  const cryptoCount = cryptoSummary?.count ?? 0
+  const goldCount = goldSummary?.count ?? 0
 
-  const stocksPnL = stockSales.reduce((s, sale) => s + sale.realizedPnL, 0)
-  const cryptosPnL = cryptoSales.reduce((s, sale) => s + sale.realizedPnL, 0)
-  const goldsPnL = goldSales.reduce((s, sale) => s + sale.realizedPnL, 0)
+  if (stockCount === 0 && cryptoCount === 0 && goldCount === 0) return null
+
+  const stocksPnL = stockSummary?.totalRealizedPnL ?? 0
+  const cryptosPnL = cryptoSummary?.totalRealizedPnL ?? 0
+  const goldsPnL = goldSummary?.totalRealizedPnL ?? 0
   const totalPnL = stocksPnL + cryptosPnL + goldsPnL
 
   return (
@@ -30,8 +34,8 @@ export default function RealizedPnLCard() {
         <div>
           <h3 className="text-lg font-semibold">Realized P&L</h3>
           <p className="text-sm text-muted-foreground mt-1">
-            {stockSales.length} stock sales • {cryptoSales.length} crypto sales
-            {goldSales.length > 0 && ` • ${goldSales.length} gold sales`}
+            {stockCount} stock sales • {cryptoCount} crypto sales
+            {goldCount > 0 && ` • ${goldCount} gold sales`}
           </p>
           <div className="mt-3 space-y-2">
             <p className="text-2xl font-bold">{formatCurrency(totalPnL)}</p>

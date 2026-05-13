@@ -20,12 +20,25 @@ export const cryptoSalesQueryOptions = () => ({
   },
 })
 
+export type CryptoSalesSummary = { totalRealizedPnL: number; count: number }
+
+export const cryptoSalesSummaryQueryOptions = () => ({
+  queryKey: queryKeys.cryptoSalesSummary,
+  queryFn: async (): Promise<CryptoSalesSummary> => {
+    return apiFetch('/api/crypto/sales?aggregate=sum')
+  },
+})
+
 export function useCryptosQuery() {
   return useQuery(cryptosQueryOptions())
 }
 
 export function useCryptoSalesQuery() {
   return useQuery(cryptoSalesQueryOptions())
+}
+
+export function useCryptoSalesSummaryQuery() {
+  return useQuery(cryptoSalesSummaryQueryOptions())
 }
 
 export function useAddCrypto() {

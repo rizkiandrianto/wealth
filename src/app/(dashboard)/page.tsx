@@ -4,11 +4,11 @@
 //   GET /api/accounts
 //   GET /api/transactions?limit=5
 //   GET /api/stocks
-//   GET /api/stocks/sales
+//   GET /api/stocks/sales?aggregate=sum
 //   GET /api/crypto
-//   GET /api/crypto/sales
+//   GET /api/crypto/sales?aggregate=sum
 //   GET /api/gold
-//   GET /api/gold/sales
+//   GET /api/gold/sales?aggregate=sum
 //   GET /api/market/prices
 
 import { useEffect } from 'react'
@@ -22,9 +22,9 @@ import PriceTicker from '@/components/PriceTicker'
 import RealizedPnLCard from '@/components/dashboard/RealizedPnLCard'
 import { accountsQueryOptions } from '@/lib/queries/accounts'
 import { transactionsQueryOptions, useTransactionsQuery } from '@/lib/queries/transactions'
-import { stocksQueryOptions, stockSalesQueryOptions } from '@/lib/queries/stocks'
-import { cryptosQueryOptions, cryptoSalesQueryOptions } from '@/lib/queries/crypto'
-import { goldsQueryOptions, goldSalesQueryOptions } from '@/lib/queries/gold'
+import { stocksQueryOptions, stockSalesSummaryQueryOptions } from '@/lib/queries/stocks'
+import { cryptosQueryOptions, cryptoSalesSummaryQueryOptions } from '@/lib/queries/crypto'
+import { goldsQueryOptions, goldSalesSummaryQueryOptions } from '@/lib/queries/gold'
 import { assetPricesQueryOptions } from '@/lib/queries/prices'
 import { Skeleton } from '@/components/ui/skeleton'
 
@@ -36,11 +36,11 @@ export default function Home() {
     qc.prefetchQuery(accountsQueryOptions())
     qc.prefetchQuery(transactionsQueryOptions({ limit: RECENT_TX_LIMIT }))
     qc.prefetchQuery(stocksQueryOptions())
-    qc.prefetchQuery(stockSalesQueryOptions())
+    qc.prefetchQuery(stockSalesSummaryQueryOptions())
     qc.prefetchQuery(cryptosQueryOptions())
-    qc.prefetchQuery(cryptoSalesQueryOptions())
+    qc.prefetchQuery(cryptoSalesSummaryQueryOptions())
     qc.prefetchQuery(goldsQueryOptions())
-    qc.prefetchQuery(goldSalesQueryOptions())
+    qc.prefetchQuery(goldSalesSummaryQueryOptions())
     qc.prefetchQuery(assetPricesQueryOptions())
   }, [qc])
 
