@@ -1,0 +1,16 @@
+export const queryKeys = {
+  accounts: ['accounts'] as const,
+  transactions: ['transactions'] as const,
+  accountSnapshots: ['accountSnapshots'] as const,
+  stocks: ['stocks'] as const,
+  stockLocations: ['stockLocations'] as const,
+  stockSales: ['stockSales'] as const,
+  cryptos: ['cryptos'] as const,
+  cryptoLocations: ['cryptoLocations'] as const,
+  cryptoSales: ['cryptoSales'] as const,
+  golds: ['golds'] as const,
+  goldLocations: ['goldLocations'] as const,
+  goldSales: ['goldSales'] as const,
+  assetPrices: ['assetPrices'] as const,
+  portfolioSnapshots: ['portfolioSnapshots'] as const,
+} as const
