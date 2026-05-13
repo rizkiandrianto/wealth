@@ -104,12 +104,12 @@ async function fetchGoldPriceIDR(): Promise<number | null> {
   return null
 }
 
-export async function POST(req: NextRequest, { params }: { params: Promise<{ excludeGold: boolean }> }) {
+export async function POST(req: NextRequest) {
   if (!checkApiKey(req)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const { excludeGold } = await params
+  const excludeGold = req.nextUrl.searchParams.get('excludeGold') === '1'
   const { stocks, cryptos, hasGold } = await getUniqueTickers()
 
   const updated = { stock: 0, crypto: 0, gold: 0 }
