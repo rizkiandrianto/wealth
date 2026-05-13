@@ -4,7 +4,8 @@ import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
 import { Drawer, DrawerContent, DrawerTitle } from '@/components/ui/drawer'
 import { useIsMobile } from '@/components/ui/use-mobile'
 import { Button } from '@/components/ui/button'
-import { useAssetStore } from '@/lib/useAssetStore'
+import { useAccountsQuery } from '@/lib/queries/accounts'
+import { useAddTransaction } from '@/lib/queries/transactions'
 import StockForm from '@/components/StockForm'
 import CryptoForm from '@/components/CryptoForm'
 import GoldForm from '@/components/GoldForm'
@@ -33,8 +34,8 @@ export default function AssetFormSheet({
   editingId = null,
 }: AssetFormSheetProps) {
   const isMobile = useIsMobile()
-  const accounts = useAssetStore((s) => s.accounts)
-  const addTransaction = useAssetStore((s) => s.addTransaction)
+  const { data: accounts = [] } = useAccountsQuery()
+  const addTransaction = useAddTransaction()
 
   const close = () => onOpenChange(false)
 
@@ -64,8 +65,8 @@ export default function AssetFormSheet({
     return (
       <TransactionForm
         accounts={accounts}
-        onSubmit={(data) => {
-          addTransaction(data)
+        onSubmit={async (data) => {
+          await addTransaction.mutateAsync(data)
           close()
         }}
         onCancel={close}

@@ -6,14 +6,14 @@ import { Button } from '@/components/ui/button'
 import { Transaction } from '@/lib/types'
 import { useFormatCurrency, formatDateTime } from '@/lib/format'
 import { ArrowRight } from 'lucide-react'
-import { useAssetStore } from '@/lib/useAssetStore'
+import { useAccountsQuery } from '@/lib/queries/accounts'
 
 interface RecentTransactionsProps {
   transactions: Transaction[]
 }
 
 export default function RecentTransactions({ transactions }: RecentTransactionsProps) {
-  const { accounts } = useAssetStore()
+  const { data: accounts = [] } = useAccountsQuery()
   const formatCurrency = useFormatCurrency()
 
   const getAccountName = (accountId: string) => {
