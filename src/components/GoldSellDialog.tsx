@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { GoldHolding } from '@/lib/types'
 import { useFormatCurrency } from '@/lib/format'
-import { useAssetStore } from '@/lib/useAssetStore'
+import { useAssetPricesQuery } from '@/lib/queries/prices'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card } from '@/components/ui/card'
@@ -16,7 +16,7 @@ interface GoldSellDialogProps {
 }
 
 export default function GoldSellDialog({ gold, onSell, onClose }: GoldSellDialogProps) {
-  const { assetPrices } = useAssetStore()
+  const { data: assetPrices = [] } = useAssetPricesQuery()
   const formatCurrency = useFormatCurrency()
   const currentPrice = assetPrices.find((p) => p.ticker === 'XAU')?.price ?? 0
   const [weight, setWeight] = useState('')

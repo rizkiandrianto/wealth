@@ -4,8 +4,9 @@ import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import FormShell from '@/components/FormShell'
-import { useAssetStore } from '@/lib/useAssetStore'
 import LocationPickerSelect from '@/components/LocationPickerSelect'
+import { useGoldsQuery, useAddGold, useUpdateGold } from '@/lib/queries/gold'
+import { useGoldLocationsQuery, useAddGoldLocation } from '@/lib/queries/goldLocations'
 
 interface GoldFormProps {
   editingId: string | null
@@ -13,7 +14,11 @@ interface GoldFormProps {
 }
 
 export default function GoldForm({ editingId, onClose }: GoldFormProps) {
-  const { golds, goldLocations, addGold, updateGold, addGoldLocation } = useAssetStore()
+  const { data: golds = [] } = useGoldsQuery()
+  const { data: goldLocations = [] } = useGoldLocationsQuery()
+  const addGold = useAddGold()
+  const updateGold = useUpdateGold()
+  const addGoldLocation = useAddGoldLocation()
   const editingGold = editingId ? golds.find((g) => g.id === editingId) : null
 
   const [formData, setFormData] = useState({
@@ -41,7 +46,7 @@ export default function GoldForm({ editingId, onClose }: GoldFormProps) {
     }
   }, [editingGold, goldLocations])
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
     if (!formData.locationId || !formData.weight || !formData.purchasePrice || !formData.purchaseDate) {
@@ -57,9 +62,9 @@ export default function GoldForm({ editingId, onClose }: GoldFormProps) {
     }
 
     if (editingId) {
-      updateGold(editingId, goldData)
+      await updateGold.mutateAsync({ id: editingId, updates: goldData })
     } else {
-      addGold(goldData)
+      await addGold.mutateAsync(goldData)
     }
 
     setFormData({
@@ -84,7 +89,7 @@ export default function GoldForm({ editingId, onClose }: GoldFormProps) {
             locations={goldLocations}
             value={formData.locationId}
             onChange={(id) => setFormData({ ...formData, locationId: id })}
-            onAddLocation={(name) => addGoldLocation({ name })}
+            onAddLocation={async (name) => (await addGoldLocation.mutateAsync({ name })).id}
           />
         </div>
 

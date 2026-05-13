@@ -3,7 +3,8 @@
 import { useState } from 'react'
 import { GoldHolding, GoldLocation } from '@/lib/types'
 import { useFormatCurrency } from '@/lib/format'
-import { useAssetStore } from '@/lib/useAssetStore'
+import { useDeleteGold, useSellGold } from '@/lib/queries/gold'
+import { useAssetPricesQuery } from '@/lib/queries/prices'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Trash2, Edit2, DollarSign, TrendingUp, TrendingDown } from 'lucide-react'
@@ -16,7 +17,9 @@ interface GoldListProps {
 }
 
 export default function GoldList({ golds, locations, onEdit }: GoldListProps) {
-  const { deleteGold, getGoldProfitLoss, sellGold, assetPrices } = useAssetStore()
+  const { data: assetPrices = [] } = useAssetPricesQuery()
+  const deleteGold = useDeleteGold()
+  const sellGold = useSellGold()
   const formatCurrency = useFormatCurrency()
   const goldPrice = assetPrices.find((p) => p.ticker === 'XAU')?.price ?? 0
   const [sellingGoldId, setSellingGoldId] = useState<string | null>(null)
@@ -52,8 +55,10 @@ export default function GoldList({ golds, locations, onEdit }: GoldListProps) {
 
             <div className="space-y-3">
               {locationGolds.map((gold) => {
-                const pl = getGoldProfitLoss(gold.id)
                 const value = goldPrice > 0 ? gold.weight * goldPrice : 0
+                const cost = gold.weight * gold.purchasePrice
+                const pnlAmount = value - cost
+                const pnlPercent = cost > 0 ? (pnlAmount / cost) * 100 : 0
 
                 return (
                   <Card key={gold.id} className="p-4 border-l-4 border-l-yellow-500">
@@ -67,9 +72,9 @@ export default function GoldList({ golds, locations, onEdit }: GoldListProps) {
                       <div className="text-right">
                         <p className="text-xl font-bold">{goldPrice > 0 ? formatCurrency(value) : '—'}</p>
                         {goldPrice > 0 && (
-                          <p className={`text-sm font-medium flex items-center justify-end gap-1 ${pl.amount >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                            {pl.amount >= 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
-                            {formatCurrency(pl.amount)} ({pl.percentage.toFixed(2)}%)
+                          <p className={`text-sm font-medium flex items-center justify-end gap-1 ${pnlAmount >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                            {pnlAmount >= 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+                            {formatCurrency(pnlAmount)} ({pnlPercent.toFixed(2)}%)
                           </p>
                         )}
                       </div>
@@ -99,7 +104,7 @@ export default function GoldList({ golds, locations, onEdit }: GoldListProps) {
                         size="sm"
                         onClick={() => {
                           if (confirm('Hapus holding emas ini?')) {
-                            deleteGold(gold.id)
+                            deleteGold.mutate(gold.id)
                           }
                         }}
                         className="gap-2 text-red-600 hover:text-red-700 hover:bg-red-50"
@@ -132,7 +137,7 @@ export default function GoldList({ golds, locations, onEdit }: GoldListProps) {
         <GoldSellDialog
           gold={sellingGold}
           onSell={(weight, salePrice) => {
-            sellGold(sellingGold.id, weight, salePrice)
+            sellGold.mutate({ goldId: sellingGold.id, weight, salePrice })
             setSellingGoldId(null)
           }}
           onClose={() => setSellingGoldId(null)}
