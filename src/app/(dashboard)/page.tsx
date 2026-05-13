@@ -11,16 +11,36 @@
 //   GET /api/gold/sales
 //   GET /api/market/prices
 
+import { useEffect } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
 import DashboardLayout from '@/components/DashboardLayout'
 import DashboardSummary from '@/components/DashboardSummary'
 import AccountsList from '@/components/AccountsList'
 import RecentTransactions from '@/components/RecentTransactions'
 import QuickAddFab from '@/components/QuickAddFab'
 import RealizedPnLCard from '@/components/dashboard/RealizedPnLCard'
-import { useTransactionsQuery } from '@/lib/queries/transactions'
+import { accountsQueryOptions } from '@/lib/queries/accounts'
+import { transactionsQueryOptions, useTransactionsQuery } from '@/lib/queries/transactions'
+import { stocksQueryOptions, stockSalesQueryOptions } from '@/lib/queries/stocks'
+import { cryptosQueryOptions, cryptoSalesQueryOptions } from '@/lib/queries/crypto'
+import { goldsQueryOptions, goldSalesQueryOptions } from '@/lib/queries/gold'
+import { assetPricesQueryOptions } from '@/lib/queries/prices'
 import { Skeleton } from '@/components/ui/skeleton'
 
 export default function Home() {
+  const qc = useQueryClient()
+  useEffect(() => {
+    qc.prefetchQuery(accountsQueryOptions())
+    qc.prefetchQuery(transactionsQueryOptions())
+    qc.prefetchQuery(stocksQueryOptions())
+    qc.prefetchQuery(stockSalesQueryOptions())
+    qc.prefetchQuery(cryptosQueryOptions())
+    qc.prefetchQuery(cryptoSalesQueryOptions())
+    qc.prefetchQuery(goldsQueryOptions())
+    qc.prefetchQuery(goldSalesQueryOptions())
+    qc.prefetchQuery(assetPricesQueryOptions())
+  }, [qc])
+
   const { data: transactions = [], isLoading: txLoading } = useTransactionsQuery()
 
   return (

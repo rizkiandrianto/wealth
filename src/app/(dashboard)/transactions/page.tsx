@@ -6,16 +6,27 @@
 //   DELETE /api/transactions/[id]
 //   (POST  /api/transactions via AssetFormSheet → TransactionForm)
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
 import DashboardLayout from '@/components/DashboardLayout'
 import AssetFormSheet from '@/components/AssetFormSheet'
 import TransactionList from '@/components/TransactionList'
 import { Skeleton } from '@/components/ui/skeleton'
-import { useAccountsQuery } from '@/lib/queries/accounts'
-import { useTransactionsQuery, useDeleteTransaction } from '@/lib/queries/transactions'
+import { accountsQueryOptions, useAccountsQuery } from '@/lib/queries/accounts'
+import {
+  transactionsQueryOptions,
+  useTransactionsQuery,
+  useDeleteTransaction,
+} from '@/lib/queries/transactions'
 import { ArrowRight } from 'lucide-react'
 
 export default function TransactionsPage() {
+  const qc = useQueryClient()
+  useEffect(() => {
+    qc.prefetchQuery(accountsQueryOptions())
+    qc.prefetchQuery(transactionsQueryOptions())
+  }, [qc])
+
   const { data: accounts = [], isLoading: accountsLoading } = useAccountsQuery()
   const { data: transactions = [], isLoading: txLoading } = useTransactionsQuery()
   const deleteTransaction = useDeleteTransaction()

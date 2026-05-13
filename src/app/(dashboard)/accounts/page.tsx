@@ -5,7 +5,8 @@
 //   POST   /api/accounts
 //   DELETE /api/accounts/[id]
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
 import DashboardLayout from '@/components/DashboardLayout'
 import AccountForm from '@/components/AccountForm'
 import AccountCard from '@/components/AccountCard'
@@ -13,10 +14,20 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
 import { Skeleton } from '@/components/ui/skeleton'
 import { AccountType } from '@/lib/types'
-import { useAccountsQuery, useAddAccount, useDeleteAccount } from '@/lib/queries/accounts'
+import {
+  accountsQueryOptions,
+  useAccountsQuery,
+  useAddAccount,
+  useDeleteAccount,
+} from '@/lib/queries/accounts'
 import { Wallet } from 'lucide-react'
 
 export default function AccountsPage() {
+  const qc = useQueryClient()
+  useEffect(() => {
+    qc.prefetchQuery(accountsQueryOptions())
+  }, [qc])
+
   const { data: accounts = [], isLoading } = useAccountsQuery()
   const addAccount = useAddAccount()
   const deleteAccount = useDeleteAccount()

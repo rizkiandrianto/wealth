@@ -4,12 +4,16 @@
 //   GET /api/accounts
 //   GET /api/account-snapshots
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
 import DashboardLayout from '@/components/DashboardLayout'
 import BalanceChart from '@/components/BalanceChart'
 import HistoryTable from '@/components/HistoryTable'
-import { useAccountsQuery } from '@/lib/queries/accounts'
-import { useAccountSnapshotsQuery } from '@/lib/queries/accountSnapshots'
+import { accountsQueryOptions, useAccountsQuery } from '@/lib/queries/accounts'
+import {
+  accountSnapshotsQueryOptions,
+  useAccountSnapshotsQuery,
+} from '@/lib/queries/accountSnapshots'
 import { buildDailyBalancesFromSnapshots } from '@/lib/calculations/dailyBalances'
 import { getMonthFromDate, getYearFromDate } from '@/lib/format'
 import { Card } from '@/components/ui/card'
@@ -31,6 +35,12 @@ function toIsoDate(date: Date): string {
 }
 
 export default function HistoryPage() {
+  const qc = useQueryClient()
+  useEffect(() => {
+    qc.prefetchQuery(accountsQueryOptions())
+    qc.prefetchQuery(accountSnapshotsQueryOptions())
+  }, [qc])
+
   const { data: accounts = [], isLoading: accountsLoading } = useAccountsQuery()
   const { data: snapshots = [], isLoading: snapshotsLoading } = useAccountSnapshotsQuery()
   const [viewType, setViewType] = useState<ViewType>('month')

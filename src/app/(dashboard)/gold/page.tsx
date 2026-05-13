@@ -6,7 +6,8 @@
 //   GET    /api/market/prices
 //   (POST/PATCH/DELETE /api/gold/* via GoldForm / dialog)
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
 import { Plus } from 'lucide-react'
 import DashboardLayout from '@/components/DashboardLayout'
 import { Button } from '@/components/ui/button'
@@ -14,10 +15,18 @@ import { Skeleton } from '@/components/ui/skeleton'
 import AssetFormSheet from '@/components/AssetFormSheet'
 import GoldList from '@/components/GoldList'
 import GoldSummary from '@/components/GoldSummary'
-import { useGoldsQuery } from '@/lib/queries/gold'
-import { useGoldLocationsQuery } from '@/lib/queries/goldLocations'
+import { goldsQueryOptions, useGoldsQuery } from '@/lib/queries/gold'
+import { goldLocationsQueryOptions, useGoldLocationsQuery } from '@/lib/queries/goldLocations'
+import { assetPricesQueryOptions } from '@/lib/queries/prices'
 
 export default function GoldPage() {
+  const qc = useQueryClient()
+  useEffect(() => {
+    qc.prefetchQuery(goldsQueryOptions())
+    qc.prefetchQuery(goldLocationsQueryOptions())
+    qc.prefetchQuery(assetPricesQueryOptions())
+  }, [qc])
+
   const { data: golds = [], isLoading: goldsLoading } = useGoldsQuery()
   const { data: goldLocations = [] } = useGoldLocationsQuery()
   const [showForm, setShowForm] = useState(false)

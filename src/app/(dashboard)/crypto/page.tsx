@@ -6,7 +6,8 @@
 //   GET    /api/market/prices
 //   (POST/PATCH/DELETE /api/crypto/* via CryptoForm / dialogs)
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
 import { Plus } from 'lucide-react'
 import DashboardLayout from '@/components/DashboardLayout'
 import { Button } from '@/components/ui/button'
@@ -16,10 +17,18 @@ import AssetFormSheet from '@/components/AssetFormSheet'
 import CryptosList from '@/components/CryptosList'
 import CryptosByLocation from '@/components/CryptosByLocation'
 import CryptosSummary from '@/components/CryptosSummary'
-import { useCryptosQuery } from '@/lib/queries/crypto'
-import { useCryptoLocationsQuery } from '@/lib/queries/cryptoLocations'
+import { cryptosQueryOptions, useCryptosQuery } from '@/lib/queries/crypto'
+import { cryptoLocationsQueryOptions, useCryptoLocationsQuery } from '@/lib/queries/cryptoLocations'
+import { assetPricesQueryOptions } from '@/lib/queries/prices'
 
 export default function CryptoPage() {
+  const qc = useQueryClient()
+  useEffect(() => {
+    qc.prefetchQuery(cryptosQueryOptions())
+    qc.prefetchQuery(cryptoLocationsQueryOptions())
+    qc.prefetchQuery(assetPricesQueryOptions())
+  }, [qc])
+
   const { data: cryptos = [], isLoading: cryptosLoading } = useCryptosQuery()
   const { data: cryptoLocations = [] } = useCryptoLocationsQuery()
   const [showForm, setShowForm] = useState(false)

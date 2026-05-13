@@ -6,7 +6,8 @@
 //   GET    /api/market/prices
 //   (POST/PATCH/DELETE /api/stocks/*  via StockForm / dialogs)
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
 import { Plus } from 'lucide-react'
 import DashboardLayout from '@/components/DashboardLayout'
 import { Button } from '@/components/ui/button'
@@ -16,10 +17,18 @@ import AssetFormSheet from '@/components/AssetFormSheet'
 import StocksList from '@/components/StocksList'
 import StocksByLocation from '@/components/StocksByLocation'
 import StocksSummary from '@/components/StocksSummary'
-import { useStocksQuery } from '@/lib/queries/stocks'
-import { useStockLocationsQuery } from '@/lib/queries/stockLocations'
+import { stocksQueryOptions, useStocksQuery } from '@/lib/queries/stocks'
+import { stockLocationsQueryOptions, useStockLocationsQuery } from '@/lib/queries/stockLocations'
+import { assetPricesQueryOptions } from '@/lib/queries/prices'
 
 export default function StocksPage() {
+  const qc = useQueryClient()
+  useEffect(() => {
+    qc.prefetchQuery(stocksQueryOptions())
+    qc.prefetchQuery(stockLocationsQueryOptions())
+    qc.prefetchQuery(assetPricesQueryOptions())
+  }, [qc])
+
   const { data: stocks = [], isLoading: stocksLoading } = useStocksQuery()
   const { data: stockLocations = [] } = useStockLocationsQuery()
   const [showForm, setShowForm] = useState(false)
