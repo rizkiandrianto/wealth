@@ -21,11 +21,19 @@ export const stockSalesQueryOptions = () => ({
 })
 
 export type SalesSummary = { totalRealizedPnL: number; count: number }
+export type HoldingsSummary = { totalValue: number; totalCost: number; uniqueCount: number }
 
 export const stockSalesSummaryQueryOptions = () => ({
   queryKey: queryKeys.stockSalesSummary,
   queryFn: async (): Promise<SalesSummary> => {
-    return apiFetch('/api/stocks/sales?aggregate=sum')
+    return apiFetch('/api/stocks/sales/summary')
+  },
+})
+
+export const stocksSummaryQueryOptions = () => ({
+  queryKey: queryKeys.stocksSummary,
+  queryFn: async (): Promise<HoldingsSummary> => {
+    return apiFetch('/api/stocks/summary')
   },
 })
 
@@ -39,6 +47,10 @@ export function useStockSalesQuery() {
 
 export function useStockSalesSummaryQuery() {
   return useQuery(stockSalesSummaryQueryOptions())
+}
+
+export function useStocksSummaryQuery() {
+  return useQuery(stocksSummaryQueryOptions())
 }
 
 export function useAddStock() {

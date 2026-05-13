@@ -5,25 +5,23 @@ import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useFormatCurrency } from '@/lib/format'
-import { useGoldsQuery } from '@/lib/queries/gold'
-import { useAssetPricesQuery } from '@/lib/queries/prices'
+import { useGoldsSummaryQuery } from '@/lib/queries/gold'
 import { ArrowRight, TrendingDown, TrendingUp } from 'lucide-react'
 
 export default function GoldSummaryCard() {
   const formatCurrency = useFormatCurrency()
-  const { data: golds = [], isLoading: goldsLoading } = useGoldsQuery()
-  const { data: prices = [], isLoading: pricesLoading } = useAssetPricesQuery()
+  const { data: summary, isLoading } = useGoldsSummaryQuery()
 
-  if (goldsLoading || pricesLoading) {
+  if (isLoading) {
     return <Skeleton className="h-40 rounded-xl" />
   }
 
-  if (golds.length === 0) return null
+  const totalWeight = summary?.totalWeight ?? 0
+  if (totalWeight === 0) return null
 
-  const goldPrice = prices.find((p) => p.ticker === 'XAU')?.price ?? 0
-  const totalWeight = golds.reduce((sum, g) => sum + g.weight, 0)
-  const totalValue = golds.reduce((sum, g) => sum + g.weight * goldPrice, 0)
-  const totalCost = golds.reduce((sum, g) => sum + g.weight * g.purchasePrice, 0)
+  const totalValue = summary?.totalValue ?? 0
+  const totalCost = summary?.totalCost ?? 0
+  const goldPrice = summary?.goldPrice ?? 0
   const profit = totalValue - totalCost
   const profitPercent = totalCost > 0 ? (profit / totalCost) * 100 : 0
   const isPositive = profit >= 0

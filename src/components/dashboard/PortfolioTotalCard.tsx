@@ -3,13 +3,11 @@
 import { Card } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useFormatCurrency } from '@/lib/format'
-import { stockShares } from '@/lib/stock'
 import { useUIStore, type PortfolioKey } from '@/lib/store/useUIStore'
 import { useAccountsQuery } from '@/lib/queries/accounts'
-import { useStocksQuery } from '@/lib/queries/stocks'
-import { useCryptosQuery } from '@/lib/queries/crypto'
-import { useGoldsQuery } from '@/lib/queries/gold'
-import { useAssetPricesQuery } from '@/lib/queries/prices'
+import { useStocksSummaryQuery } from '@/lib/queries/stocks'
+import { useCryptosSummaryQuery } from '@/lib/queries/crypto'
+import { useGoldsSummaryQuery } from '@/lib/queries/gold'
 import { Eye, EyeOff, TrendingDown, TrendingUp } from 'lucide-react'
 
 export default function PortfolioTotalCard() {
@@ -21,12 +19,11 @@ export default function PortfolioTotalCard() {
   const isExcluded = (key: PortfolioKey) => excludedPortfolios.includes(key)
 
   const { data: accounts = [], isLoading: accountsLoading } = useAccountsQuery()
-  const { data: stocks = [], isLoading: stocksLoading } = useStocksQuery()
-  const { data: cryptos = [], isLoading: cryptosLoading } = useCryptosQuery()
-  const { data: golds = [], isLoading: goldsLoading } = useGoldsQuery()
-  const { data: prices = [], isLoading: pricesLoading } = useAssetPricesQuery()
+  const { data: stockSummary, isLoading: stocksLoading } = useStocksSummaryQuery()
+  const { data: cryptoSummary, isLoading: cryptosLoading } = useCryptosSummaryQuery()
+  const { data: goldSummary, isLoading: goldsLoading } = useGoldsSummaryQuery()
 
-  const anyLoading = accountsLoading || stocksLoading || cryptosLoading || goldsLoading || pricesLoading
+  const anyLoading = accountsLoading || stocksLoading || cryptosLoading || goldsLoading
 
   if (anyLoading) {
     return (
@@ -42,16 +39,13 @@ export default function PortfolioTotalCard() {
     )
   }
 
-  const getPrice = (ticker: string) => prices.find((p) => p.ticker === ticker)?.price ?? 0
-  const goldPrice = getPrice('XAU')
-
   const totalBalance = accounts.reduce((s, a) => s + a.balance, 0)
-  const totalStockValue = stocks.reduce((s, st) => s + stockShares(st) * getPrice(st.ticker), 0)
-  const totalStockCost = stocks.reduce((s, st) => s + stockShares(st) * st.averagePrice, 0)
-  const totalCryptoValue = cryptos.reduce((s, c) => s + c.quantity * getPrice(c.symbol), 0)
-  const totalCryptoCost = cryptos.reduce((s, c) => s + c.quantity * c.averagePrice, 0)
-  const totalGoldValue = golds.reduce((s, g) => s + g.weight * goldPrice, 0)
-  const totalGoldCost = golds.reduce((s, g) => s + g.weight * g.purchasePrice, 0)
+  const totalStockValue = stockSummary?.totalValue ?? 0
+  const totalStockCost = stockSummary?.totalCost ?? 0
+  const totalCryptoValue = cryptoSummary?.totalValue ?? 0
+  const totalCryptoCost = cryptoSummary?.totalCost ?? 0
+  const totalGoldValue = goldSummary?.totalValue ?? 0
+  const totalGoldCost = goldSummary?.totalCost ?? 0
 
   const totalPortfolio =
     (isExcluded('cash') ? 0 : totalBalance) +

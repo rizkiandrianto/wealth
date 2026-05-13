@@ -75,7 +75,7 @@ Tambahkan prefetch ke semua 7 pages. Lihat tabel "Required APIs per Page" di baw
 
 | Page | Required APIs |
 |---|---|
-| `/` (Dashboard) | `/api/accounts`, `/api/transactions?limit=5`, `/api/stocks`, `/api/crypto`, `/api/gold`, `/api/stocks/sales?aggregate=sum`, `/api/crypto/sales?aggregate=sum`, `/api/gold/sales?aggregate=sum`, `/api/market/prices` |
+| `/` (Dashboard) | `/api/accounts`, `/api/transactions?limit=5`, `/api/stocks`, `/api/stocks/summary`, `/api/stocks/sales/summary`, `/api/crypto`, `/api/crypto/summary`, `/api/crypto/sales/summary`, `/api/gold`, `/api/gold/summary`, `/api/gold/sales/summary`, `/api/market/prices` |
 | `/accounts` | `/api/accounts` |
 | `/accounts/[id]` | `/api/accounts`, `/api/transactions?accountId=[id]` |
 | `/stocks` | `/api/stocks`, `/api/stock-locations`, `/api/market/prices`, `/api/stocks/sales` |

@@ -5,24 +5,22 @@ import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useFormatCurrency } from '@/lib/format'
-import { useCryptosQuery } from '@/lib/queries/crypto'
-import { useAssetPricesQuery } from '@/lib/queries/prices'
+import { useCryptosSummaryQuery } from '@/lib/queries/crypto'
 import { ArrowRight, TrendingDown, TrendingUp } from 'lucide-react'
 
 export default function CryptoSummaryCard() {
   const formatCurrency = useFormatCurrency()
-  const { data: cryptos = [], isLoading: cryptosLoading } = useCryptosQuery()
-  const { data: prices = [], isLoading: pricesLoading } = useAssetPricesQuery()
+  const { data: summary, isLoading } = useCryptosSummaryQuery()
 
-  if (cryptosLoading || pricesLoading) {
+  if (isLoading) {
     return <Skeleton className="h-40 rounded-xl" />
   }
 
-  if (cryptos.length === 0) return null
+  const uniqueCount = summary?.uniqueCount ?? 0
+  if (uniqueCount === 0) return null
 
-  const getPrice = (symbol: string) => prices.find((p) => p.ticker === symbol)?.price ?? 0
-  const totalValue = cryptos.reduce((s, c) => s + c.quantity * getPrice(c.symbol), 0)
-  const totalCost = cryptos.reduce((s, c) => s + c.quantity * c.averagePrice, 0)
+  const totalValue = summary?.totalValue ?? 0
+  const totalCost = summary?.totalCost ?? 0
   const profit = totalValue - totalCost
   const profitPercent = totalCost > 0 ? (profit / totalCost) * 100 : 0
   const isPositive = profit >= 0
@@ -33,7 +31,7 @@ export default function CryptoSummaryCard() {
         <div>
           <h3 className="text-lg font-semibold">Portfolio Crypto</h3>
           <p className="text-sm text-muted-foreground mt-1">
-            {new Set(cryptos.map((c) => c.symbol)).size} crypto dimiliki
+            {uniqueCount} crypto dimiliki
           </p>
           <div className="mt-3 space-y-2">
             <p className="text-2xl font-bold">{formatCurrency(totalValue)}</p>

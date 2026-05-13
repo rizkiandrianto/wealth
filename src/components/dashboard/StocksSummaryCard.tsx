@@ -5,25 +5,22 @@ import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useFormatCurrency } from '@/lib/format'
-import { stockShares } from '@/lib/stock'
-import { useStocksQuery } from '@/lib/queries/stocks'
-import { useAssetPricesQuery } from '@/lib/queries/prices'
+import { useStocksSummaryQuery } from '@/lib/queries/stocks'
 import { ArrowRight, TrendingDown, TrendingUp } from 'lucide-react'
 
 export default function StocksSummaryCard() {
   const formatCurrency = useFormatCurrency()
-  const { data: stocks = [], isLoading: stocksLoading } = useStocksQuery()
-  const { data: prices = [], isLoading: pricesLoading } = useAssetPricesQuery()
+  const { data: summary, isLoading } = useStocksSummaryQuery()
 
-  if (stocksLoading || pricesLoading) {
+  if (isLoading) {
     return <Skeleton className="h-40 rounded-xl" />
   }
 
-  if (stocks.length === 0) return null
+  const uniqueCount = summary?.uniqueCount ?? 0
+  if (uniqueCount === 0) return null
 
-  const getPrice = (ticker: string) => prices.find((p) => p.ticker === ticker)?.price ?? 0
-  const totalValue = stocks.reduce((s, st) => s + stockShares(st) * getPrice(st.ticker), 0)
-  const totalCost = stocks.reduce((s, st) => s + stockShares(st) * st.averagePrice, 0)
+  const totalValue = summary?.totalValue ?? 0
+  const totalCost = summary?.totalCost ?? 0
   const profit = totalValue - totalCost
   const profitPercent = totalCost > 0 ? (profit / totalCost) * 100 : 0
   const isPositive = profit >= 0
@@ -34,7 +31,7 @@ export default function StocksSummaryCard() {
         <div>
           <h3 className="text-lg font-semibold">Portfolio Saham</h3>
           <p className="text-sm text-muted-foreground mt-1">
-            {new Set(stocks.map((s) => s.ticker)).size} saham dimiliki
+            {uniqueCount} saham dimiliki
           </p>
           <div className="mt-3 space-y-2">
             <p className="text-2xl font-bold">{formatCurrency(totalValue)}</p>

@@ -21,11 +21,24 @@ export const goldSalesQueryOptions = () => ({
 })
 
 export type GoldSalesSummary = { totalRealizedPnL: number; count: number }
+export type GoldsSummary = {
+  totalValue: number
+  totalCost: number
+  totalWeight: number
+  goldPrice: number
+}
 
 export const goldSalesSummaryQueryOptions = () => ({
   queryKey: queryKeys.goldSalesSummary,
   queryFn: async (): Promise<GoldSalesSummary> => {
-    return apiFetch('/api/gold/sales?aggregate=sum')
+    return apiFetch('/api/gold/sales/summary')
+  },
+})
+
+export const goldsSummaryQueryOptions = () => ({
+  queryKey: queryKeys.goldsSummary,
+  queryFn: async (): Promise<GoldsSummary> => {
+    return apiFetch('/api/gold/summary')
   },
 })
 
@@ -39,6 +52,10 @@ export function useGoldSalesQuery() {
 
 export function useGoldSalesSummaryQuery() {
   return useQuery(goldSalesSummaryQueryOptions())
+}
+
+export function useGoldsSummaryQuery() {
+  return useQuery(goldsSummaryQueryOptions())
 }
 
 export function useAddGold() {
