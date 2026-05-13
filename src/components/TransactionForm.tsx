@@ -245,7 +245,7 @@ export default function TransactionForm({
           />
         </div>
 
-        <div className="flex gap-2 justify-end pt-2">
+        <div className="md:flex gap-2 md:justify-end grid grid-cols-2 pt-2">
           <Button type="button" variant="outline" onClick={onCancel}>
             Batal
           </Button>

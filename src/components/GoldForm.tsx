@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import FormShell from '@/components/FormShell'
 import LocationPickerSelect from '@/components/LocationPickerSelect'
+import type { GoldHolding, GoldLocation } from '@/lib/types'
 import { useGoldsQuery, useAddGold, useUpdateGold } from '@/lib/queries/gold'
 import { useGoldLocationsQuery, useAddGoldLocation } from '@/lib/queries/goldLocations'
 
@@ -13,9 +14,13 @@ interface GoldFormProps {
   onClose: () => void
 }
 
+// Stable empty fallbacks — see StockForm for context on the re-render loop.
+const EMPTY_GOLDS: GoldHolding[] = []
+const EMPTY_LOCATIONS: GoldLocation[] = []
+
 export default function GoldForm({ editingId, onClose }: GoldFormProps) {
-  const { data: golds = [] } = useGoldsQuery()
-  const { data: goldLocations = [] } = useGoldLocationsQuery()
+  const { data: golds = EMPTY_GOLDS } = useGoldsQuery()
+  const { data: goldLocations = EMPTY_LOCATIONS } = useGoldLocationsQuery()
   const addGold = useAddGold()
   const updateGold = useUpdateGold()
   const addGoldLocation = useAddGoldLocation()
@@ -36,14 +41,15 @@ export default function GoldForm({ editingId, onClose }: GoldFormProps) {
         purchasePrice: editingGold.purchasePrice.toString(),
         purchaseDate: new Date(editingGold.purchaseDate).toISOString().split('T')[0],
       })
-    } else {
-      setFormData(prev => ({
-        ...prev,
-        locationId: goldLocations.find(l => l.id === prev.locationId)
-          ? prev.locationId
-          : goldLocations[0]?.id || '',
-      }))
+      return
     }
+    setFormData(prev => {
+      const next = goldLocations.some(l => l.id === prev.locationId)
+        ? prev.locationId
+        : goldLocations[0]?.id ?? ''
+      if (next === prev.locationId) return prev
+      return { ...prev, locationId: next }
+    })
   }, [editingGold, goldLocations])
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -129,7 +135,7 @@ export default function GoldForm({ editingId, onClose }: GoldFormProps) {
           />
         </div>
 
-        <div className="flex gap-2 justify-end pt-2">
+        <div className="md:flex gap-2 md:justify-end grid grid-cols-2 pt-2">
           <Button type="button" variant="outline" onClick={onClose}>
             Batal
           </Button>

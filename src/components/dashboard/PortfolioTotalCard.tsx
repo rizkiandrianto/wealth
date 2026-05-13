@@ -30,7 +30,7 @@ export default function PortfolioTotalCard() {
 
   if (anyLoading) {
     return (
-      <Card className="p-6 bg-gradient-to-br from-emerald-50 to-emerald-100 border-emerald-200">
+      <Card className="p-6">
         <Skeleton className="h-4 w-32 mb-2" />
         <Skeleton className="h-9 w-48 mb-4" />
         <div className="space-y-2">
@@ -72,7 +72,7 @@ export default function PortfolioTotalCard() {
   const isTotalPositive = totalInvestedProfit >= 0
 
   return (
-    <Card className="p-6 bg-gradient-to-br from-emerald-50 to-emerald-100 border-emerald-200">
+    <Card className="p-6 bg-linear-to-br from-emerald-50 to-emerald-100 border-emerald-200">
       <div className="flex items-start justify-between">
         <div>
           <p className="text-sm font-medium text-muted-foreground mb-2 flex items-center gap-1.5">

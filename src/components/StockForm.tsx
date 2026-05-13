@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/select'
 import FormShell from '@/components/FormShell'
 import LocationPickerSelect from '@/components/LocationPickerSelect'
-import type { StockMarket } from '@/lib/types'
+import type { StockHolding, StockLocation, StockMarket } from '@/lib/types'
 import { useStocksQuery, useAddStock, useUpdateStock } from '@/lib/queries/stocks'
 import { useStockLocationsQuery, useAddStockLocation } from '@/lib/queries/stockLocations'
 
@@ -21,9 +21,15 @@ interface StockFormProps {
   onClose: () => void
 }
 
+// Stable empty fallbacks — destructure default `= []` allocates a new array
+// every render, breaking referential equality for useEffect deps and causing
+// an infinite re-render loop while query data is still loading.
+const EMPTY_STOCKS: StockHolding[] = []
+const EMPTY_LOCATIONS: StockLocation[] = []
+
 export default function StockForm({ editingId, onClose }: StockFormProps) {
-  const { data: stocks = [] } = useStocksQuery()
-  const { data: stockLocations = [] } = useStockLocationsQuery()
+  const { data: stocks = EMPTY_STOCKS } = useStocksQuery()
+  const { data: stockLocations = EMPTY_LOCATIONS } = useStockLocationsQuery()
   const addStock = useAddStock()
   const updateStock = useUpdateStock()
   const addStockLocation = useAddStockLocation()
@@ -52,14 +58,15 @@ export default function StockForm({ editingId, onClose }: StockFormProps) {
         quantity: editingStock.quantity.toString(),
         averagePrice: editingStock.averagePrice.toString(),
       })
-    } else {
-      setFormData(prev => ({
-        ...prev,
-        locationId: stockLocations.find(l => l.id === prev.locationId)
-          ? prev.locationId
-          : stockLocations[0]?.id || '',
-      }))
+      return
     }
+    setFormData(prev => {
+      const next = stockLocations.some(l => l.id === prev.locationId)
+        ? prev.locationId
+        : stockLocations[0]?.id ?? ''
+      if (next === prev.locationId) return prev
+      return { ...prev, locationId: next }
+    })
   }, [editingStock, stockLocations])
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -170,7 +177,7 @@ export default function StockForm({ editingId, onClose }: StockFormProps) {
           </div>
         </div>
 
-        <div className="flex gap-2 justify-end pt-2">
+        <div className="md:flex gap-2 md:justify-end grid grid-cols-2 pt-2">
           <Button type="button" variant="outline" onClick={onClose}>
             Batal
           </Button>

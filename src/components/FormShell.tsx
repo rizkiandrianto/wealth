@@ -8,10 +8,10 @@ import { cn } from '@/lib/utils'
 export type FormTheme = 'blue' | 'purple' | 'yellow' | 'emerald'
 
 const THEMES: Record<FormTheme, string> = {
-  blue: 'border-l-blue-500 bg-blue-50',
-  purple: 'border-l-purple-500 bg-purple-50',
-  yellow: 'border-l-yellow-500 bg-yellow-50',
-  emerald: 'border-l-emerald-500 bg-emerald-50',
+  blue: 'md:border-l-blue-500 md:bg-blue-50',
+  purple: 'md:border-l-purple-500 md:bg-purple-50',
+  yellow: 'md:border-l-yellow-500 md:bg-yellow-50',
+  emerald: 'md:border-l-emerald-500 md:bg-emerald-50',
 }
 
 interface FormShellProps {
@@ -23,7 +23,7 @@ interface FormShellProps {
 
 export default function FormShell({ title, theme, onClose, children }: FormShellProps) {
   return (
-    <Card className={cn('p-6 border-l-4', THEMES[theme])}>
+    <Card className={cn('border-0 md:border p-4 md:p-6 md:border-l-4', THEMES[theme])}>
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-xl font-bold">{title}</h2>
         {onClose && (
@@ -32,7 +32,7 @@ export default function FormShell({ title, theme, onClose, children }: FormShell
             variant="ghost"
             size="sm"
             onClick={onClose}
-            className="h-8 w-8 p-0"
+            className="h-8 w-8 p-0 hidden md:block"
             aria-label="Tutup"
           >
             <X className="w-5 h-5" />

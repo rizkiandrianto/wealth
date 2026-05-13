@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input'
 import { Loader2 } from 'lucide-react'
 import FormShell from '@/components/FormShell'
 import LocationPickerSelect from '@/components/LocationPickerSelect'
+import type { CryptoHolding, CryptoLocation } from '@/lib/types'
 import { useCryptosQuery, useAddCrypto, useUpdateCrypto } from '@/lib/queries/crypto'
 import { useCryptoLocationsQuery, useAddCryptoLocation } from '@/lib/queries/cryptoLocations'
 
@@ -14,9 +15,13 @@ interface CryptoFormProps {
   onClose: () => void
 }
 
+// Stable empty fallbacks — see StockForm for context on the re-render loop.
+const EMPTY_CRYPTOS: CryptoHolding[] = []
+const EMPTY_LOCATIONS: CryptoLocation[] = []
+
 export default function CryptoForm({ editingId, onClose }: CryptoFormProps) {
-  const { data: cryptos = [] } = useCryptosQuery()
-  const { data: cryptoLocations = [] } = useCryptoLocationsQuery()
+  const { data: cryptos = EMPTY_CRYPTOS } = useCryptosQuery()
+  const { data: cryptoLocations = EMPTY_LOCATIONS } = useCryptoLocationsQuery()
   const addCrypto = useAddCrypto()
   const updateCrypto = useUpdateCrypto()
   const addCryptoLocation = useAddCryptoLocation()
@@ -40,14 +45,15 @@ export default function CryptoForm({ editingId, onClose }: CryptoFormProps) {
         quantity: editingCrypto.quantity.toString(),
         averagePrice: editingCrypto.averagePrice.toString(),
       })
-    } else {
-      setFormData(prev => ({
-        ...prev,
-        locationId: cryptoLocations.find(l => l.id === prev.locationId)
-          ? prev.locationId
-          : cryptoLocations[0]?.id || '',
-      }))
+      return
     }
+    setFormData(prev => {
+      const next = cryptoLocations.some(l => l.id === prev.locationId)
+        ? prev.locationId
+        : cryptoLocations[0]?.id ?? ''
+      if (next === prev.locationId) return prev
+      return { ...prev, locationId: next }
+    })
   }, [editingCrypto, cryptoLocations])
 
   const handleSymbolBlur = async () => {
@@ -178,7 +184,7 @@ export default function CryptoForm({ editingId, onClose }: CryptoFormProps) {
           </div>
         </div>
 
-        <div className="flex gap-2 justify-end pt-2">
+        <div className="md:flex gap-2 md:justify-end grid grid-cols-2 pt-2">
           <Button type="button" variant="outline" onClick={onClose}>
             Batal
           </Button>

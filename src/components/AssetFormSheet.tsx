@@ -86,7 +86,7 @@ export default function AssetFormSheet({
       <Drawer open={open} onOpenChange={onOpenChange}>
         <DrawerContent className="max-h-[90vh]">
           <DrawerTitle className="sr-only">{TITLE[type]}</DrawerTitle>
-          <div className="overflow-y-auto px-4 pb-6">{body}</div>
+          <div className="overflow-y-auto md:px-4 md:pb-6">{body}</div>
         </DrawerContent>
       </Drawer>
     )
@@ -96,7 +96,7 @@ export default function AssetFormSheet({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         showCloseButton={false}
-        className="p-0 max-w-lg max-h-[90vh] overflow-y-auto"
+        className="p-0 max-w-lg max-h-[90vh] overflow-y-auto rounded-xl"
       >
         <DialogTitle className="sr-only">{TITLE[type]}</DialogTitle>
         {body}
