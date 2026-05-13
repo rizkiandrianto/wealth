@@ -76,6 +76,13 @@ export default function AccountsList({
     <div>
       <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
         <h2 className="text-2xl font-bold text-foreground">Your Accounts</h2>
+        {hideToolBar && hiddenCount > 0 && (
+          <Link href="/accounts">
+            <Button variant="outline" size="sm">
+              View All
+            </Button>
+          </Link>
+        )}
         {
           !hideToolBar && (
             <div className="flex items-center gap-3">
