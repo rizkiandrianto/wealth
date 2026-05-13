@@ -22,6 +22,13 @@ export const cryptoSalesQueryOptions = () => ({
 
 export type CryptoSalesSummary = { totalRealizedPnL: number; count: number }
 export type CryptosSummary = { totalValue: number; totalCost: number; uniqueCount: number }
+export type CryptoTicker = {
+  symbol: string
+  avgCost: number
+  price: number
+  currency: string
+  changePercentage: number | null
+}
 
 export const cryptoSalesSummaryQueryOptions = () => ({
   queryKey: queryKeys.cryptoSalesSummary,
@@ -34,6 +41,13 @@ export const cryptosSummaryQueryOptions = () => ({
   queryKey: queryKeys.cryptosSummary,
   queryFn: async (): Promise<CryptosSummary> => {
     return apiFetch('/api/crypto/summary')
+  },
+})
+
+export const cryptosTickersQueryOptions = () => ({
+  queryKey: queryKeys.cryptosTickers,
+  queryFn: async (): Promise<CryptoTicker[]> => {
+    return apiFetch('/api/crypto/tickers')
   },
 })
 
@@ -51,6 +65,10 @@ export function useCryptoSalesSummaryQuery() {
 
 export function useCryptosSummaryQuery() {
   return useQuery(cryptosSummaryQueryOptions())
+}
+
+export function useCryptosTickersQuery() {
+  return useQuery(cryptosTickersQueryOptions())
 }
 
 export function useAddCrypto() {

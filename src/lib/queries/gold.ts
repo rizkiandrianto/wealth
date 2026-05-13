@@ -27,6 +27,13 @@ export type GoldsSummary = {
   totalWeight: number
   goldPrice: number
 }
+export type GoldTicker = {
+  totalWeight: number
+  avgCost: number
+  price: number
+  currency: string
+  changePercentage: number | null
+}
 
 export const goldSalesSummaryQueryOptions = () => ({
   queryKey: queryKeys.goldSalesSummary,
@@ -39,6 +46,13 @@ export const goldsSummaryQueryOptions = () => ({
   queryKey: queryKeys.goldsSummary,
   queryFn: async (): Promise<GoldsSummary> => {
     return apiFetch('/api/gold/summary')
+  },
+})
+
+export const goldsTickerQueryOptions = () => ({
+  queryKey: queryKeys.goldsTicker,
+  queryFn: async (): Promise<GoldTicker | null> => {
+    return apiFetch('/api/gold/tickers')
   },
 })
 
@@ -56,6 +70,10 @@ export function useGoldSalesSummaryQuery() {
 
 export function useGoldsSummaryQuery() {
   return useQuery(goldsSummaryQueryOptions())
+}
+
+export function useGoldsTickerQuery() {
+  return useQuery(goldsTickerQueryOptions())
 }
 
 export function useAddGold() {

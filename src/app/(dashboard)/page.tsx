@@ -3,16 +3,15 @@
 // Required APIs:
 //   GET /api/accounts
 //   GET /api/transactions?limit=5
-//   GET /api/stocks                (PriceTicker)
 //   GET /api/stocks/summary        (Portfolio + Stocks card)
+//   GET /api/stocks/tickers        (PriceTicker)
 //   GET /api/stocks/sales/summary  (RealizedPnLCard)
-//   GET /api/crypto                (PriceTicker)
 //   GET /api/crypto/summary        (Portfolio + Crypto card)
+//   GET /api/crypto/tickers        (PriceTicker)
 //   GET /api/crypto/sales/summary  (RealizedPnLCard)
-//   GET /api/gold                  (PriceTicker)
 //   GET /api/gold/summary          (Portfolio + Gold card)
+//   GET /api/gold/tickers          (PriceTicker)
 //   GET /api/gold/sales/summary    (RealizedPnLCard)
-//   GET /api/market/prices         (PriceTicker)
 
 import { useEffect } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
@@ -26,21 +25,20 @@ import RealizedPnLCard from '@/components/dashboard/RealizedPnLCard'
 import { accountsQueryOptions } from '@/lib/queries/accounts'
 import { transactionsQueryOptions, useTransactionsQuery } from '@/lib/queries/transactions'
 import {
-  stocksQueryOptions,
   stocksSummaryQueryOptions,
+  stocksTickersQueryOptions,
   stockSalesSummaryQueryOptions,
 } from '@/lib/queries/stocks'
 import {
-  cryptosQueryOptions,
   cryptosSummaryQueryOptions,
+  cryptosTickersQueryOptions,
   cryptoSalesSummaryQueryOptions,
 } from '@/lib/queries/crypto'
 import {
-  goldsQueryOptions,
   goldsSummaryQueryOptions,
+  goldsTickerQueryOptions,
   goldSalesSummaryQueryOptions,
 } from '@/lib/queries/gold'
-import { assetPricesQueryOptions } from '@/lib/queries/prices'
 import { Skeleton } from '@/components/ui/skeleton'
 
 const RECENT_TX_LIMIT = 5
@@ -50,16 +48,15 @@ export default function Home() {
   useEffect(() => {
     qc.prefetchQuery(accountsQueryOptions())
     qc.prefetchQuery(transactionsQueryOptions({ limit: RECENT_TX_LIMIT }))
-    qc.prefetchQuery(stocksQueryOptions())
     qc.prefetchQuery(stocksSummaryQueryOptions())
+    qc.prefetchQuery(stocksTickersQueryOptions())
     qc.prefetchQuery(stockSalesSummaryQueryOptions())
-    qc.prefetchQuery(cryptosQueryOptions())
     qc.prefetchQuery(cryptosSummaryQueryOptions())
+    qc.prefetchQuery(cryptosTickersQueryOptions())
     qc.prefetchQuery(cryptoSalesSummaryQueryOptions())
-    qc.prefetchQuery(goldsQueryOptions())
     qc.prefetchQuery(goldsSummaryQueryOptions())
+    qc.prefetchQuery(goldsTickerQueryOptions())
     qc.prefetchQuery(goldSalesSummaryQueryOptions())
-    qc.prefetchQuery(assetPricesQueryOptions())
   }, [qc])
 
   const { data: transactions = [], isLoading: txLoading } = useTransactionsQuery({

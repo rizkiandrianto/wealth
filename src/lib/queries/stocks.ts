@@ -22,6 +22,14 @@ export const stockSalesQueryOptions = () => ({
 
 export type SalesSummary = { totalRealizedPnL: number; count: number }
 export type HoldingsSummary = { totalValue: number; totalCost: number; uniqueCount: number }
+export type StockTicker = {
+  ticker: string
+  market: 'IDX' | 'US'
+  avgCost: number
+  price: number
+  currency: string
+  changePercentage: number | null
+}
 
 export const stockSalesSummaryQueryOptions = () => ({
   queryKey: queryKeys.stockSalesSummary,
@@ -34,6 +42,13 @@ export const stocksSummaryQueryOptions = () => ({
   queryKey: queryKeys.stocksSummary,
   queryFn: async (): Promise<HoldingsSummary> => {
     return apiFetch('/api/stocks/summary')
+  },
+})
+
+export const stocksTickersQueryOptions = () => ({
+  queryKey: queryKeys.stocksTickers,
+  queryFn: async (): Promise<StockTicker[]> => {
+    return apiFetch('/api/stocks/tickers')
   },
 })
 
@@ -51,6 +66,10 @@ export function useStockSalesSummaryQuery() {
 
 export function useStocksSummaryQuery() {
   return useQuery(stocksSummaryQueryOptions())
+}
+
+export function useStocksTickersQuery() {
+  return useQuery(stocksTickersQueryOptions())
 }
 
 export function useAddStock() {
