@@ -4,16 +4,29 @@ import { toTransaction, Row } from '@/lib/normalizers'
 import { Transaction } from '@/lib/types'
 import { queryKeys } from './keys'
 
-export const transactionsQueryOptions = () => ({
-  queryKey: queryKeys.transactions,
-  queryFn: async (): Promise<Transaction[]> => {
-    const rows: Row[] = await apiFetch('/api/transactions')
-    return rows.map(toTransaction)
-  },
-})
+export type TransactionsQueryParams = {
+  limit?: number
+  accountId?: string
+}
 
-export function useTransactionsQuery() {
-  return useQuery(transactionsQueryOptions())
+export const transactionsQueryOptions = (params: TransactionsQueryParams = {}) => {
+  const search = new URLSearchParams()
+  if (params.limit !== undefined) search.set('limit', String(params.limit))
+  if (params.accountId) search.set('accountId', params.accountId)
+  const qs = search.toString()
+  const url = qs ? `/api/transactions?${qs}` : '/api/transactions'
+
+  return {
+    queryKey: [...queryKeys.transactions, params] as const,
+    queryFn: async (): Promise<Transaction[]> => {
+      const rows: Row[] = await apiFetch(url)
+      return rows.map(toTransaction)
+    },
+  }
+}
+
+export function useTransactionsQuery(params: TransactionsQueryParams = {}) {
+  return useQuery(transactionsQueryOptions(params))
 }
 
 export function useAddTransaction() {

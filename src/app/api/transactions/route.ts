@@ -1,20 +1,38 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { db } from '@/db'
-import { desc, eq, sql } from 'drizzle-orm'
+import { and, desc, eq, or, sql } from 'drizzle-orm'
 import { transactions, wealthAccounts } from '@/db/schema'
 import { appDateStr, recomputeSnapshotsForward } from '@/lib/snapshot'
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   const session = await auth()
   const userId = session?.user?.id
   if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const rows = await db
+  const { searchParams } = new URL(req.url)
+  const limitParam = searchParams.get('limit')
+  const accountId = searchParams.get('accountId')
+
+  const limit = limitParam ? Number.parseInt(limitParam, 10) : undefined
+  if (limitParam && (!Number.isFinite(limit) || limit! <= 0)) {
+    return NextResponse.json({ error: 'Invalid limit' }, { status: 400 })
+  }
+
+  const conditions = [eq(transactions.userId, userId)]
+  if (accountId) {
+    conditions.push(
+      or(eq(transactions.fromAccountId, accountId), eq(transactions.toAccountId, accountId))!
+    )
+  }
+
+  const base = db
     .select()
     .from(transactions)
-    .where(eq(transactions.userId, userId))
+    .where(and(...conditions))
     .orderBy(desc(transactions.date), desc(transactions.createdAt))
+
+  const rows = await (limit ? base.limit(limit) : base)
   return NextResponse.json(rows)
 }
 

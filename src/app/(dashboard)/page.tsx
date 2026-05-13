@@ -2,7 +2,7 @@
 
 // Required APIs:
 //   GET /api/accounts
-//   GET /api/transactions
+//   GET /api/transactions?limit=5
 //   GET /api/stocks
 //   GET /api/stocks/sales
 //   GET /api/crypto
@@ -28,11 +28,13 @@ import { goldsQueryOptions, goldSalesQueryOptions } from '@/lib/queries/gold'
 import { assetPricesQueryOptions } from '@/lib/queries/prices'
 import { Skeleton } from '@/components/ui/skeleton'
 
+const RECENT_TX_LIMIT = 5
+
 export default function Home() {
   const qc = useQueryClient()
   useEffect(() => {
     qc.prefetchQuery(accountsQueryOptions())
-    qc.prefetchQuery(transactionsQueryOptions())
+    qc.prefetchQuery(transactionsQueryOptions({ limit: RECENT_TX_LIMIT }))
     qc.prefetchQuery(stocksQueryOptions())
     qc.prefetchQuery(stockSalesQueryOptions())
     qc.prefetchQuery(cryptosQueryOptions())
@@ -42,7 +44,9 @@ export default function Home() {
     qc.prefetchQuery(assetPricesQueryOptions())
   }, [qc])
 
-  const { data: transactions = [], isLoading: txLoading } = useTransactionsQuery()
+  const { data: transactions = [], isLoading: txLoading } = useTransactionsQuery({
+    limit: RECENT_TX_LIMIT,
+  })
 
   return (
     <DashboardLayout>
@@ -64,7 +68,7 @@ export default function Home() {
             <Skeleton className="h-16 w-full" />
           </div>
         ) : (
-          <RecentTransactions transactions={transactions.slice(0, 5)} />
+          <RecentTransactions transactions={transactions} />
         )}
       </div>
 
