@@ -18,6 +18,7 @@ import DashboardSummary from '@/components/DashboardSummary'
 import AccountsList from '@/components/AccountsList'
 import RecentTransactions from '@/components/RecentTransactions'
 import QuickAddFab from '@/components/QuickAddFab'
+import PriceTicker from '@/components/PriceTicker'
 import RealizedPnLCard from '@/components/dashboard/RealizedPnLCard'
 import { accountsQueryOptions } from '@/lib/queries/accounts'
 import { transactionsQueryOptions, useTransactionsQuery } from '@/lib/queries/transactions'
@@ -45,6 +46,10 @@ export default function Home() {
 
   return (
     <DashboardLayout>
+      <div className="-mx-4 sm:-mx-6 lg:-mx-8 -mt-4 sm:-mt-6 lg:-mt-8 mb-6">
+        <PriceTicker />
+      </div>
+
       <div className="space-y-6">
         <DashboardSummary />
 
