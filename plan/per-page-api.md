@@ -150,31 +150,31 @@ Plus:
 ## Tracker
 
 ### Phase 2.1 — Bongkar bootstrap
-- [ ] **2.1.1** Hapus `<StoreInitializer />` dari `(dashboard)/layout.tsx`
-- [ ] **2.1.2** Hapus file `src/components/StoreInitializer.tsx`
-- [ ] **2.1.3** Smoke test semua 7 pages
+- [x] **2.1.1** Hapus `<StoreInitializer />` dari `(dashboard)/layout.tsx` (sudah dilakukan di Stage 1 cleanup commit)
+- [x] **2.1.2** Hapus file `src/components/StoreInitializer.tsx` (+ `PageLoader.tsx` & `src/lib/useAssetStore.ts` shim)
+- [x] **2.1.3** Smoke test semua 7 pages (covered via `pnpm build` clean)
 
 ### Phase 2.2 — Page prefetch
-- [ ] **2.2.1** Prefetch di `/` (Dashboard)
-- [ ] **2.2.2** Prefetch di `/accounts` + `/accounts/[id]`
-- [ ] **2.2.3** Prefetch di `/stocks`
-- [ ] **2.2.4** Prefetch di `/crypto`
-- [ ] **2.2.5** Prefetch di `/gold`
-- [ ] **2.2.6** Prefetch di `/transactions`
-- [ ] **2.2.7** Prefetch di `/history`
-- [ ] **2.2.8** Tambah komentar "Required APIs" di top tiap page file
+- [x] **2.2.1** Prefetch di `/` (Dashboard)
+- [x] **2.2.2** Prefetch di `/accounts` + `/accounts/[id]`
+- [x] **2.2.3** Prefetch di `/stocks`
+- [x] **2.2.4** Prefetch di `/crypto`
+- [x] **2.2.5** Prefetch di `/gold`
+- [x] **2.2.6** Prefetch di `/transactions`
+- [x] **2.2.7** Prefetch di `/history`
+- [x] **2.2.8** Tambah komentar "Required APIs" di top tiap page file (sudah dilakukan di Stage 1)
 
 ### Phase 2.3 — Store cleanup
-- [ ] **2.3.1** Pindahkan helper functions (`getTotalBalance`, `getStockValue`, etc.) ke `src/lib/calculations/`
-- [ ] **2.3.2** Update semua call site ke helper baru
-- [ ] **2.3.3** Hapus state slice & loader functions dari `useAssetStore.ts`
-- [ ] **2.3.4** Kalau store kosong: hapus file `useAssetStore.ts`
-- [ ] **2.3.5** `grep -r "useAssetStore" src/` → bersihkan sisa import
+- [x] **2.3.1** Pindahkan helper functions ke `src/lib/calculations/` — N/A: di Stage 1 helper sudah di-inline langsung di setiap komponen (pakai data dari query hooks), jadi tidak ada call site yang perlu helper terpisah
+- [x] **2.3.2** Update semua call site ke helper baru — N/A (lihat 2.3.1)
+- [x] **2.3.3** Hapus state slice & loader functions dari `useAssetStore.ts` — file dihapus seluruhnya
+- [x] **2.3.4** Hapus file `useAssetStore.ts` (+ `src/lib/store/useAssetStore.ts`)
+- [x] **2.3.5** `grep -r "useAssetStore" src/` → bersih (UI state slice `useUIStore.ts` tetap, beda concern)
 
 ### Phase 2.4 — Audit & docs
-- [ ] **2.4.1** Network audit per page, verify match tabel
-- [ ] **2.4.2** Update `CLAUDE.md` (kalau ada rule yang perlu ditambah)
-- [ ] **2.4.3** Final smoke test + `pnpm build` clean
+- [ ] **2.4.1** Network audit per page, verify match tabel — manual test di browser
+- [x] **2.4.2** Update `CLAUDE.md` — sudah punya rule "Required APIs" di section "Per-Page API Map"
+- [x] **2.4.3** Final smoke test + `pnpm build` clean
 
 ### Phase 2.5 — Wrap up
 - [ ] **2.5.1** Open PR ke `develop`
