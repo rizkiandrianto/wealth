@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { CryptoHolding } from '@/lib/types'
 import { useFormatCurrency } from '@/lib/format'
-import { useAssetStore } from '@/lib/useAssetStore'
+import { useAssetPricesQuery } from '@/lib/queries/prices'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card } from '@/components/ui/card'
@@ -16,7 +16,7 @@ interface CryptoSellDialogProps {
 }
 
 export default function CryptoSellDialog({ crypto, onSell, onClose }: CryptoSellDialogProps) {
-  const { assetPrices } = useAssetStore()
+  const { data: assetPrices = [] } = useAssetPricesQuery()
   const formatCurrency = useFormatCurrency()
   const currentPrice = assetPrices.find((p) => p.ticker === crypto.symbol)?.price ?? 0
   const [quantity, setQuantity] = useState('')
@@ -24,10 +24,10 @@ export default function CryptoSellDialog({ crypto, onSell, onClose }: CryptoSell
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     const qty = parseFloat(quantity)
     const price = parseFloat(salePrice)
-    
+
     if (!qty || qty <= 0 || qty > crypto.quantity || !price || price <= 0) {
       alert('Invalid quantity or price')
       return

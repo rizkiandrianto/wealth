@@ -1,26 +1,29 @@
 'use client'
 
+// Required APIs:
+//   GET    /api/crypto
+//   GET    /api/crypto-locations
+//   GET    /api/market/prices
+//   (POST/PATCH/DELETE /api/crypto/* via CryptoForm / dialogs)
+
 import { useState } from 'react'
 import { Plus } from 'lucide-react'
 import DashboardLayout from '@/components/DashboardLayout'
-import PageLoader from '@/components/PageLoader'
 import { Button } from '@/components/ui/button'
+import { Skeleton } from '@/components/ui/skeleton'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import AssetFormSheet from '@/components/AssetFormSheet'
 import CryptosList from '@/components/CryptosList'
 import CryptosByLocation from '@/components/CryptosByLocation'
 import CryptosSummary from '@/components/CryptosSummary'
-import { useAssetStore } from '@/lib/useAssetStore'
+import { useCryptosQuery } from '@/lib/queries/crypto'
+import { useCryptoLocationsQuery } from '@/lib/queries/cryptoLocations'
 
 export default function CryptoPage() {
-  const { cryptos, cryptoLocations } = useAssetStore()
-  const hasHydrated = useAssetStore((s) => s.hasHydrated)
+  const { data: cryptos = [], isLoading: cryptosLoading } = useCryptosQuery()
+  const { data: cryptoLocations = [] } = useCryptoLocationsQuery()
   const [showForm, setShowForm] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
-
-  if (!hasHydrated) {
-    return <PageLoader />
-  }
 
   return (
     <DashboardLayout>
@@ -54,53 +57,70 @@ export default function CryptoPage() {
           editingId={editingId}
         />
 
-        {cryptos.length > 0 && <CryptosSummary />}
+        {cryptosLoading ? (
+          <>
+            <div className="grid gap-4 md:grid-cols-3">
+              <Skeleton className="h-28 rounded-xl" />
+              <Skeleton className="h-28 rounded-xl" />
+              <Skeleton className="h-28 rounded-xl" />
+            </div>
+            <Skeleton className="h-12 w-full rounded-md" />
+            <div className="space-y-3">
+              <Skeleton className="h-20 w-full rounded-lg" />
+              <Skeleton className="h-20 w-full rounded-lg" />
+            </div>
+          </>
+        ) : (
+          <>
+            {cryptos.length > 0 && <CryptosSummary />}
 
-        {cryptos.length > 0 && (
-          <Tabs defaultValue="by-symbol" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="by-symbol">Berdasarkan Symbol</TabsTrigger>
-              <TabsTrigger value="by-location">Berdasarkan Lokasi</TabsTrigger>
-            </TabsList>
+            {cryptos.length > 0 && (
+              <Tabs defaultValue="by-symbol" className="w-full">
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="by-symbol">Berdasarkan Symbol</TabsTrigger>
+                  <TabsTrigger value="by-location">Berdasarkan Lokasi</TabsTrigger>
+                </TabsList>
 
-            <TabsContent value="by-symbol" className="space-y-4">
-              <CryptosList
-                cryptos={cryptos}
-                onEdit={(id) => {
-                  setEditingId(id)
-                  setShowForm(true)
-                }}
-              />
-            </TabsContent>
+                <TabsContent value="by-symbol" className="space-y-4">
+                  <CryptosList
+                    cryptos={cryptos}
+                    onEdit={(id) => {
+                      setEditingId(id)
+                      setShowForm(true)
+                    }}
+                  />
+                </TabsContent>
 
-            <TabsContent value="by-location" className="space-y-4">
-              <CryptosByLocation
-                cryptos={cryptos}
-                locations={cryptoLocations}
-                onEdit={(id) => {
-                  setEditingId(id)
-                  setShowForm(true)
-                }}
-              />
-            </TabsContent>
-          </Tabs>
-        )}
+                <TabsContent value="by-location" className="space-y-4">
+                  <CryptosByLocation
+                    cryptos={cryptos}
+                    locations={cryptoLocations}
+                    onEdit={(id) => {
+                      setEditingId(id)
+                      setShowForm(true)
+                    }}
+                  />
+                </TabsContent>
+              </Tabs>
+            )}
 
-        {cryptos.length === 0 && (
-          <div className="text-center py-12 border border-dashed rounded-lg">
-            <p className="text-muted-foreground mb-4">Belum ada crypto</p>
-            <Button
-              onClick={() => {
-                setEditingId(null)
-                setShowForm(true)
-              }}
-              variant="outline"
-              className="gap-2"
-            >
-              <Plus className="w-4 h-4" />
-              Tambah Crypto Pertama
-            </Button>
-          </div>
+            {cryptos.length === 0 && (
+              <div className="text-center py-12 border border-dashed rounded-lg">
+                <p className="text-muted-foreground mb-4">Belum ada crypto</p>
+                <Button
+                  onClick={() => {
+                    setEditingId(null)
+                    setShowForm(true)
+                  }}
+                  variant="outline"
+                  className="gap-2"
+                >
+                  <Plus className="w-4 h-4" />
+                  Tambah Crypto Pertama
+                </Button>
+              </div>
+            )}
+          </>
         )}
       </div>
     </DashboardLayout>

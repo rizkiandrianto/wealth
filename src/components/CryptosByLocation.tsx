@@ -3,7 +3,8 @@
 import { useState } from 'react'
 import { CryptoHolding, CryptoLocation } from '@/lib/types'
 import { useFormatCurrency } from '@/lib/format'
-import { useAssetStore } from '@/lib/useAssetStore'
+import { useDeleteCrypto, useSellCrypto, useSellCryptoBatch } from '@/lib/queries/crypto'
+import { useAssetPricesQuery } from '@/lib/queries/prices'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import {
@@ -23,7 +24,10 @@ interface CryptosByLocationProps {
 }
 
 export default function CryptosByLocation({ cryptos, locations, onEdit }: CryptosByLocationProps) {
-  const { deleteCrypto, sellCrypto, sellCryptoBatch, assetPrices } = useAssetStore()
+  const { data: assetPrices = [] } = useAssetPricesQuery()
+  const deleteCrypto = useDeleteCrypto()
+  const sellCrypto = useSellCrypto()
+  const sellCryptoBatch = useSellCryptoBatch()
   const formatCurrency = useFormatCurrency()
   const getPrice = (symbol: string) =>
     assetPrices.find((p) => p.ticker === symbol)?.price ?? 0
@@ -166,7 +170,7 @@ export default function CryptosByLocation({ cryptos, locations, onEdit }: Crypto
                                       variant="ghost"
                                       onClick={() => {
                                         if (confirm('Delete this crypto holding?')) {
-                                          deleteCrypto(lot.id)
+                                          deleteCrypto.mutate(lot.id)
                                         }
                                       }}
                                       className="h-6 w-6 p-0 text-red-600 hover:text-red-700"
@@ -205,7 +209,7 @@ export default function CryptosByLocation({ cryptos, locations, onEdit }: Crypto
                                   size="sm"
                                   onClick={() => {
                                     if (confirm('Delete this crypto holding?')) {
-                                      deleteCrypto(lots[0].id)
+                                      deleteCrypto.mutate(lots[0].id)
                                     }
                                   }}
                                   className="gap-2 text-red-600 hover:text-red-700 hover:bg-red-50"
@@ -240,7 +244,7 @@ export default function CryptosByLocation({ cryptos, locations, onEdit }: Crypto
         <CryptoSellDialog
           crypto={sellingCrypto}
           onSell={(quantity, salePrice) => {
-            sellCrypto(sellingCrypto.id, quantity, salePrice)
+            sellCrypto.mutate({ cryptoId: sellingCrypto.id, quantity, salePrice })
             setSellingCryptoId(null)
           }}
           onClose={() => setSellingCryptoId(null)}
@@ -254,7 +258,7 @@ export default function CryptosByLocation({ cryptos, locations, onEdit }: Crypto
           locationName={sellingLocationName}
           lots={sellingLocationLots}
           onSell={({ quantity, salePrice }) => {
-            sellCryptoBatch({
+            sellCryptoBatch.mutate({
               symbol: sellingLocation.symbol,
               locationId: sellingLocation.locationId,
               quantity,
