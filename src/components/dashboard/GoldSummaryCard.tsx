@@ -27,11 +27,11 @@ export default function GoldSummaryCard() {
   const isPositive = profit >= 0
 
   return (
-    <Card className="p-6 border-l-4 border-l-yellow-500 bg-gradient-to-r from-yellow-50 to-transparent">
+    <Card className="p-6 border-l-4 border-l-yellow-500 bg-linear-to-br from-yellow-50 to-transparent">
       <div className="flex items-start justify-between">
         <div>
           <h3 className="text-lg font-semibold flex items-center gap-2">Portfolio Emas</h3>
-          <p className="text-sm text-muted-foreground mt-1">
+          <p className="text-sm text-muted-foreground mt-1 font-bold">
             {totalWeight.toFixed(2)} g
             {totalWeight > 0 && ` · avg ${formatCurrency(totalCost / totalWeight)}/g`}
           </p>

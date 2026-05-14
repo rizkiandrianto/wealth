@@ -66,14 +66,14 @@ export default function PortfolioTotalCard() {
   const isTotalPositive = totalInvestedProfit >= 0
 
   return (
-    <Card className="p-6 bg-linear-to-br from-emerald-50 to-emerald-100 border-emerald-200">
+    <Card className="p-6 bg-linear-to-br from-transparent to-emerald-100 border-emerald-200">
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-sm font-medium text-muted-foreground mb-2 flex items-center gap-1.5">
+          <p className="text-sm text-muted-foreground mb-2 flex items-center gap-1.5 font-bold">
             Total Portfolio
           </p>
           <p className="text-3xl font-bold text-foreground">{formatCurrency(totalPortfolio)}</p>
-          <div className="mt-3 text-sm text-muted-foreground space-y-1.5">
+          <div className="mt-3 text-sm text-muted-foreground space-y-1.5 font-bold">
             <button
               type="button"
               onClick={() => togglePortfolioExclusion('cash')}
