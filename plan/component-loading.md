@@ -190,7 +190,7 @@ Gunakan `Skeleton` dari `src/components/ui/skeleton.tsx` (shadcn, sudah ada). In
 - [x] **1.4.2** Final smoke test + `pnpm build` clean
 
 ### Phase 1.5 — Wrap up
-- [ ] **1.5.1** Open PR ke `develop`
-- [ ] **1.5.2** Test pass → merge → proceed ke Stage 2
+- [x] **1.5.1** Open PR ke `develop`
+- [x] **1.5.2** Test pass → merge → proceed ke Stage 2
 
 Setiap item di tracker = 1 commit + stop & test sebelum lanjut.

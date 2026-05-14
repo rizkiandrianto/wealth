@@ -128,13 +128,13 @@ Mirror `src/app/api/account-snapshots/route.ts`. Session auth, return rows untuk
 
 ## Tracker
 
-- [ ] **Phase PS.1** — Add `portfolioValueSnapshots` ke `src/db/schema.ts`
-- [ ] **Phase PS.2** — Generate migration (`pnpm db:generate`), review SQL
-- [ ] **Phase PS.3** — Run migration di dev DB (`pnpm db:migrate`)
-- [ ] **Phase PS.4** — Create `src/lib/portfolioSnapshot.ts` (computePortfolioForUser + upsertPortfolioSnapshot)
-- [ ] **Phase PS.5** — Wire trigger di `src/app/api/market/prices/update/route.ts`
-- [ ] **Phase PS.6** — Create `src/app/api/portfolio-snapshots/route.ts` (GET endpoint)
-- [ ] **Phase PS.7** — E2E test: trigger price update, verify DB rows, verify upsert behavior, verify timezone
-- [ ] **Phase PS.8** — Open PR ke `develop`
+- [x] **Phase PS.1** — Add `portfolioValueSnapshots` ke `src/db/schema.ts`
+- [x] **Phase PS.2** — Generate migration (`pnpm db:generate`), review SQL
+- [x] **Phase PS.3** — Run migration di dev DB (`pnpm db:migrate`)
+- [x] **Phase PS.4** — Create `src/lib/portfolioSnapshot.ts` (computePortfolioForUser + upsertPortfolioSnapshot)
+- [x] **Phase PS.5** — Wire trigger di `src/app/api/market/prices/update/route.ts`
+- [x] **Phase PS.6** — Create `src/app/api/portfolio-snapshots/route.ts` (GET endpoint)
+- [x] **Phase PS.7** — E2E test: trigger price update, verify DB rows, verify upsert behavior, verify timezone
+- [x] **Phase PS.8** — Open PR ke `develop`
 
 Each sub-step = 1 commit + user testing gate. AI berhenti dan tawarkan commit setelah tiap phase.

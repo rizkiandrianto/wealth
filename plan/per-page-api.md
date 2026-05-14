@@ -172,12 +172,12 @@ Plus:
 - [x] **2.3.5** `grep -r "useAssetStore" src/` → bersih (UI state slice `useUIStore.ts` tetap, beda concern)
 
 ### Phase 2.4 — Audit & docs
-- [ ] **2.4.1** Network audit per page, verify match tabel — manual test di browser
+- [x] **2.4.1** Network audit per page, verify match tabel — manual test di browser
 - [x] **2.4.2** Update `CLAUDE.md` — sudah punya rule "Required APIs" di section "Per-Page API Map"
 - [x] **2.4.3** Final smoke test + `pnpm build` clean
 
 ### Phase 2.5 — Wrap up
-- [ ] **2.5.1** Open PR ke `develop`
-- [ ] **2.5.2** Test pass → merge
+- [x] **2.5.1** Open PR ke `develop`
+- [x] **2.5.2** Test pass → merge
 
 Setiap item = 1 commit + stop & test sebelum lanjut.
