@@ -9,23 +9,12 @@ import { Label } from '@/components/ui/label'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useFormatCurrency } from '@/lib/format'
 import { useAccountsQuery } from '@/lib/queries/accounts'
-import { Banknote, PiggyBank, Wallet, ChevronRight, Plus } from 'lucide-react'
+import { Wallet, ChevronRight, Plus } from 'lucide-react'
+import { ACCOUNT_TYPE_ICONS, ACCOUNT_TYPE_COLORS } from '@/lib/accountTypeMeta'
 
 interface AccountsListProps {
   defaultHideZeroBalance?: boolean;
   hideToolBar?: boolean;
-}
-
-const ACCOUNT_TYPE_ICONS = {
-  bank: Banknote,
-  deposit: PiggyBank,
-  cash: Wallet,
-}
-
-const ACCOUNT_TYPE_COLORS = {
-  bank: 'from-blue-50 to-blue-100 border-blue-200 dark:from-blue-950/40 dark:to-blue-900/20 dark:border-blue-900/70',
-  deposit: 'from-green-50 to-green-100 border-green-200 dark:from-green-950/40 dark:to-green-900/20 dark:border-green-900/70',
-  cash: 'from-yellow-50 to-yellow-100 border-yellow-200 dark:from-yellow-950/40 dark:to-yellow-900/20 dark:border-yellow-900/70',
 }
 
 export default function AccountsList({

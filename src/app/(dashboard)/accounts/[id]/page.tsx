@@ -12,8 +12,6 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   ArrowLeft,
-  Banknote,
-  PiggyBank,
   Wallet,
   Pencil,
   Trash2,
@@ -28,6 +26,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 import ConfirmDialog from "@/components/ConfirmDialog";
 import { Account, AccountType, Transaction } from "@/lib/types";
 import {
+  ACCOUNT_TYPE_ICONS,
+  ACCOUNT_TYPE_COLORS,
+} from "@/lib/accountTypeMeta";
+import {
   accountsQueryOptions,
   useAccountsQuery,
   useUpdateAccount,
@@ -37,18 +39,6 @@ import {
   transactionsQueryOptions,
   useTransactionsQuery,
 } from "@/lib/queries/transactions";
-
-const ACCOUNT_TYPE_ICONS = {
-  bank: Banknote,
-  deposit: PiggyBank,
-  cash: Wallet,
-};
-
-const ACCOUNT_TYPE_COLORS = {
-  bank: "from-blue-50 to-blue-100 border-blue-200",
-  deposit: "from-green-50 to-green-100 border-green-200",
-  cash: "from-yellow-50 to-yellow-100 border-yellow-200",
-};
 
 function TransactionListWrapper(
   transactions: Transaction[],

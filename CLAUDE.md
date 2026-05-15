@@ -47,6 +47,13 @@ Tujuan: hindari regression ke pola monolithic `fetchAll()`. Tracking eksplisit e
 - **Derived/computed values** → pure functions di `src/lib/calculations/`, terima data sebagai argument (bukan ambil dari store).
 - **Mutation** → TanStack `useMutation` + invalidate query keys yang terdampak. Lihat invalidation matrix di `plan/component-loading.md`.
 
+## Shared Constants & Types Convention
+
+- Kalau satu constant/lookup table/type literal dipakai di **>1 file** (komponen, page, atau lib), **wajib extract** ke modul shared — jangan copy-paste.
+- Lokasi default: `src/lib/<domain>Meta.ts` (atau `src/lib/<domain>.ts`) untuk lookup tables yang terikat ke domain type. Type literal yang reusable masuk `src/lib/types.ts`.
+- Contoh: `ACCOUNT_TYPE_ICONS` / `ACCOUNT_TYPE_COLORS` → `src/lib/accountTypeMeta.ts`, di-type sebagai `Record<AccountType, …>` supaya ke-cover semua varian `AccountType` saat ada penambahan.
+- Sebelum nulis constant baru di komponen, **grep dulu** apakah sudah ada di codebase. Kalau ada drift (misal warna beda antar file), pilih versi paling lengkap (mis. yang sudah dark-mode aware) sebagai canonical.
+
 ## Workflow Convention
 
 - Setiap plan = branch sendiri (`feat/<plan-name>`). Cut dari `develop`.

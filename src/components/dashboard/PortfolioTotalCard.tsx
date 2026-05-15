@@ -82,7 +82,7 @@ export default function PortfolioTotalCard() {
                 isExcluded('cash') ? 'line-through opacity-50' : ''
               }`}
             >
-              <span className="w-2 h-2 rounded-full bg-blue-500 shrink-0" />
+              <span className="w-2 h-2 rounded-full bg-purple-500 shrink-0" />
               <span>Cash: {formatCurrency(totalBalance)}</span>
             </button>
             {totalStockValue > 0 && (
@@ -94,7 +94,7 @@ export default function PortfolioTotalCard() {
                   isExcluded('stock') ? 'line-through opacity-50' : ''
                 }`}
               >
-                <span className="w-2 h-2 rounded-full bg-purple-500 shrink-0" />
+                <span className="w-2 h-2 rounded-full bg-blue-500 shrink-0" />
                 <span>Saham: {formatCurrency(totalStockValue)}</span>
               </button>
             )}
@@ -146,7 +146,7 @@ export default function PortfolioTotalCard() {
             onClick={toggleHideValues}
             aria-label={hideValues ? 'Show values' : 'Hide values'}
             title={hideValues ? 'Show values' : 'Hide values'}
-            className="w-12 h-12 rounded-lg bg-blue-500 hover:bg-blue-600 dark:bg-emerald-700 dark:hover:bg-emerald-600 flex items-center justify-center transition-colors"
+            className="w-12 h-12 rounded-lg bg-emerald-700 hover:bg-emerald-600 flex items-center justify-center transition-colors"
           >
             {hideValues ? (
               <EyeOff className="w-6 h-6 text-white" />

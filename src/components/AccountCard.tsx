@@ -4,27 +4,16 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { Account } from '@/lib/types'
 import { useFormatCurrency } from '@/lib/format'
-import { Banknote, PiggyBank, Wallet, Trash2 } from 'lucide-react'
+import { Trash2 } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import ConfirmDialog from '@/components/ConfirmDialog'
+import { ACCOUNT_TYPE_ICONS, ACCOUNT_TYPE_COLORS } from '@/lib/accountTypeMeta'
 
 interface AccountCardProps {
   account: Account
   balance: number
   onDelete: (id: string) => void | Promise<void>
-}
-
-const ACCOUNT_TYPE_ICONS = {
-  bank: Banknote,
-  deposit: PiggyBank,
-  cash: Wallet,
-}
-
-const ACCOUNT_TYPE_COLORS = {
-  bank: 'from-blue-50 to-blue-100 border-blue-200 dark:from-blue-950/40 dark:to-blue-900/20 dark:border-blue-900/70',
-  deposit: 'from-green-50 to-green-100 border-green-200 dark:from-green-950/40 dark:to-green-900/20 dark:border-green-900/70',
-  cash: 'from-yellow-50 to-yellow-100 border-yellow-200 dark:from-yellow-950/40 dark:to-yellow-900/20 dark:border-yellow-900/70',
 }
 
 export default function AccountCard({
@@ -57,7 +46,7 @@ export default function AccountCard({
 
   return (
     <>
-      <Card className={`p-0 bg-gradient-to-br ${colorClass} relative overflow-hidden group hover:shadow-md transition-shadow`}>
+      <Card className={`p-0 bg-linear-to-br ${colorClass} relative overflow-hidden group hover:shadow-md transition-shadow`}>
         <Link href={`/accounts/${account.id}`} className="block p-6">
           <div className="flex items-start justify-between">
             <div className="flex-1">
