@@ -83,8 +83,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
             <Link href="/" className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
-                <Wallet className="w-5 h-5 text-white" />
+              <div className="w-8 h-8 rounded-lg p-1 bg-white flex items-center justify-center overflow-hidden">
+                <img src="/mywealth.png" alt="app-logo" className='rounded-lg' />
               </div>
               <h1 className="text-xl font-bold text-foreground">Wealth</h1>
             </Link>
