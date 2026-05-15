@@ -85,7 +85,7 @@ export default function StocksPage() {
 
             {stocks.length > 0 && (
               <Tabs defaultValue="by-ticker" className="w-full">
-                <TabsList className="grid w-full grid-cols-2">
+                <TabsList className="grid grid-cols-2 mb-6">
                   <TabsTrigger value="by-ticker">Berdasarkan Ticker</TabsTrigger>
                   <TabsTrigger value="by-location">Berdasarkan Lokasi</TabsTrigger>
                 </TabsList>

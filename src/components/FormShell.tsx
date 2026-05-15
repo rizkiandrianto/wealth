@@ -8,10 +8,10 @@ import { cn } from '@/lib/utils'
 export type FormTheme = 'blue' | 'purple' | 'yellow' | 'emerald'
 
 const THEMES: Record<FormTheme, string> = {
-  blue: 'md:border-l-blue-500 md:bg-blue-50',
-  purple: 'md:border-l-purple-500 md:bg-purple-50',
-  yellow: 'md:border-l-yellow-500 md:bg-yellow-50',
-  emerald: 'md:border-l-emerald-500 md:bg-emerald-50',
+  blue: 'md:border-l-blue-500 md:bg-blue-50 md:dark:bg-blue-950/30',
+  purple: 'md:border-l-purple-500 md:bg-purple-50 md:dark:bg-purple-950/30',
+  yellow: 'md:border-l-yellow-500 md:bg-yellow-50 md:dark:bg-yellow-950/30',
+  emerald: 'md:border-l-emerald-500 md:bg-emerald-50 md:dark:bg-emerald-950/30',
 }
 
 interface FormShellProps {

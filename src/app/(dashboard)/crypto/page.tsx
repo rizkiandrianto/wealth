@@ -85,7 +85,7 @@ export default function CryptoPage() {
 
             {cryptos.length > 0 && (
               <Tabs defaultValue="by-symbol" className="w-full">
-                <TabsList className="grid w-full grid-cols-2">
+                <TabsList className="grid grid-cols-2 mb-6">
                   <TabsTrigger value="by-symbol">Berdasarkan Symbol</TabsTrigger>
                   <TabsTrigger value="by-location">Berdasarkan Lokasi</TabsTrigger>
                 </TabsList>
