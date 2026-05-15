@@ -66,7 +66,7 @@ export default function PortfolioTotalCard() {
   const isTotalPositive = totalInvestedProfit >= 0
 
   return (
-    <Card className="p-6 bg-linear-to-br from-transparent to-emerald-100 border-emerald-200">
+    <Card className="p-6 bg-linear-to-br from-transparent to-emerald-100 border-emerald-200 dark:to-emerald-950/60 dark:border-emerald-900/70">
       <div className="flex items-start justify-between">
         <div>
           <p className="text-sm text-muted-foreground mb-2 flex items-center gap-1.5 font-bold">
@@ -78,7 +78,7 @@ export default function PortfolioTotalCard() {
               type="button"
               onClick={() => togglePortfolioExclusion('cash')}
               aria-pressed={!isExcluded('cash')}
-              className={`flex items-center gap-2 px-2 py-1 -mx-2 rounded-md hover:bg-emerald-200/40 transition-colors w-full text-left ${
+              className={`flex items-center gap-2 px-2 py-1 -mx-2 rounded-md hover:bg-emerald-200/40 dark:hover:bg-emerald-900/40 transition-colors w-full text-left ${
                 isExcluded('cash') ? 'line-through opacity-50' : ''
               }`}
             >
@@ -90,7 +90,7 @@ export default function PortfolioTotalCard() {
                 type="button"
                 onClick={() => togglePortfolioExclusion('stock')}
                 aria-pressed={!isExcluded('stock')}
-                className={`flex items-center gap-2 px-2 py-1 -mx-2 rounded-md hover:bg-emerald-200/40 transition-colors w-full text-left ${
+                className={`flex items-center gap-2 px-2 py-1 -mx-2 rounded-md hover:bg-emerald-200/40 dark:hover:bg-emerald-900/40 transition-colors w-full text-left ${
                   isExcluded('stock') ? 'line-through opacity-50' : ''
                 }`}
               >
@@ -103,7 +103,7 @@ export default function PortfolioTotalCard() {
                 type="button"
                 onClick={() => togglePortfolioExclusion('crypto')}
                 aria-pressed={!isExcluded('crypto')}
-                className={`flex items-center gap-2 px-2 py-1 -mx-2 rounded-md hover:bg-emerald-200/40 transition-colors w-full text-left ${
+                className={`flex items-center gap-2 px-2 py-1 -mx-2 rounded-md hover:bg-emerald-200/40 dark:hover:bg-emerald-900/40 transition-colors w-full text-left ${
                   isExcluded('crypto') ? 'line-through opacity-50' : ''
                 }`}
               >
@@ -116,7 +116,7 @@ export default function PortfolioTotalCard() {
                 type="button"
                 onClick={() => togglePortfolioExclusion('gold')}
                 aria-pressed={!isExcluded('gold')}
-                className={`flex items-center gap-2 px-2 py-1 -mx-2 rounded-md hover:bg-emerald-200/40 transition-colors w-full text-left ${
+                className={`flex items-center gap-2 px-2 py-1 -mx-2 rounded-md hover:bg-emerald-200/40 dark:hover:bg-emerald-900/40 transition-colors w-full text-left ${
                   isExcluded('gold') ? 'line-through opacity-50' : ''
                 }`}
               >
@@ -146,7 +146,7 @@ export default function PortfolioTotalCard() {
             onClick={toggleHideValues}
             aria-label={hideValues ? 'Show values' : 'Hide values'}
             title={hideValues ? 'Show values' : 'Hide values'}
-            className="w-12 h-12 rounded-lg bg-blue-500 hover:bg-blue-600 flex items-center justify-center transition-colors"
+            className="w-12 h-12 rounded-lg bg-blue-500 hover:bg-blue-600 dark:bg-emerald-700 dark:hover:bg-emerald-600 flex items-center justify-center transition-colors"
           >
             {hideValues ? (
               <EyeOff className="w-6 h-6 text-white" />

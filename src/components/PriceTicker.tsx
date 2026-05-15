@@ -113,8 +113,8 @@ export default function PriceTicker() {
                     {item.badge}
                   </span>
                 )}
-                <span className="font-semibold text-background">{item.label}</span>
-                <span className="font-medium text-background">
+                <span className="font-semibold text-white">{item.label}</span>
+                <span className="font-medium text-white">
                   {formatPrice(item.price, item.currency, (val, cur) => formatCurrency(val, cur, false))}
                 </span>
                 <span className={`flex items-center gap-0.5 text-xs font-medium ${color}`}>

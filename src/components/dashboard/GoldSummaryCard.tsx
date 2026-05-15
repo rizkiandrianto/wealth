@@ -27,7 +27,7 @@ export default function GoldSummaryCard() {
   const isPositive = profit >= 0
 
   return (
-    <Card className="p-6 border-l-4 border-l-yellow-500 bg-linear-to-br from-yellow-50 to-transparent">
+    <Card className="p-6 border-l-4 border-l-yellow-500 bg-linear-to-br from-yellow-50 to-transparent dark:from-yellow-950/40">
       <div className="flex items-start justify-between">
         <div>
           <h3 className="text-lg font-semibold flex items-center gap-2">Portfolio Emas</h3>

@@ -22,9 +22,9 @@ const ACCOUNT_TYPE_ICONS = {
 }
 
 const ACCOUNT_TYPE_COLORS = {
-  bank: 'from-blue-50 to-blue-100 border-blue-200',
-  deposit: 'from-green-50 to-green-100 border-green-200',
-  cash: 'from-yellow-50 to-yellow-100 border-yellow-200',
+  bank: 'from-blue-50 to-blue-100 border-blue-200 dark:from-blue-950/40 dark:to-blue-900/20 dark:border-blue-900/70',
+  deposit: 'from-green-50 to-green-100 border-green-200 dark:from-green-950/40 dark:to-green-900/20 dark:border-green-900/70',
+  cash: 'from-yellow-50 to-yellow-100 border-yellow-200 dark:from-yellow-950/40 dark:to-yellow-900/20 dark:border-yellow-900/70',
 }
 
 export default function AccountCard({
@@ -80,7 +80,7 @@ export default function AccountCard({
           variant="ghost"
           size="sm"
           onClick={handleDeleteClick}
-          className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity text-red-600 hover:text-red-700 hover:bg-red-50 z-10"
+          className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/40 z-10"
         >
           <Trash2 className="w-4 h-4" />
         </Button>

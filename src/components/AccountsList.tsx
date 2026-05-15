@@ -23,9 +23,9 @@ const ACCOUNT_TYPE_ICONS = {
 }
 
 const ACCOUNT_TYPE_COLORS = {
-  bank: 'from-blue-50 to-blue-100 border-blue-200',
-  deposit: 'from-green-50 to-green-100 border-green-200',
-  cash: 'from-yellow-50 to-yellow-100 border-yellow-200',
+  bank: 'from-blue-50 to-blue-100 border-blue-200 dark:from-blue-950/40 dark:to-blue-900/20 dark:border-blue-900/70',
+  deposit: 'from-green-50 to-green-100 border-green-200 dark:from-green-950/40 dark:to-green-900/20 dark:border-green-900/70',
+  cash: 'from-yellow-50 to-yellow-100 border-yellow-200 dark:from-yellow-950/40 dark:to-yellow-900/20 dark:border-yellow-900/70',
 }
 
 export default function AccountsList({
@@ -135,7 +135,7 @@ export default function AccountsList({
                       </p>
                     </div>
                     <div className="flex flex-col items-end gap-2">
-                      <div className="w-10 h-10 rounded-lg bg-white bg-opacity-50 flex items-center justify-center">
+                      <div className="w-10 h-10 rounded-lg bg-white/50 dark:bg-white/10 flex items-center justify-center">
                         <Icon className="w-5 h-5 text-foreground" />
                       </div>
                       <ChevronRight className="w-5 h-5 text-muted-foreground" />

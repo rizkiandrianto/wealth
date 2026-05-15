@@ -1,9 +1,10 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useSession, signOut } from 'next-auth/react'
+import { useTheme } from 'next-themes'
 import {
   LayoutDashboard,
   Wallet,
@@ -15,6 +16,7 @@ import {
   Gem,
   ChevronDown,
   LogOut,
+  Moon,
   User,
   Bitcoin,
   ArrowLeftRight,
@@ -27,6 +29,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { Switch } from '@/components/ui/switch'
 import { cn } from '@/lib/utils'
 
 interface DashboardLayoutProps {
@@ -54,17 +57,21 @@ const BOTTOM_NAV = [
 
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [mounted, setMounted] = useState(false)
   const currentPath = usePathname()
   const { data: session } = useSession()
   const userName = session?.user?.name ?? session?.user?.email ?? 'User'
+  const { resolvedTheme, setTheme } = useTheme()
+  useEffect(() => setMounted(true), [])
+  const isDark = mounted && resolvedTheme === 'dark'
 
   const isFinanceActive = FINANCE_ITEMS.some((i) => i.href === currentPath)
   const isPortfolioActive = PORTFOLIO_ITEMS.some((i) => i.href === currentPath)
 
   // Bottom nav active: Finance tab is active on /accounts or /transactions
   const getBottomActive = (href: string) => {
-    if (href === '/accounts') return isFinanceActive
-    if (href === '/stocks') return isPortfolioActive
+    if (href === '/crypto') return currentPath === '/crypto'
+    if (href === '/stocks') return currentPath === '/stocks'
     return currentPath === href
   }
 
@@ -162,6 +169,16 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                     {session?.user?.email}
                   </div>
                   <DropdownMenuSeparator />
+                  <div className="flex items-center gap-2 px-2 py-1.5 text-sm">
+                    <Moon className="w-4 h-4" />
+                    <span className="flex-1">Dark mode</span>
+                    <Switch
+                      checked={isDark}
+                      onCheckedChange={(checked) => setTheme(checked ? 'dark' : 'light')}
+                      aria-label="Toggle dark mode"
+                    />
+                  </div>
+                  <DropdownMenuSeparator />
                   <DropdownMenuItem
                     className="gap-2 text-destructive focus:text-destructive cursor-pointer"
                     onClick={() => signOut({ callbackUrl: '/login' })}
@@ -242,6 +259,15 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 </Button>
               </Link>
               <div className="pt-2 border-t border-border">
+                <div className="flex items-center gap-3 px-3 py-2 text-sm">
+                  <Moon className="w-5 h-5" />
+                  <span className="flex-1">Dark mode</span>
+                  <Switch
+                    checked={isDark}
+                    onCheckedChange={(checked) => setTheme(checked ? 'dark' : 'light')}
+                    aria-label="Toggle dark mode"
+                  />
+                </div>
                 <Button
                   variant="ghost"
                   className="w-full justify-start gap-3 text-destructive hover:text-destructive"

@@ -26,7 +26,7 @@ export default function CryptoSummaryCard() {
   const isPositive = profit >= 0
 
   return (
-    <Card className="p-6 border-l-4 border-l-orange-500 bg-linear-to-br from-orange-50 to-transparent">
+    <Card className="p-6 border-l-4 border-l-orange-500 bg-linear-to-br from-orange-50 to-transparent dark:from-orange-950/40">
       <div className="flex items-start justify-between">
         <div>
           <h3 className="text-lg font-semibold">Portfolio Crypto</h3>

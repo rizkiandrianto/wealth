@@ -29,7 +29,7 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" className={`bg-background ${geist.className}`}>
+    <html lang="en" className={`bg-background ${geist.className}`} suppressHydrationWarning>
       <body className="antialiased bg-background text-foreground">
         <Providers>{children}</Providers>
         {process.env.NODE_ENV === 'production' && <Analytics />}
