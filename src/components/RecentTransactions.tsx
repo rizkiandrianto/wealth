@@ -50,9 +50,9 @@ export default function RecentTransactions({ transactions }: RecentTransactionsP
         <div className="divide-y divide-border">
           {transactions.map((tx) => (
             <div key={tx.id} className="p-4 hover:bg-muted/50 transition-colors">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 justify-between">
                 <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
+                  <div className="md:flex flex-col md:flex-row items-center gap-2 mb-1">
                     <p className="font-medium text-foreground">
                       {getAccountName(tx.fromAccountId ?? "")} → {getAccountName(tx.toAccountId ?? "")}
                     </p>

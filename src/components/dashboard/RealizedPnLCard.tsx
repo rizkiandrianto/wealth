@@ -42,7 +42,7 @@ export default function RealizedPnLCard() {
   if (goldCount > 0) countParts.push(`${goldCount} gold sales`)
 
   return (
-    <Card className="p-6 border-l-4 border-l-transparent bg-linear-to-br from-teal-50 to-transparent dark:border-l-yellow-500 dark:from-yellow-950/30">
+    <Card className="p-6 border-l-4 border-l-teal-500 bg-linear-to-br from-teal-50 to-transparent dark:border-l-teal-500 dark:from-teal-950/30">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-6">
         <div className="flex items-center gap-4 sm:shrink-0">
           <div className="w-12 h-12 rounded-xl bg-green-100 dark:bg-yellow-950/60 flex items-center justify-center shrink-0">

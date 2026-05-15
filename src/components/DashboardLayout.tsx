@@ -298,7 +298,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 <div
                   className={cn(
                     'flex flex-col items-center justify-center h-16 text-xs gap-1 transition-colors',
-                    isActive ? 'text-blue-600 font-semibold' : 'text-muted-foreground hover:text-foreground'
+                    isActive ? 'text-blue-600 font-semibold dark:text-primary' : 'text-muted-foreground hover:text-foreground'
                   )}
                 >
                   <Icon className="w-5 h-5" />

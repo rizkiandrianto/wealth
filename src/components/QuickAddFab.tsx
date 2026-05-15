@@ -97,7 +97,7 @@ export default function QuickAddFab() {
           onClick={() => setOpen((v) => !v)}
           aria-label={open ? 'Tutup menu tambah' : 'Buka menu tambah'}
           aria-expanded={open}
-          className="flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg transition-all hover:shadow-xl active:scale-95 border-4 border-white"
+          className="flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg transition-all hover:shadow-xl active:scale-95 border-4 border-white dark:border-background"
         >
           <Plus
             className={cn(
