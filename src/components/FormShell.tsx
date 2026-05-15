@@ -1,6 +1,7 @@
 'use client'
 
 import { X } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
@@ -22,6 +23,7 @@ interface FormShellProps {
 }
 
 export default function FormShell({ title, theme, onClose, children }: FormShellProps) {
+  const tCommon = useTranslations('common')
   return (
     <Card className={cn('border-0 md:border p-4 md:p-6 md:border-l-4', THEMES[theme])}>
       <div className="flex items-center justify-between mb-4">
@@ -33,7 +35,7 @@ export default function FormShell({ title, theme, onClose, children }: FormShell
             size="sm"
             onClick={onClose}
             className="h-8 w-8 p-0 hidden md:block"
-            aria-label="Tutup"
+            aria-label={tCommon('close')}
           >
             <X className="w-5 h-5" />
           </Button>

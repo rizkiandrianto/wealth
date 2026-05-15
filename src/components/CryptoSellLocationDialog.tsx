@@ -1,6 +1,7 @@
 'use client'
 
 import { useMemo, useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { CryptoHolding } from '@/lib/types'
 import { useFormatCurrency } from '@/lib/format'
 import { useAssetPricesQuery } from '@/lib/queries/prices'
@@ -25,6 +26,11 @@ export default function CryptoSellLocationDialog({
   onSell,
   onClose,
 }: CryptoSellLocationDialogProps) {
+  const t = useTranslations('sellDialog')
+  const tCrypto = useTranslations('holdings.crypto')
+  const tStocks = useTranslations('holdings.stocks')
+  const tCommon = useTranslations('common')
+  const tDash = useTranslations('dashboard')
   const { data: assetPrices = [] } = useAssetPricesQuery()
   const formatCurrency = useFormatCurrency()
   const currentPrice = assetPrices.find((p) => p.ticker === symbol)?.price ?? 0
@@ -78,7 +84,7 @@ export default function CryptoSellLocationDialog({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (qtyNum <= 0 || qtyNum > totalQty + 1e-12 || priceNum <= 0) {
-      alert('Invalid quantity or price')
+      alert(t('invalidQuantityOrPrice'))
       return
     }
     onSell({ quantity: qtyNum, salePrice: priceNum })
@@ -90,8 +96,8 @@ export default function CryptoSellLocationDialog({
       <Card className="w-full max-w-lg p-6 space-y-4 max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-xl font-bold">Sell {symbol}</h2>
-            <p className="text-xs text-muted-foreground">{locationName} • FIFO across {sortedLots.length} lot{sortedLots.length > 1 ? 's' : ''}</p>
+            <h2 className="text-xl font-bold">{t('sellTicker', { ticker: symbol })}</h2>
+            <p className="text-xs text-muted-foreground">{locationName} • {t('fifoAcrossLots', { count: sortedLots.length })}</p>
           </div>
           <button onClick={onClose} className="text-muted-foreground hover:text-foreground">
             <X className="w-5 h-5" />
@@ -100,14 +106,14 @@ export default function CryptoSellLocationDialog({
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="bg-muted/50 p-3 rounded-lg text-sm space-y-1">
-            <p><span className="text-muted-foreground">Available:</span> <span className="font-semibold">{totalQty.toFixed(8)}</span></p>
-            <p><span className="text-muted-foreground">Weighted Avg Cost:</span> <span className="font-semibold">{formatCurrency(weightedAvg)}</span></p>
-            <p><span className="text-muted-foreground">Current Price:</span> <span className="font-semibold">{currentPrice > 0 ? formatCurrency(currentPrice) : '—'}</span></p>
+            <p><span className="text-muted-foreground">{t('available')}:</span> <span className="font-semibold">{totalQty.toFixed(8)}</span></p>
+            <p><span className="text-muted-foreground">{t('weightedAvgCost')}:</span> <span className="font-semibold">{formatCurrency(weightedAvg)}</span></p>
+            <p><span className="text-muted-foreground">{tStocks('currentPrice')}:</span> <span className="font-semibold">{currentPrice > 0 ? formatCurrency(currentPrice) : '—'}</span></p>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-sm font-medium mb-2">Quantity</label>
+              <label className="block text-sm font-medium mb-2">{t('quantity')}</label>
               <Input
                 type="number"
                 step="any"
@@ -117,7 +123,7 @@ export default function CryptoSellLocationDialog({
               />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-2">Sale Price (per unit)</label>
+              <label className="block text-sm font-medium mb-2">{t('salePricePerUnit')}</label>
               <Input
                 type="number"
                 step="any"
@@ -130,15 +136,15 @@ export default function CryptoSellLocationDialog({
 
           {fifoPreview.length > 0 && (
             <div className="border rounded-lg p-3 space-y-2 text-sm">
-              <p className="font-medium text-xs text-muted-foreground uppercase">FIFO Consumption</p>
+              <p className="font-medium text-xs text-muted-foreground uppercase">{t('fifoConsumption')}</p>
               {fifoPreview.map((c, idx) => {
                 const pct = c.lot.averagePrice > 0 ? (c.pnl / (c.consumedQty * c.lot.averagePrice)) * 100 : 0
                 const pos = c.pnl >= 0
                 return (
                   <div key={c.lot.id} className="flex items-center justify-between gap-2 py-1 border-b last:border-b-0">
                     <div className="text-xs">
-                      <p className="font-medium">Lot #{idx + 1} • {c.consumedQty.toFixed(8)} of {c.lot.quantity.toFixed(8)}</p>
-                      <p className="text-muted-foreground">avg {formatCurrency(c.lot.averagePrice)}</p>
+                      <p className="font-medium">{t('lotOfDecimal', { index: idx + 1, consumed: c.consumedQty.toFixed(8), total: c.lot.quantity.toFixed(8) })}</p>
+                      <p className="text-muted-foreground">{t('avg')} {formatCurrency(c.lot.averagePrice)}</p>
                     </div>
                     <div className={`text-xs text-right ${pos ? 'text-green-600' : 'text-red-600'}`}>
                       <p className="font-semibold">{formatCurrency(c.pnl)}</p>
@@ -152,20 +158,20 @@ export default function CryptoSellLocationDialog({
 
           {qtyNum > 0 && priceNum > 0 && (
             <div className="bg-blue-50 dark:bg-blue-950/30 p-3 rounded-lg space-y-1 text-sm">
-              <p><span className="text-muted-foreground">Total Sale Value:</span> <span className="font-semibold">{formatCurrency(totalSaleValue)}</span></p>
-              <p><span className="text-muted-foreground">Total Cost:</span> <span className="font-semibold">{formatCurrency(totalCostConsumed)}</span></p>
+              <p><span className="text-muted-foreground">{t('totalSaleValue')}:</span> <span className="font-semibold">{formatCurrency(totalSaleValue)}</span></p>
+              <p><span className="text-muted-foreground">{tStocks('totalCost')}:</span> <span className="font-semibold">{formatCurrency(totalCostConsumed)}</span></p>
               <p className={`font-semibold ${totalRealizedPnl >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                Realized P&L: {formatCurrency(totalRealizedPnl)} ({realizedPercent.toFixed(2)}%)
+                {tDash('realizedPnl')}: {formatCurrency(totalRealizedPnl)} ({realizedPercent.toFixed(2)}%)
               </p>
             </div>
           )}
 
           <div className="flex gap-2 pt-2">
             <Button type="button" variant="outline" onClick={onClose} className="flex-1">
-              Cancel
+              {tCommon('cancel')}
             </Button>
             <Button type="submit" className="flex-1 bg-green-600 hover:bg-green-700" disabled={qtyNum <= 0 || qtyNum > totalQty + 1e-12 || priceNum <= 0}>
-              Sell
+              {tCrypto('sell')}
             </Button>
           </div>
         </form>

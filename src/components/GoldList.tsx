@@ -1,8 +1,9 @@
 'use client'
 
 import { useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { GoldHolding, GoldLocation } from '@/lib/types'
-import { useFormatCurrency } from '@/lib/format'
+import { useFormatCurrency, useFormatDate } from '@/lib/format'
 import { useDeleteGold, useSellGold } from '@/lib/queries/gold'
 import { useAssetPricesQuery } from '@/lib/queries/prices'
 import { Card } from '@/components/ui/card'
@@ -17,6 +18,9 @@ interface GoldListProps {
 }
 
 export default function GoldList({ golds, locations, onEdit }: GoldListProps) {
+  const t = useTranslations('holdings.gold')
+  const tCommon = useTranslations('common')
+  const formatDate = useFormatDate()
   const { data: assetPrices = [] } = useAssetPricesQuery()
   const deleteGold = useDeleteGold()
   const sellGold = useSellGold()
@@ -66,7 +70,7 @@ export default function GoldList({ golds, locations, onEdit }: GoldListProps) {
                       <div>
                         <p className="font-semibold">{gold.weight.toFixed(4)} gram</p>
                         <p className="text-sm text-muted-foreground">
-                          Beli: {formatCurrency(gold.purchasePrice)}/gram · {new Date(gold.purchaseDate).toLocaleDateString('id-ID')}
+                          {t('buy')}: {formatCurrency(gold.purchasePrice)}/gram · {formatDate(gold.purchaseDate)}
                         </p>
                       </div>
                       <div className="text-right">
@@ -88,7 +92,7 @@ export default function GoldList({ golds, locations, onEdit }: GoldListProps) {
                         className="gap-2"
                       >
                         <Edit2 className="w-4 h-4" />
-                        Edit
+                        {tCommon('edit')}
                       </Button>
                       <Button
                         variant="ghost"
@@ -97,20 +101,20 @@ export default function GoldList({ golds, locations, onEdit }: GoldListProps) {
                         className="gap-2 text-yellow-600 hover:text-yellow-700 hover:bg-yellow-50"
                       >
                         <DollarSign className="w-4 h-4" />
-                        Jual
+                        {t('sell')}
                       </Button>
                       <Button
                         variant="ghost"
                         size="sm"
                         onClick={() => {
-                          if (confirm('Hapus holding emas ini?')) {
+                          if (confirm(t('deleteConfirmPrompt'))) {
                             deleteGold.mutate(gold.id)
                           }
                         }}
                         className="gap-2 text-red-600 hover:text-red-700 hover:bg-red-50"
                       >
                         <Trash2 className="w-4 h-4" />
-                        Hapus
+                        {tCommon('delete')}
                       </Button>
                     </div>
                   </Card>
@@ -120,7 +124,7 @@ export default function GoldList({ golds, locations, onEdit }: GoldListProps) {
 
             {locationGolds.length > 1 && goldPrice > 0 && (
               <div className="bg-muted/50 p-3 rounded-lg text-sm flex items-center justify-between">
-                <span className="text-muted-foreground">Total {location.name}</span>
+                <span className="text-muted-foreground">{t('totalAtLocation', { location: location.name })}</span>
                 <div className="text-right">
                   <p className="font-semibold">{formatCurrency(totalValue)}</p>
                   <p className={`text-xs ${isPositive ? 'text-green-600' : 'text-red-600'}`}>

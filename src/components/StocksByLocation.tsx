@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { StockHolding, StockLocation } from '@/lib/types'
 import { useFormatCurrency } from '@/lib/format'
 import { stockShares } from '@/lib/stock'
@@ -25,6 +26,8 @@ interface StocksByLocationProps {
 }
 
 export default function StocksByLocation({ stocks, locations, onEdit }: StocksByLocationProps) {
+  const t = useTranslations('holdings.stocks')
+  const tCommon = useTranslations('common')
   const { data: assetPrices = [] } = useAssetPricesQuery()
   const deleteStock = useDeleteStock()
   const sellStock = useSellStock()
@@ -89,7 +92,7 @@ export default function StocksByLocation({ stocks, locations, onEdit }: StocksBy
                 <div className="flex flex-1 items-center justify-between gap-4 pr-2">
                   <h3 className="text-lg font-semibold">{location.name}</h3>
                   <div className="text-right">
-                    <p className="text-sm text-muted-foreground">{tickerCount} saham</p>
+                    <p className="text-sm text-muted-foreground">{t('stockCount', { count: tickerCount })}</p>
                     <p className={`text-sm font-semibold ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
                       {formatCurrency(profitLoss)}
                     </p>
@@ -119,19 +122,19 @@ export default function StocksByLocation({ stocks, locations, onEdit }: StocksBy
                               <p className="text-sm text-muted-foreground">{getName(ticker)}</p>
                               <div className="mt-2 grid grid-cols-2 gap-2 text-xs">
                                 <div>
-                                  <p className="text-muted-foreground">Qty</p>
+                                  <p className="text-muted-foreground">{t('quantityShares')}</p>
                                   <p className="font-medium">{totalQty.toFixed(2)} lot{lots.length > 1 ? ` • ${lots.length} lots` : ''}</p>
                                 </div>
                                 <div>
-                                  <p className="text-muted-foreground">Harga Rata-rata</p>
+                                  <p className="text-muted-foreground">{t('averagePrice')}</p>
                                   <p className="font-medium">{formatCurrency(weightedAvg)}</p>
                                 </div>
                                 <div>
-                                  <p className="text-muted-foreground">Harga Terkini</p>
+                                  <p className="text-muted-foreground">{t('currentPrice')}</p>
                                   <p className="font-medium">{price > 0 ? formatCurrency(price) : '—'}</p>
                                 </div>
                                 <div>
-                                  <p className="text-muted-foreground">Total Value</p>
+                                  <p className="text-muted-foreground">{t('totalValue')}</p>
                                   <p className="font-medium">{formatCurrency(value)}</p>
                                 </div>
                               </div>
@@ -197,7 +200,7 @@ export default function StocksByLocation({ stocks, locations, onEdit }: StocksBy
                                   className="flex-1 gap-2"
                                 >
                                   <Edit2 className="w-3 h-3" />
-                                  Edit
+                                  {tCommon('edit')}
                                 </Button>
                                 <Button
                                   size="sm"
@@ -206,7 +209,7 @@ export default function StocksByLocation({ stocks, locations, onEdit }: StocksBy
                                   className="flex-1 gap-2 bg-green-50 text-green-700 hover:bg-green-100"
                                 >
                                   <DollarSign className="w-3 h-3" />
-                                  Sell
+                                  {t('sell')}
                                 </Button>
                                 <Button
                                   size="sm"
@@ -215,7 +218,7 @@ export default function StocksByLocation({ stocks, locations, onEdit }: StocksBy
                                   className="flex-1 gap-2 text-red-600 hover:text-red-700"
                                 >
                                   <Trash2 className="w-3 h-3" />
-                                  Hapus
+                                  {tCommon('delete')}
                                 </Button>
                               </>
                             ) : (
@@ -226,7 +229,7 @@ export default function StocksByLocation({ stocks, locations, onEdit }: StocksBy
                                 className="flex-1 gap-2 bg-green-50 text-green-700 hover:bg-green-100"
                               >
                                 <DollarSign className="w-3 h-3" />
-                                Sell {ticker} (FIFO)
+                                {t('sellTickerFifo', { ticker })}
                               </Button>
                             )}
                           </div>

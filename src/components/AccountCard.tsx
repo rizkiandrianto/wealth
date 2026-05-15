@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { useTranslations } from 'next-intl'
 import { Account } from '@/lib/types'
 import { useFormatCurrency } from '@/lib/format'
 import { Trash2 } from 'lucide-react'
@@ -21,6 +22,8 @@ export default function AccountCard({
   balance,
   onDelete,
 }: AccountCardProps) {
+  const t = useTranslations('accounts')
+  const tCommon = useTranslations('common')
   const Icon = ACCOUNT_TYPE_ICONS[account.type]
   const colorClass = ACCOUNT_TYPE_COLORS[account.type]
   const formatCurrency = useFormatCurrency()
@@ -60,7 +63,7 @@ export default function AccountCard({
               <p className="text-2xl font-bold text-foreground">
                 {formatCurrency(Math.max(balance, 0), account.currency)}
               </p>
-              <p className="text-xs text-muted-foreground mt-2">Currency: {account.currency}</p>
+              <p className="text-xs text-muted-foreground mt-2">{t('currency')}: {account.currency}</p>
             </div>
           </div>
         </Link>
@@ -78,10 +81,10 @@ export default function AccountCard({
       <ConfirmDialog
         open={showDeleteDialog}
         onOpenChange={setShowDeleteDialog}
-        title={`Delete ${account.name}?`}
-        description="This will permanently delete this account and all of its transactions. This action cannot be undone."
-        confirmLabel="Delete"
-        loadingLabel="Deleting…"
+        title={t('deleteConfirmTitle', { name: account.name })}
+        description={t('deleteConfirmDescriptionFull')}
+        confirmLabel={tCommon('delete')}
+        loadingLabel={tCommon('deleting')}
         isLoading={isDeleting}
         destructive
         onConfirm={handleConfirmDelete}

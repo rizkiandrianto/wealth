@@ -1,5 +1,6 @@
 'use client'
 
+import { useTranslations } from 'next-intl'
 import { useFormatCurrency } from '@/lib/format'
 import { Card } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -8,6 +9,8 @@ import { useGoldsQuery } from '@/lib/queries/gold'
 import { useAssetPricesQuery } from '@/lib/queries/prices'
 
 export default function GoldSummary() {
+  const t = useTranslations('summaryCards')
+  const tStocks = useTranslations('holdings.stocks')
   const { data: golds = [], isLoading: goldsLoading } = useGoldsQuery()
   const { data: prices = [], isLoading: pricesLoading } = useAssetPricesQuery()
   const formatCurrency = useFormatCurrency()
@@ -34,12 +37,12 @@ export default function GoldSummary() {
   return (
     <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
       <Card className="p-6 border-l-4 border-l-yellow-500">
-        <p className="text-sm font-medium text-muted-foreground">Total Berat</p>
+        <p className="text-sm font-medium text-muted-foreground">{t('totalWeight')}</p>
         <p className="text-3xl font-bold mt-2">{totalWeight.toFixed(4)} g</p>
       </Card>
 
       <Card className="p-6 border-l-4 border-l-yellow-400">
-        <p className="text-sm font-medium text-muted-foreground">Total Value</p>
+        <p className="text-sm font-medium text-muted-foreground">{t('totalValue')}</p>
         <p className="text-3xl font-bold mt-2">{goldPrice > 0 ? formatCurrency(totalValue) : '—'}</p>
         {goldPrice > 0 && (
           <p className="text-xs text-muted-foreground mt-1">{formatCurrency(goldPrice)}/gram</p>
@@ -47,14 +50,14 @@ export default function GoldSummary() {
       </Card>
 
       <Card className="p-6 border-l-4 border-l-blue-500">
-        <p className="text-sm font-medium text-muted-foreground">Total Cost</p>
+        <p className="text-sm font-medium text-muted-foreground">{tStocks('totalCost')}</p>
         <p className="text-3xl font-bold mt-2">{formatCurrency(totalCost)}</p>
       </Card>
 
       <Card className={`p-6 border-l-4 ${isPositive ? 'border-l-green-500' : 'border-l-red-500'}`}>
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm font-medium text-muted-foreground">Profit / Loss</p>
+            <p className="text-sm font-medium text-muted-foreground">{t('profitLoss')}</p>
             <p className={`text-3xl font-bold mt-2 ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
               {goldPrice > 0 ? formatCurrency(profitLoss) : '—'}
             </p>

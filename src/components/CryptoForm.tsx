@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useTranslations } from 'next-intl'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Loader2 } from 'lucide-react'
@@ -20,6 +21,9 @@ const EMPTY_CRYPTOS: CryptoHolding[] = []
 const EMPTY_LOCATIONS: CryptoLocation[] = []
 
 export default function CryptoForm({ editingId, onClose }: CryptoFormProps) {
+  const t = useTranslations('holdings.crypto')
+  const tCommon = useTranslations('common')
+  const tError = useTranslations('errors')
   const { data: cryptos = EMPTY_CRYPTOS } = useCryptosQuery()
   const { data: cryptoLocations = EMPTY_LOCATIONS } = useCryptoLocationsQuery()
   const addCrypto = useAddCrypto()
@@ -82,7 +86,7 @@ export default function CryptoForm({ editingId, onClose }: CryptoFormProps) {
       !formData.quantity ||
       !formData.averagePrice
     ) {
-      alert('Semua field harus diisi')
+      alert(tError('allFieldsRequired'))
       return
     }
 
@@ -113,32 +117,32 @@ export default function CryptoForm({ editingId, onClose }: CryptoFormProps) {
 
   return (
     <FormShell
-      title={editingId ? 'Edit Crypto' : 'Tambah Crypto'}
+      title={editingId ? t('editTitle') : t('addCrypto')}
       theme="purple"
       onClose={onClose}
     >
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="text-sm font-medium">Symbol</label>
+            <label className="text-sm font-medium">{t('symbol')}</label>
             <Input
               type="text"
               value={formData.symbol}
               onChange={(e) => setFormData({ ...formData, symbol: e.target.value })}
               onBlur={handleSymbolBlur}
-              placeholder="e.g., BTC"
+              placeholder={t('symbolPlaceholder')}
               className="mt-1"
             />
           </div>
 
           <div>
-            <label className="text-sm font-medium">Nama Crypto</label>
+            <label className="text-sm font-medium">{t('name')}</label>
             <div className="relative mt-1">
               <Input
                 type="text"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                placeholder="e.g., Bitcoin"
+                placeholder={t('namePlaceholder')}
                 className={nameLookupLoading ? 'pr-8' : ''}
               />
               {nameLookupLoading && (
@@ -149,7 +153,7 @@ export default function CryptoForm({ editingId, onClose }: CryptoFormProps) {
         </div>
 
         <div>
-          <label className="text-sm font-medium">Lokasi Penyimpanan</label>
+          <label className="text-sm font-medium">{t('locationStorage')}</label>
           <LocationPickerSelect
             locations={cryptoLocations}
             value={formData.locationId}
@@ -160,7 +164,7 @@ export default function CryptoForm({ editingId, onClose }: CryptoFormProps) {
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="text-sm font-medium">Quantity</label>
+            <label className="text-sm font-medium">{t('quantity')}</label>
             <Input
               type="number"
               step="0.00000001"
@@ -172,7 +176,7 @@ export default function CryptoForm({ editingId, onClose }: CryptoFormProps) {
           </div>
 
           <div>
-            <label className="text-sm font-medium">Harga Rata-rata (IDR)</label>
+            <label className="text-sm font-medium">{t('averagePriceIDR')}</label>
             <Input
               type="number"
               step="0.01"
@@ -186,10 +190,10 @@ export default function CryptoForm({ editingId, onClose }: CryptoFormProps) {
 
         <div className="md:flex gap-2 md:justify-end grid grid-cols-2 pt-2">
           <Button type="button" variant="outline" onClick={onClose}>
-            Batal
+            {tCommon('cancel')}
           </Button>
           <Button type="submit" className="bg-purple-600 hover:bg-purple-700">
-            {editingId ? 'Update' : 'Tambah'} Crypto
+            {editingId ? t('updateCrypto') : t('addCrypto')}
           </Button>
         </div>
       </form>

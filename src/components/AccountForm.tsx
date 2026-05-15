@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { AccountType } from '@/lib/types'
@@ -15,11 +16,7 @@ interface AccountFormProps {
   }
 }
 
-const ACCOUNT_TYPES: { value: AccountType; label: string }[] = [
-  { value: 'bank', label: 'Bank Account' },
-  { value: 'deposit', label: 'Deposit' },
-  { value: 'cash', label: 'Cash' },
-]
+const ACCOUNT_TYPE_VALUES: AccountType[] = ['bank', 'deposit', 'cash']
 
 const CURRENCIES = ['IDR', 'USD', 'EUR', 'SGD']
 
@@ -28,6 +25,8 @@ export default function AccountForm({
   onCancel,
   initialData,
 }: AccountFormProps) {
+  const t = useTranslations('accounts')
+  const tCommon = useTranslations('common')
   const [name, setName] = useState(initialData?.name || '')
   const [type, setType] = useState<AccountType>(initialData?.type || 'bank')
   const [currency, setCurrency] = useState(initialData?.currency || 'IDR')
@@ -37,7 +36,7 @@ export default function AccountForm({
     const newErrors: Record<string, string> = {}
 
     if (!name.trim()) {
-      newErrors.name = 'Account name is required'
+      newErrors.name = t('nameRequired')
     }
 
     setErrors(newErrors)
@@ -59,12 +58,12 @@ export default function AccountForm({
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <label className="block text-sm font-medium mb-2">Account Name</label>
+        <label className="block text-sm font-medium mb-2">{t('name')}</label>
         <Input
           type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          placeholder="e.g., BNI Savings, Emergency Fund"
+          placeholder={t('namePlaceholder')}
           className="w-full"
         />
         {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
@@ -72,22 +71,22 @@ export default function AccountForm({
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium mb-2">Account Type</label>
+          <label className="block text-sm font-medium mb-2">{t('type')}</label>
           <select
             value={type}
             onChange={(e) => setType(e.target.value as AccountType)}
             className="w-full px-3 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
-            {ACCOUNT_TYPES.map((t) => (
-              <option key={t.value} value={t.value}>
-                {t.label}
+            {ACCOUNT_TYPE_VALUES.map((v) => (
+              <option key={v} value={v}>
+                {t(`accountType.${v}`)}
               </option>
             ))}
           </select>
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-2">Currency</label>
+          <label className="block text-sm font-medium mb-2">{t('currency')}</label>
           <select
             value={currency}
             onChange={(e) => setCurrency(e.target.value)}
@@ -104,10 +103,10 @@ export default function AccountForm({
 
       <div className="flex gap-2 pt-4">
         <Button type="submit" className="flex-1 bg-blue-600 hover:bg-blue-700">
-          {initialData ? 'Update Account' : 'Add Account'}
+          {initialData ? t('updateAccount') : t('addAccount')}
         </Button>
         <Button type="button" variant="outline" onClick={onCancel} className="flex-1">
-          Cancel
+          {tCommon('cancel')}
         </Button>
       </div>
     </form>

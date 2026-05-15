@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useTranslations } from 'next-intl'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import FormShell from '@/components/FormShell'
@@ -19,6 +20,9 @@ const EMPTY_GOLDS: GoldHolding[] = []
 const EMPTY_LOCATIONS: GoldLocation[] = []
 
 export default function GoldForm({ editingId, onClose }: GoldFormProps) {
+  const t = useTranslations('holdings.gold')
+  const tCommon = useTranslations('common')
+  const tError = useTranslations('errors')
   const { data: golds = EMPTY_GOLDS } = useGoldsQuery()
   const { data: goldLocations = EMPTY_LOCATIONS } = useGoldLocationsQuery()
   const addGold = useAddGold()
@@ -56,7 +60,7 @@ export default function GoldForm({ editingId, onClose }: GoldFormProps) {
     e.preventDefault()
 
     if (!formData.locationId || !formData.weight || !formData.purchasePrice || !formData.purchaseDate) {
-      alert('Semua field harus diisi')
+      alert(tError('allFieldsRequired'))
       return
     }
 
@@ -84,13 +88,13 @@ export default function GoldForm({ editingId, onClose }: GoldFormProps) {
 
   return (
     <FormShell
-      title={editingId ? 'Edit Emas' : 'Tambah Emas'}
+      title={editingId ? t('editTitle') : t('addGold')}
       theme="yellow"
       onClose={onClose}
     >
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="text-sm font-medium">Lokasi Penyimpanan</label>
+          <label className="text-sm font-medium">{t('locationStorage')}</label>
           <LocationPickerSelect
             locations={goldLocations}
             value={formData.locationId}
@@ -101,7 +105,7 @@ export default function GoldForm({ editingId, onClose }: GoldFormProps) {
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="text-sm font-medium">Berat (gram)</label>
+            <label className="text-sm font-medium">{t('weight')}</label>
             <Input
               type="number"
               step="0.0001"
@@ -113,7 +117,7 @@ export default function GoldForm({ editingId, onClose }: GoldFormProps) {
           </div>
 
           <div>
-            <label className="text-sm font-medium">Harga Beli (IDR/gram)</label>
+            <label className="text-sm font-medium">{t('purchasePrice')}</label>
             <Input
               type="number"
               step="0.01"
@@ -126,7 +130,7 @@ export default function GoldForm({ editingId, onClose }: GoldFormProps) {
         </div>
 
         <div>
-          <label className="text-sm font-medium">Tanggal Beli</label>
+          <label className="text-sm font-medium">{t('purchaseDate')}</label>
           <Input
             type="date"
             value={formData.purchaseDate}
@@ -137,10 +141,10 @@ export default function GoldForm({ editingId, onClose }: GoldFormProps) {
 
         <div className="md:flex gap-2 md:justify-end grid grid-cols-2 pt-2">
           <Button type="button" variant="outline" onClick={onClose}>
-            Batal
+            {tCommon('cancel')}
           </Button>
           <Button type="submit" className="bg-yellow-600 hover:bg-yellow-700">
-            {editingId ? 'Update' : 'Tambah'} Emas
+            {editingId ? t('updateGold') : t('addGold')}
           </Button>
         </div>
       </form>

@@ -1,5 +1,6 @@
 'use client'
 
+import { useTranslations } from 'next-intl'
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
 import { Drawer, DrawerContent, DrawerTitle } from '@/components/ui/drawer'
 import { useIsMobile } from '@/components/ui/use-mobile'
@@ -20,28 +21,21 @@ interface AssetFormSheetProps {
   editingId?: string | null
 }
 
-const TITLE: Record<AssetFormType, string> = {
-  stock: 'Tambah / Edit Saham',
-  crypto: 'Tambah / Edit Crypto',
-  gold: 'Tambah / Edit Emas',
-  transaction: 'Catat Transaksi',
-}
-
 // Isolates accounts + transaction hooks so they only fire when the
 // transaction sheet is actually mounted (sheet open + type === 'transaction').
 function TransactionBody({ close }: { close: () => void }) {
+  const t = useTranslations('assetFormSheet')
+  const tCommon = useTranslations('common')
   const { data: accounts = [] } = useAccountsQuery()
   const addTransaction = useAddTransaction()
 
   if (accounts.length === 0) {
     return (
       <div className="p-6 text-center space-y-4">
-        <h3 className="text-lg font-semibold">Belum ada akun</h3>
-        <p className="text-sm text-muted-foreground">
-          Buat akun dulu sebelum mencatat transaksi.
-        </p>
+        <h3 className="text-lg font-semibold">{t('noAccounts')}</h3>
+        <p className="text-sm text-muted-foreground">{t('noAccountsHint')}</p>
         <Button onClick={close} variant="outline">
-          Tutup
+          {tCommon('close')}
         </Button>
       </div>
     )
@@ -65,8 +59,16 @@ export default function AssetFormSheet({
   onOpenChange,
   editingId = null,
 }: AssetFormSheetProps) {
+  const t = useTranslations('assetFormSheet')
   const isMobile = useIsMobile()
   const close = () => onOpenChange(false)
+  const titleKeyMap: Record<AssetFormType, 'stock' | 'crypto' | 'gold' | 'transaction'> = {
+    stock: 'stock',
+    crypto: 'crypto',
+    gold: 'gold',
+    transaction: 'transaction',
+  }
+  const title = t(`title.${titleKeyMap[type]}`)
 
   const body = (() => {
     if (type === 'stock') {
@@ -85,7 +87,7 @@ export default function AssetFormSheet({
     return (
       <Drawer open={open} onOpenChange={onOpenChange}>
         <DrawerContent className="max-h-[90vh]">
-          <DrawerTitle className="sr-only">{TITLE[type]}</DrawerTitle>
+          <DrawerTitle className="sr-only">{title}</DrawerTitle>
           <div className="overflow-y-auto md:px-4 md:pb-6">{body}</div>
         </DrawerContent>
       </Drawer>
@@ -98,7 +100,7 @@ export default function AssetFormSheet({
         showCloseButton={false}
         className="p-0 max-w-lg max-h-[90vh] overflow-y-auto rounded-xl"
       >
-        <DialogTitle className="sr-only">{TITLE[type]}</DialogTitle>
+        <DialogTitle className="sr-only">{title}</DialogTitle>
         {body}
       </DialogContent>
     </Dialog>

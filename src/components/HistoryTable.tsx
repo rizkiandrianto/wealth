@@ -1,7 +1,8 @@
 'use client'
 
+import { useTranslations } from 'next-intl'
 import { Account, DailyBalance } from '@/lib/types'
-import { useFormatCurrency, formatDate, formatMonth } from '@/lib/format'
+import { useFormatCurrency, useFormatDate, formatMonth } from '@/lib/format'
 import { Card } from '@/components/ui/card'
 
 interface HistoryTableProps {
@@ -15,13 +16,15 @@ export default function HistoryTable({
   accounts,
   viewType,
 }: HistoryTableProps) {
+  const t = useTranslations('history')
   const formatCurrency = useFormatCurrency()
+  const formatDate = useFormatDate()
 
   if (data.length === 0) {
     return (
       <Card className="p-8">
         <div className="text-center">
-          <p className="text-muted-foreground">No history data available yet</p>
+          <p className="text-muted-foreground">{t('table.empty')}</p>
         </div>
       </Card>
     )
@@ -34,10 +37,10 @@ export default function HistoryTable({
           <thead className="bg-muted border-b border-border">
             <tr>
               <th className="px-6 py-3 text-left text-sm font-semibold text-foreground">
-                {viewType === 'day' ? 'Date' : viewType === 'month' ? 'Month' : 'Year'}
+                {viewType === 'day' ? t('table.date') : viewType === 'month' ? t('table.month') : t('table.year')}
               </th>
               <th className="px-6 py-3 text-right text-sm font-semibold text-foreground">
-                Total Balance
+                {t('table.totalBalance')}
               </th>
               {accounts.map((account) => (
                 <th

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { StockHolding } from '@/lib/types'
 import { useFormatCurrency } from '@/lib/format'
 import { stockShares } from '@/lib/stock'
@@ -24,6 +25,8 @@ interface StocksListProps {
 }
 
 export default function StocksList({ stocks, onEdit }: StocksListProps) {
+  const t = useTranslations('holdings.stocks')
+  const tCommon = useTranslations('common')
   const { data: stockLocations = [] } = useStockLocationsQuery()
   const { data: assetPrices = [] } = useAssetPricesQuery()
   const deleteStock = useDeleteStock()
@@ -103,19 +106,19 @@ export default function StocksList({ stocks, onEdit }: StocksListProps) {
                   {/* Holdings details */}
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm bg-muted p-3 rounded">
                   <div>
-                    <p className="text-muted-foreground text-xs">Qty</p>
+                    <p className="text-muted-foreground text-xs">{t('quantityShares')}</p>
                     <p className="font-semibold">{totalQuantity.toFixed(2)}</p>
                   </div>
                   <div>
-                    <p className="text-muted-foreground text-xs">Harga Rata-rata</p>
+                    <p className="text-muted-foreground text-xs">{t('averagePrice')}</p>
                     <p className="font-semibold">{formatCurrency(totalShares > 0 ? totalCost / totalShares : 0)}</p>
                   </div>
                   <div>
-                    <p className="text-muted-foreground text-xs">Harga Terkini</p>
+                    <p className="text-muted-foreground text-xs">{t('currentPrice')}</p>
                     <p className="font-semibold">{price > 0 ? formatCurrency(price) : '—'}</p>
                   </div>
                   <div>
-                    <p className="text-muted-foreground text-xs">Total Cost</p>
+                    <p className="text-muted-foreground text-xs">{t('totalCost')}</p>
                     <p className="font-semibold">{formatCurrency(totalCost)}</p>
                   </div>
                 </div>
@@ -198,7 +201,7 @@ export default function StocksList({ stocks, onEdit }: StocksListProps) {
                               className="flex-1 gap-2"
                             >
                               <Edit2 className="w-3 h-3" />
-                              Edit
+                              {tCommon('edit')}
                             </Button>
                             <Button
                               size="sm"
@@ -207,7 +210,7 @@ export default function StocksList({ stocks, onEdit }: StocksListProps) {
                               className="flex-1 gap-2 bg-green-50 text-green-700 hover:bg-green-100"
                             >
                               <DollarSign className="w-3 h-3" />
-                              Sell
+                              {t('sell')}
                             </Button>
                             <Button
                               size="sm"
@@ -216,7 +219,7 @@ export default function StocksList({ stocks, onEdit }: StocksListProps) {
                               className="flex-1 gap-2 text-red-600 hover:text-red-700"
                             >
                               <Trash2 className="w-3 h-3" />
-                              Hapus
+                              {tCommon('delete')}
                             </Button>
                           </>
                         ) : (
@@ -227,7 +230,7 @@ export default function StocksList({ stocks, onEdit }: StocksListProps) {
                             className="flex-1 gap-2 bg-green-50 text-green-700 hover:bg-green-100"
                           >
                             <DollarSign className="w-3 h-3" />
-                            Sell from {getLocationName(locationId)} (FIFO)
+                            {t('sellFromLocation', { location: getLocationName(locationId) })}
                           </Button>
                         )}
                       </div>

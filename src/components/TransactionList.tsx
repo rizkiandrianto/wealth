@@ -1,7 +1,8 @@
 'use client'
 
+import { useTranslations, useLocale } from 'next-intl'
 import { Account, Transaction } from '@/lib/types'
-import { useFormatCurrency, formatDateTime } from '@/lib/format'
+import { useFormatCurrency, useFormatDateTime } from '@/lib/format'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { ArrowRight, Trash2 } from 'lucide-react'
@@ -17,14 +18,15 @@ export default function TransactionList({
   accounts,
   onDelete,
 }: TransactionListProps) {
+  const t = useTranslations('transactions')
+  const tDash = useTranslations('dashboard')
+  const locale = useLocale()
+  const localeTag = locale === 'id' ? 'id-ID' : 'en-US'
   const formatCurrency = useFormatCurrency()
+  const formatDateTime = useFormatDateTime()
 
   const getAccountName = (accountId: string) => {
-    return accounts.find((a) => a.id === accountId)?.name || 'Unknown'
-  }
-
-  const getAccountCurrency = (accountId: string) => {
-    return accounts.find((a) => a.id === accountId)?.currency || 'IDR'
+    return accounts.find((a) => a.id === accountId)?.name || t('unknownAccount')
   }
 
   if (transactions.length === 0) {
@@ -32,8 +34,8 @@ export default function TransactionList({
       <Card className="p-8">
         <div className="text-center">
           <ArrowRight className="w-12 h-12 mx-auto text-muted-foreground mb-4 opacity-50" />
-          <h3 className="text-lg font-semibold mb-2">No transactions yet</h3>
-          <p className="text-muted-foreground">Start by recording your first transaction</p>
+          <h3 className="text-lg font-semibold mb-2">{tDash('noTransactions')}</h3>
+          <p className="text-muted-foreground">{tDash('noTransactionsHint')}</p>
         </div>
       </Card>
     )
@@ -42,7 +44,7 @@ export default function TransactionList({
   // Group transactions by date
   const groupedByDate = transactions.reduce(
     (acc, tx) => {
-      const date = new Date(tx.date).toLocaleDateString('id-ID', {
+      const date = new Date(tx.date).toLocaleDateString(localeTag, {
         year: 'numeric',
         month: 'long',
         day: 'numeric',
@@ -83,11 +85,11 @@ export default function TransactionList({
                 let amountPrefix = '+'
                 
                 if (isTopup) {
-                  label = `Topup → ${getAccountName(tx.toAccountId!)}`
+                  label = `${t('topup')} → ${getAccountName(tx.toAccountId!)}`
                   bgColor = 'from-green-50 to-green-100'
                   iconColor = 'text-green-600'
                 } else if (isWithdrawal) {
-                  label = `${getAccountName(tx.fromAccountId!)} → Withdrawal`
+                  label = `${getAccountName(tx.fromAccountId!)} → ${t('withdrawal')}`
                   bgColor = 'from-orange-50 to-orange-100'
                   iconColor = 'text-orange-600'
                   amountColor = 'text-orange-600'
@@ -125,7 +127,7 @@ export default function TransactionList({
                         variant="ghost"
                         size="sm"
                         onClick={() => {
-                          if (confirm('Delete this transaction?')) {
+                          if (confirm(t('deleteConfirmPrompt'))) {
                             onDelete(tx.id)
                           }
                         }}

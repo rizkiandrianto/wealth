@@ -20,7 +20,7 @@ export default function ModeToggle<T extends string>({
 }: ModeToggleProps<T>) {
   return (
     <div
-      className={`inline-flex gap-1 p-1 bg-muted rounded-lg ${className ?? ''}`}
+      className={`inline-flex gap-1 p-1 bg-muted rounded-lg w-fit ${className ?? ''}`}
       role="group"
     >
       {options.map((opt) => {

@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { useTranslations } from 'next-intl'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -9,6 +10,7 @@ import { useGoldsSummaryQuery } from '@/lib/queries/gold'
 import { ArrowRight, TrendingDown, TrendingUp } from 'lucide-react'
 
 export default function GoldSummaryCard() {
+  const t = useTranslations('summaryCards')
   const formatCurrency = useFormatCurrency()
   const { data: summary, isLoading } = useGoldsSummaryQuery()
 
@@ -30,10 +32,10 @@ export default function GoldSummaryCard() {
     <Card className="p-6 border-l-4 border-l-yellow-500 bg-linear-to-br from-yellow-50 to-transparent dark:from-yellow-950/40">
       <div className="flex items-start justify-between">
         <div>
-          <h3 className="text-lg font-semibold flex items-center gap-2">Portfolio Emas</h3>
+          <h3 className="text-lg font-semibold flex items-center gap-2">{t('goldTitle')}</h3>
           <p className="text-sm text-muted-foreground mt-1 font-bold">
             {totalWeight.toFixed(2)} g
-            {totalWeight > 0 && ` · avg ${formatCurrency(totalCost / totalWeight)}/g`}
+            {totalWeight > 0 && ` · ${t('avg')} ${formatCurrency(totalCost / totalWeight)}/g`}
           </p>
           <div className="mt-3 space-y-2">
             <p className="text-2xl font-bold">
@@ -57,7 +59,7 @@ export default function GoldSummaryCard() {
         </div>
         <Link href="/gold">
           <Button variant="outline" className="gap-2">
-            Detail
+            {t('detail')}
             <ArrowRight className="w-4 h-4" />
           </Button>
         </Link>

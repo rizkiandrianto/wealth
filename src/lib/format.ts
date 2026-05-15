@@ -1,11 +1,26 @@
 import { useCallback } from 'react'
+import { useLocale } from 'next-intl'
 import { useUIStore } from '@/lib/store/useUIStore'
 
 export const HIDDEN_VALUE_MASK = '••••••'
 
-export function formatCurrency(amount: number, currency: string = 'IDR', hide = false): string {
+const LOCALE_TAG: Record<string, string> = {
+  id: 'id-ID',
+  en: 'en-US',
+}
+
+function resolveLocaleTag(locale: string | undefined): string {
+  return LOCALE_TAG[locale ?? 'id'] ?? 'id-ID'
+}
+
+export function formatCurrency(
+  amount: number,
+  currency: string = 'IDR',
+  hide = false,
+  locale: string = 'id-ID',
+): string {
   if (hide) return HIDDEN_VALUE_MASK
-  return new Intl.NumberFormat('id-ID', {
+  return new Intl.NumberFormat(locale, {
     style: 'currency',
     currency,
     minimumFractionDigits: 0,
@@ -15,9 +30,11 @@ export function formatCurrency(amount: number, currency: string = 'IDR', hide = 
 
 export function useFormatCurrency() {
   const hide = useUIStore((s) => s.hideValues)
+  const locale = useLocale()
+  const localeTag = resolveLocaleTag(locale)
   return useCallback(
-    (amount: number, currency: string = 'IDR') => formatCurrency(amount, currency, hide),
-    [hide]
+    (amount: number, currency: string = 'IDR') => formatCurrency(amount, currency, hide, localeTag),
+    [hide, localeTag],
   )
 }
 
@@ -29,24 +46,42 @@ export function useMaskValue() {
   )
 }
 
-export function formatDate(timestamp: number | string): string {
+export function formatDate(timestamp: number | string, locale: string = 'id-ID'): string {
   const date = typeof timestamp === 'string' ? new Date(timestamp) : new Date(timestamp)
-  return date.toLocaleDateString('id-ID', {
+  return date.toLocaleDateString(locale, {
     year: 'numeric',
     month: 'long',
     day: 'numeric',
   })
 }
 
-export function formatDateTime(timestamp: number): string {
+export function formatDateTime(timestamp: number, locale: string = 'id-ID'): string {
   const date = new Date(timestamp)
-  return date.toLocaleDateString('id-ID', {
+  return date.toLocaleDateString(locale, {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
     hour: '2-digit',
     minute: '2-digit',
   })
+}
+
+export function useFormatDate() {
+  const locale = useLocale()
+  const localeTag = resolveLocaleTag(locale)
+  return useCallback(
+    (timestamp: number | string) => formatDate(timestamp, localeTag),
+    [localeTag],
+  )
+}
+
+export function useFormatDateTime() {
+  const locale = useLocale()
+  const localeTag = resolveLocaleTag(locale)
+  return useCallback(
+    (timestamp: number) => formatDateTime(timestamp, localeTag),
+    [localeTag],
+  )
 }
 
 export function formatDateShort(date: string): string {

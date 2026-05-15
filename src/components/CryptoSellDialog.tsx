@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { CryptoHolding } from '@/lib/types'
 import { useFormatCurrency } from '@/lib/format'
 import { useAssetPricesQuery } from '@/lib/queries/prices'
@@ -16,6 +17,11 @@ interface CryptoSellDialogProps {
 }
 
 export default function CryptoSellDialog({ crypto, onSell, onClose }: CryptoSellDialogProps) {
+  const t = useTranslations('sellDialog')
+  const tCrypto = useTranslations('holdings.crypto')
+  const tStocks = useTranslations('holdings.stocks')
+  const tCommon = useTranslations('common')
+  const tDash = useTranslations('dashboard')
   const { data: assetPrices = [] } = useAssetPricesQuery()
   const formatCurrency = useFormatCurrency()
   const currentPrice = assetPrices.find((p) => p.ticker === crypto.symbol)?.price ?? 0
@@ -29,7 +35,7 @@ export default function CryptoSellDialog({ crypto, onSell, onClose }: CryptoSell
     const price = parseFloat(salePrice)
 
     if (!qty || qty <= 0 || qty > crypto.quantity || !price || price <= 0) {
-      alert('Invalid quantity or price')
+      alert(t('invalidQuantityOrPrice'))
       return
     }
 
@@ -46,7 +52,7 @@ export default function CryptoSellDialog({ crypto, onSell, onClose }: CryptoSell
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
       <Card className="w-full max-w-md p-6 space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-xl font-bold">Sell {crypto.symbol}</h2>
+          <h2 className="text-xl font-bold">{t('sellTicker', { ticker: crypto.symbol })}</h2>
           <button onClick={onClose} className="text-muted-foreground hover:text-foreground">
             <X className="w-5 h-5" />
           </button>
@@ -54,13 +60,13 @@ export default function CryptoSellDialog({ crypto, onSell, onClose }: CryptoSell
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="bg-muted/50 p-3 rounded-lg text-sm space-y-1">
-            <p><span className="text-muted-foreground">Available:</span> <span className="font-semibold">{crypto.quantity.toFixed(8)}</span></p>
-            <p><span className="text-muted-foreground">Average Cost:</span> <span className="font-semibold">{formatCurrency(crypto.averagePrice)}</span></p>
-            <p><span className="text-muted-foreground">Current Price:</span> <span className="font-semibold">{currentPrice > 0 ? formatCurrency(currentPrice) : '—'}</span></p>
+            <p><span className="text-muted-foreground">{t('available')}:</span> <span className="font-semibold">{crypto.quantity.toFixed(8)}</span></p>
+            <p><span className="text-muted-foreground">{t('averageCost')}:</span> <span className="font-semibold">{formatCurrency(crypto.averagePrice)}</span></p>
+            <p><span className="text-muted-foreground">{tStocks('currentPrice')}:</span> <span className="font-semibold">{currentPrice > 0 ? formatCurrency(currentPrice) : '—'}</span></p>
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-2">Quantity to Sell</label>
+            <label className="block text-sm font-medium mb-2">{t('quantityToSell')}</label>
             <Input
               type="number"
               step="0.00000001"
@@ -71,7 +77,7 @@ export default function CryptoSellDialog({ crypto, onSell, onClose }: CryptoSell
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-2">Sale Price (per unit)</label>
+            <label className="block text-sm font-medium mb-2">{t('salePricePerUnit')}</label>
             <Input
               type="number"
               step="0.01"
@@ -83,20 +89,20 @@ export default function CryptoSellDialog({ crypto, onSell, onClose }: CryptoSell
 
           {quantity && salePrice && (
             <div className="bg-blue-50 p-3 rounded-lg space-y-2 text-sm">
-              <p><span className="text-muted-foreground">Total Sale Value:</span> <span className="font-semibold">{formatCurrency(totalSaleValue)}</span></p>
-              <p><span className="text-muted-foreground">Total Cost Value:</span> <span className="font-semibold">{formatCurrency(totalCostValue)}</span></p>
+              <p><span className="text-muted-foreground">{t('totalSaleValue')}:</span> <span className="font-semibold">{formatCurrency(totalSaleValue)}</span></p>
+              <p><span className="text-muted-foreground">{t('totalCostValue')}:</span> <span className="font-semibold">{formatCurrency(totalCostValue)}</span></p>
               <p className={`font-semibold ${profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                Realized P&L: {formatCurrency(profit)} ({profitPercent.toFixed(2)}%)
+                {tDash('realizedPnl')}: {formatCurrency(profit)} ({profitPercent.toFixed(2)}%)
               </p>
             </div>
           )}
 
           <div className="flex gap-2 pt-2">
             <Button type="button" variant="outline" onClick={onClose} className="flex-1">
-              Cancel
+              {tCommon('cancel')}
             </Button>
             <Button type="submit" className="flex-1 bg-green-600 hover:bg-green-700">
-              Sell
+              {tCrypto('sell')}
             </Button>
           </div>
         </form>

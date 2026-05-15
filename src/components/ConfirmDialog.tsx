@@ -1,5 +1,6 @@
 'use client'
 
+import { useTranslations } from 'next-intl'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -30,13 +31,16 @@ export default function ConfirmDialog({
   onOpenChange,
   title,
   description,
-  confirmLabel = 'Confirm',
-  cancelLabel = 'Cancel',
+  confirmLabel,
+  cancelLabel,
   loadingLabel,
   isLoading = false,
   destructive = false,
   onConfirm,
 }: ConfirmDialogProps) {
+  const t = useTranslations('common')
+  const resolvedConfirmLabel = confirmLabel ?? t('confirm')
+  const resolvedCancelLabel = cancelLabel ?? t('cancel')
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent>
@@ -47,7 +51,7 @@ export default function ConfirmDialog({
           )}
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={isLoading}>{cancelLabel}</AlertDialogCancel>
+          <AlertDialogCancel disabled={isLoading}>{resolvedCancelLabel}</AlertDialogCancel>
           <AlertDialogAction
             onClick={(e) => {
               e.preventDefault()
@@ -59,7 +63,7 @@ export default function ConfirmDialog({
                 'bg-red-600 hover:bg-red-700 focus-visible:ring-red-600'
             )}
           >
-            {isLoading && loadingLabel ? loadingLabel : confirmLabel}
+            {isLoading && loadingLabel ? loadingLabel : resolvedConfirmLabel}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

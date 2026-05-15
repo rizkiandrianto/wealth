@@ -8,6 +8,7 @@
 
 import { useEffect, useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
+import { useTranslations } from 'next-intl'
 import { Plus } from 'lucide-react'
 import DashboardLayout from '@/components/DashboardLayout'
 import { Button } from '@/components/ui/button'
@@ -20,6 +21,7 @@ import { goldLocationsQueryOptions, useGoldLocationsQuery } from '@/lib/queries/
 import { assetPricesQueryOptions } from '@/lib/queries/prices'
 
 export default function GoldPage() {
+  const t = useTranslations('holdings.gold')
   const qc = useQueryClient()
   useEffect(() => {
     qc.prefetchQuery(goldsQueryOptions())
@@ -37,9 +39,9 @@ export default function GoldPage() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Emas</h1>
+            <h1 className="text-3xl font-bold tracking-tight">{t('title')}</h1>
             <p className="text-sm text-muted-foreground mt-1">
-              Kelola portfolio emas Anda
+              {t('pageSubtitle')}
             </p>
           </div>
           <Button
@@ -50,7 +52,7 @@ export default function GoldPage() {
             className="gap-2 bg-yellow-600 hover:bg-yellow-700"
           >
             <Plus className="w-4 h-4" />
-            Tambah Emas
+            {t('addGold')}
           </Button>
         </div>
 
@@ -94,7 +96,7 @@ export default function GoldPage() {
 
             {golds.length === 0 && (
               <div className="text-center py-12 border border-dashed rounded-lg">
-                <p className="text-muted-foreground mb-4">Belum ada emas</p>
+                <p className="text-muted-foreground mb-4">{t('noGold')}</p>
                 <Button
                   onClick={() => {
                     setEditingId(null)
@@ -104,7 +106,7 @@ export default function GoldPage() {
                   className="gap-2"
                 >
                   <Plus className="w-4 h-4" />
-                  Tambah Emas Pertama
+                  {t('addFirst')}
                 </Button>
               </div>
             )}

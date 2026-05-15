@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { useTranslations } from 'next-intl'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -21,6 +22,7 @@ export default function AccountsList({
   defaultHideZeroBalance = true,
   hideToolBar = false,
 }: AccountsListProps) {
+  const t = useTranslations('accounts')
   const { data: accounts = [], isLoading } = useAccountsQuery()
   const [hideZeroBalance, setHideZeroBalance] = useState(defaultHideZeroBalance)
   const formatCurrency = useFormatCurrency()
@@ -42,12 +44,12 @@ export default function AccountsList({
       <Card className="p-8">
         <div className="text-center">
           <Wallet className="w-12 h-12 mx-auto text-muted-foreground mb-4 opacity-50" />
-          <h3 className="text-lg font-semibold mb-2">No Accounts Yet</h3>
-          <p className="text-muted-foreground mb-6">Start by creating your first account</p>
+          <h3 className="text-lg font-semibold mb-2">{t('noAccounts')}</h3>
+          <p className="text-muted-foreground mb-6">{t('noAccountsHint')}</p>
           <Link href="/accounts">
             <Button className="gap-2">
               <Plus className="w-4 h-4" />
-              Add Account
+              {t('addAccount')}
             </Button>
           </Link>
         </div>
@@ -64,11 +66,11 @@ export default function AccountsList({
   return (
     <div>
       <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
-        <h2 className="text-2xl font-bold text-foreground">Your Accounts</h2>
+        <h2 className="text-2xl font-bold text-foreground">{t('yourAccounts')}</h2>
         {hideToolBar && hiddenCount > 0 && (
           <Link href="/accounts">
             <Button variant="outline" size="sm">
-              View All
+              {t('viewAll')}
             </Button>
           </Link>
         )}
@@ -82,7 +84,7 @@ export default function AccountsList({
                   onCheckedChange={(checked) => setHideZeroBalance(checked === true)}
                 />
                 <Label htmlFor="accounts-list-hide-zero" className="text-sm font-normal cursor-pointer">
-                  Hide 0 balance
+                  {t('hideZeroBalance')}
                   {hiddenCount > 0 && hideZeroBalance && (
                     <span className="text-muted-foreground"> ({hiddenCount})</span>
                   )}
@@ -91,7 +93,7 @@ export default function AccountsList({
               <Link href="/accounts">
                 <Button size="sm" variant="outline">
                   <Plus className="w-4 h-4 mr-2" />
-                  Add Account
+                  {t('addAccount')}
                 </Button>
               </Link>
             </div>
@@ -101,7 +103,7 @@ export default function AccountsList({
 
       {visibleAccounts.length === 0 ? (
         <Card className="p-6 text-center text-sm text-muted-foreground">
-          All accounts have a 0 balance. Uncheck &ldquo;Hide 0 balance&rdquo; to see them.
+          {t('allZeroBalance', { label: t('hideZeroBalance') })}
         </Card>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

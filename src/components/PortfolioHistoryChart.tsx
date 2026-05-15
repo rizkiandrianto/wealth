@@ -1,6 +1,7 @@
 'use client'
 
 import { useMemo, useState } from 'react'
+import { useTranslations } from 'next-intl'
 import {
   LineChart,
   Line,
@@ -32,20 +33,17 @@ type ChartMode = 'total' | 'breakdown'
 
 const TOTAL_COLOR = '#10b981'
 
-const MODE_OPTIONS = [
-  { value: 'total' as const, label: 'Total' },
-  { value: 'breakdown' as const, label: 'Breakdown' },
-]
+type BreakdownKey = 'cashValue' | 'stockValue' | 'cryptoValue' | 'goldValue'
 
-const BREAKDOWN_SERIES: ReadonlyArray<{
-  key: keyof Pick<PortfolioSnapshot, 'cashValue' | 'stockValue' | 'cryptoValue' | 'goldValue'>
-  name: string
+const BREAKDOWN_DEFS: ReadonlyArray<{
+  key: BreakdownKey
+  seriesKey: 'cash' | 'stocks' | 'crypto' | 'gold'
   color: string
 }> = [
-  { key: 'cashValue', name: 'Cash', color: '#3b82f6' },
-  { key: 'stockValue', name: 'Saham', color: '#a855f7' },
-  { key: 'cryptoValue', name: 'Crypto', color: '#f97316' },
-  { key: 'goldValue', name: 'Emas', color: '#eab308' },
+  { key: 'cashValue', seriesKey: 'cash', color: '#3b82f6' },
+  { key: 'stockValue', seriesKey: 'stocks', color: '#a855f7' },
+  { key: 'cryptoValue', seriesKey: 'crypto', color: '#f97316' },
+  { key: 'goldValue', seriesKey: 'gold', color: '#eab308' },
 ]
 
 function formatTickLabel(rawDate: string, viewType: ViewType): string {
@@ -77,6 +75,11 @@ function toIsoDate(date: Date): string {
 }
 
 export default function PortfolioHistoryChart() {
+  const t = useTranslations('history')
+  const MODE_OPTIONS = [
+    { value: 'total' as const, label: t('mode.total') },
+    { value: 'breakdown' as const, label: t('mode.breakdown') },
+  ]
   const range = useUIStore((s) => s.historyRange)
   const setRange = useUIStore((s) => s.setHistoryRange)
   const viewType = useUIStore((s) => s.historyViewType)
@@ -112,7 +115,7 @@ export default function PortfolioHistoryChart() {
       <ViewTypeSelector value={viewType} onChange={setViewType} />
 
       <ChartCard
-        title="Portfolio Value Trend"
+        title={t('portfolioValueTrend')}
         headerRight={<ModeToggle options={MODE_OPTIONS} value={mode} onChange={setMode} />}
         range={range}
         onRangeChange={setRange}
@@ -120,7 +123,7 @@ export default function PortfolioHistoryChart() {
         onDateFilterChange={setDateFilter}
         isLoading={isLoading}
         isEmpty={chartData.length === 0}
-        emptyMessage="No portfolio history for this range."
+        emptyMessage={t('noPortfolioRange')}
       >
         <ResponsiveContainer width="100%" height={400}>
           <LineChart data={chartData} margin={{ top: 5, right: 30, left: 0, bottom: 5 }}>
@@ -166,12 +169,12 @@ export default function PortfolioHistoryChart() {
                 isAnimationActive={false}
               />
             ) : (
-              BREAKDOWN_SERIES.map((s) => (
+              BREAKDOWN_DEFS.map((s) => (
                 <Line
                   key={s.key}
                   type="monotone"
                   dataKey={s.key}
-                  name={s.name}
+                  name={t(`series.${s.seriesKey}`)}
                   stroke={s.color}
                   strokeWidth={2}
                   dot={false}

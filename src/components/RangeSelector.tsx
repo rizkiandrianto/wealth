@@ -1,5 +1,6 @@
 'use client'
 
+import { useTranslations } from 'next-intl'
 import type { SnapshotRange } from '@/lib/snapshot'
 
 const PRESETS: ReadonlyArray<{ value: SnapshotRange; label: string }> = [
@@ -18,11 +19,12 @@ interface RangeSelectorProps {
 }
 
 export default function RangeSelector({ value, onChange, className }: RangeSelectorProps) {
+  const t = useTranslations('history.range')
   return (
     <div
       className={`inline-flex gap-1 p-1 bg-muted rounded-lg ${className ?? ''}`}
       role="group"
-      aria-label="Date range"
+      aria-label={t('label')}
     >
       {PRESETS.map((p) => {
         const active = p.value === value

@@ -1,6 +1,7 @@
 'use client'
 
 import { useMemo, useState } from 'react'
+import { useTranslations } from 'next-intl'
 import type { DateRange } from 'react-day-picker'
 import BalanceChart, { type BalanceChartMode } from '@/components/BalanceChart'
 import HistoryTable from '@/components/HistoryTable'
@@ -14,11 +15,6 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { useUIStore } from '@/lib/store/useUIStore'
 import type { Account } from '@/lib/types'
 
-const BALANCE_MODE_OPTIONS = [
-  { value: 'total' as const, label: 'Total' },
-  { value: 'per-account' as const, label: 'Per Account' },
-]
-
 function toIsoDate(date: Date): string {
   const y = date.getFullYear()
   const m = String(date.getMonth() + 1).padStart(2, '0')
@@ -31,6 +27,11 @@ interface AccountsHistoryChartProps {
 }
 
 export default function AccountsHistoryChart({ accounts }: AccountsHistoryChartProps) {
+  const t = useTranslations('history')
+  const BALANCE_MODE_OPTIONS = [
+    { value: 'total' as const, label: t('mode.total') },
+    { value: 'per-account' as const, label: t('mode.perAccount') },
+  ]
   const range = useUIStore((s) => s.historyRange)
   const setRange = useUIStore((s) => s.setHistoryRange)
   const viewType = useUIStore((s) => s.historyViewType)
@@ -69,7 +70,7 @@ export default function AccountsHistoryChart({ accounts }: AccountsHistoryChartP
       <ViewTypeSelector value={viewType} onChange={setViewType} />
 
       <ChartCard
-        title="Account Balance Trend"
+        title={t('accountBalanceTrend')}
         headerRight={<ModeToggle options={BALANCE_MODE_OPTIONS} value={mode} onChange={setMode} />}
         range={range}
         onRangeChange={setRange}

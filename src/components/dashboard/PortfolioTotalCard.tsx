@@ -2,6 +2,7 @@
 
 import { Card } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
+import { useTranslations } from 'next-intl'
 import { useFormatCurrency } from '@/lib/format'
 import { useUIStore, type PortfolioKey } from '@/lib/store/useUIStore'
 import { useAccountsQuery } from '@/lib/queries/accounts'
@@ -11,6 +12,7 @@ import { useGoldsSummaryQuery } from '@/lib/queries/gold'
 import { Eye, EyeOff, TrendingDown, TrendingUp } from 'lucide-react'
 
 export default function PortfolioTotalCard() {
+  const t = useTranslations('dashboard')
   const formatCurrency = useFormatCurrency()
   const hideValues = useUIStore((s) => s.hideValues)
   const toggleHideValues = useUIStore((s) => s.toggleHideValues)
@@ -70,7 +72,7 @@ export default function PortfolioTotalCard() {
       <div className="flex items-start justify-between">
         <div>
           <p className="text-sm text-muted-foreground mb-2 flex items-center gap-1.5 font-bold">
-            Total Portfolio
+            {t('portfolioTotal')}
           </p>
           <p className="text-3xl font-bold text-foreground">{formatCurrency(totalPortfolio)}</p>
           <div className="mt-3 text-sm text-muted-foreground space-y-1.5 font-bold">
@@ -83,7 +85,7 @@ export default function PortfolioTotalCard() {
               }`}
             >
               <span className="w-2 h-2 rounded-full bg-purple-500 shrink-0" />
-              <span>Cash: {formatCurrency(totalBalance)}</span>
+              <span>{t('cash')}: {formatCurrency(totalBalance)}</span>
             </button>
             {totalStockValue > 0 && (
               <button
@@ -95,7 +97,7 @@ export default function PortfolioTotalCard() {
                 }`}
               >
                 <span className="w-2 h-2 rounded-full bg-blue-500 shrink-0" />
-                <span>Saham: {formatCurrency(totalStockValue)}</span>
+                <span>{t('stocks')}: {formatCurrency(totalStockValue)}</span>
               </button>
             )}
             {totalCryptoValue > 0 && (
@@ -108,7 +110,7 @@ export default function PortfolioTotalCard() {
                 }`}
               >
                 <span className="w-2 h-2 rounded-full bg-orange-500 shrink-0" />
-                <span>Crypto: {formatCurrency(totalCryptoValue)}</span>
+                <span>{t('crypto')}: {formatCurrency(totalCryptoValue)}</span>
               </button>
             )}
             {totalGoldValue > 0 && (
@@ -121,7 +123,7 @@ export default function PortfolioTotalCard() {
                 }`}
               >
                 <span className="w-2 h-2 rounded-full bg-yellow-500 shrink-0" />
-                <span>Emas: {formatCurrency(totalGoldValue)}</span>
+                <span>{t('gold')}: {formatCurrency(totalGoldValue)}</span>
               </button>
             )}
           </div>
@@ -144,8 +146,8 @@ export default function PortfolioTotalCard() {
           <button
             type="button"
             onClick={toggleHideValues}
-            aria-label={hideValues ? 'Show values' : 'Hide values'}
-            title={hideValues ? 'Show values' : 'Hide values'}
+            aria-label={hideValues ? t('showValues') : t('hideValues')}
+            title={hideValues ? t('showValues') : t('hideValues')}
             className="w-12 h-12 rounded-lg bg-emerald-700 hover:bg-emerald-600 flex items-center justify-center transition-colors"
           >
             {hideValues ? (

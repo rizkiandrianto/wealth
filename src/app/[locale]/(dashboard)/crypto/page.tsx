@@ -1,36 +1,38 @@
 'use client'
 
 // Required APIs:
-//   GET    /api/stocks
-//   GET    /api/stock-locations
+//   GET    /api/crypto
+//   GET    /api/crypto-locations
 //   GET    /api/market/prices
-//   (POST/PATCH/DELETE /api/stocks/*  via StockForm / dialogs)
+//   (POST/PATCH/DELETE /api/crypto/* via CryptoForm / dialogs)
 
 import { useEffect, useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
+import { useTranslations } from 'next-intl'
 import { Plus } from 'lucide-react'
 import DashboardLayout from '@/components/DashboardLayout'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import AssetFormSheet from '@/components/AssetFormSheet'
-import StocksList from '@/components/StocksList'
-import StocksByLocation from '@/components/StocksByLocation'
-import StocksSummary from '@/components/StocksSummary'
-import { stocksQueryOptions, useStocksQuery } from '@/lib/queries/stocks'
-import { stockLocationsQueryOptions, useStockLocationsQuery } from '@/lib/queries/stockLocations'
+import CryptosList from '@/components/CryptosList'
+import CryptosByLocation from '@/components/CryptosByLocation'
+import CryptosSummary from '@/components/CryptosSummary'
+import { cryptosQueryOptions, useCryptosQuery } from '@/lib/queries/crypto'
+import { cryptoLocationsQueryOptions, useCryptoLocationsQuery } from '@/lib/queries/cryptoLocations'
 import { assetPricesQueryOptions } from '@/lib/queries/prices'
 
-export default function StocksPage() {
+export default function CryptoPage() {
+  const t = useTranslations('holdings.crypto')
   const qc = useQueryClient()
   useEffect(() => {
-    qc.prefetchQuery(stocksQueryOptions())
-    qc.prefetchQuery(stockLocationsQueryOptions())
+    qc.prefetchQuery(cryptosQueryOptions())
+    qc.prefetchQuery(cryptoLocationsQueryOptions())
     qc.prefetchQuery(assetPricesQueryOptions())
   }, [qc])
 
-  const { data: stocks = [], isLoading: stocksLoading } = useStocksQuery()
-  const { data: stockLocations = [] } = useStockLocationsQuery()
+  const { data: cryptos = [], isLoading: cryptosLoading } = useCryptosQuery()
+  const { data: cryptoLocations = [] } = useCryptoLocationsQuery()
   const [showForm, setShowForm] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
 
@@ -39,9 +41,9 @@ export default function StocksPage() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Saham</h1>
+            <h1 className="text-3xl font-bold tracking-tight">{t('title')}</h1>
             <p className="text-sm text-muted-foreground mt-1">
-              Kelola portfolio saham Anda
+              {t('pageSubtitle')}
             </p>
           </div>
           <Button
@@ -52,12 +54,12 @@ export default function StocksPage() {
             className="gap-2"
           >
             <Plus className="w-4 h-4" />
-            Tambah Saham
+            {t('addCrypto')}
           </Button>
         </div>
 
         <AssetFormSheet
-          type="stock"
+          type="crypto"
           open={showForm}
           onOpenChange={(open) => {
             setShowForm(open)
@@ -66,12 +68,12 @@ export default function StocksPage() {
           editingId={editingId}
         />
 
-        {stocksLoading ? (
+        {cryptosLoading ? (
           <>
             <div className="grid gap-4 md:grid-cols-3">
-              <Skeleton className="h-24 rounded-xl" />
-              <Skeleton className="h-24 rounded-xl" />
-              <Skeleton className="h-24 rounded-xl" />
+              <Skeleton className="h-28 rounded-xl" />
+              <Skeleton className="h-28 rounded-xl" />
+              <Skeleton className="h-28 rounded-xl" />
             </div>
             <Skeleton className="h-12 w-full rounded-md" />
             <div className="space-y-3">
@@ -81,18 +83,18 @@ export default function StocksPage() {
           </>
         ) : (
           <>
-            {stocks.length > 0 && <StocksSummary />}
+            {cryptos.length > 0 && <CryptosSummary />}
 
-            {stocks.length > 0 && (
-              <Tabs defaultValue="by-ticker" className="w-full">
+            {cryptos.length > 0 && (
+              <Tabs defaultValue="by-symbol" className="w-full">
                 <TabsList className="grid grid-cols-2 mb-6">
-                  <TabsTrigger value="by-ticker">Berdasarkan Ticker</TabsTrigger>
-                  <TabsTrigger value="by-location">Berdasarkan Lokasi</TabsTrigger>
+                  <TabsTrigger value="by-symbol">{t('bySymbol')}</TabsTrigger>
+                  <TabsTrigger value="by-location">{t('byLocation')}</TabsTrigger>
                 </TabsList>
 
-                <TabsContent value="by-ticker" className="space-y-4">
-                  <StocksList
-                    stocks={stocks}
+                <TabsContent value="by-symbol" className="space-y-4">
+                  <CryptosList
+                    cryptos={cryptos}
                     onEdit={(id) => {
                       setEditingId(id)
                       setShowForm(true)
@@ -101,9 +103,9 @@ export default function StocksPage() {
                 </TabsContent>
 
                 <TabsContent value="by-location" className="space-y-4">
-                  <StocksByLocation
-                    stocks={stocks}
-                    locations={stockLocations}
+                  <CryptosByLocation
+                    cryptos={cryptos}
+                    locations={cryptoLocations}
                     onEdit={(id) => {
                       setEditingId(id)
                       setShowForm(true)
@@ -113,9 +115,9 @@ export default function StocksPage() {
               </Tabs>
             )}
 
-            {stocks.length === 0 && (
+            {cryptos.length === 0 && (
               <div className="text-center py-12 border border-dashed rounded-lg">
-                <p className="text-muted-foreground mb-4">Belum ada saham</p>
+                <p className="text-muted-foreground mb-4">{t('noCrypto')}</p>
                 <Button
                   onClick={() => {
                     setEditingId(null)
@@ -125,7 +127,7 @@ export default function StocksPage() {
                   className="gap-2"
                 >
                   <Plus className="w-4 h-4" />
-                  Tambah Saham Pertama
+                  {t('addFirst')}
                 </Button>
               </div>
             )}

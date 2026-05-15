@@ -2,6 +2,7 @@
 
 import { Card } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
+import { useTranslations } from 'next-intl'
 import { useFormatCurrency } from '@/lib/format'
 import { useStockSalesSummaryQuery } from '@/lib/queries/stocks'
 import { useCryptoSalesSummaryQuery } from '@/lib/queries/crypto'
@@ -9,6 +10,7 @@ import { useGoldSalesSummaryQuery } from '@/lib/queries/gold'
 import { BarChart3 } from 'lucide-react'
 
 export default function RealizedPnLCard() {
+  const t = useTranslations('dashboard')
   const formatCurrency = useFormatCurrency()
   const { data: stockSummary, isLoading: stockLoading } = useStockSalesSummaryQuery()
   const { data: cryptoSummary, isLoading: cryptoLoading } = useCryptoSalesSummaryQuery()
@@ -30,16 +32,16 @@ export default function RealizedPnLCard() {
   const totalPnL = stocksPnL + cryptosPnL + goldsPnL
 
   const breakdownItems: Array<{ label: string; value: number; show: boolean }> = [
-    { label: 'Stocks', value: stocksPnL, show: stockCount > 0 },
-    { label: 'Cryptos', value: cryptosPnL, show: cryptoCount > 0 },
-    { label: 'Gold', value: goldsPnL, show: goldCount > 0 },
+    { label: t('stocks'), value: stocksPnL, show: stockCount > 0 },
+    { label: t('crypto'), value: cryptosPnL, show: cryptoCount > 0 },
+    { label: t('gold'), value: goldsPnL, show: goldCount > 0 },
   ]
   const visibleBreakdown = breakdownItems.filter((item) => item.show)
 
   const countParts: string[] = []
-  if (stockCount > 0) countParts.push(`${stockCount} stock sales`)
-  if (cryptoCount > 0) countParts.push(`${cryptoCount} crypto sales`)
-  if (goldCount > 0) countParts.push(`${goldCount} gold sales`)
+  if (stockCount > 0) countParts.push(`${stockCount} ${t('stockSales')}`)
+  if (cryptoCount > 0) countParts.push(`${cryptoCount} ${t('cryptoSales')}`)
+  if (goldCount > 0) countParts.push(`${goldCount} ${t('goldSales')}`)
 
   return (
     <Card className="p-6 border-l-4 border-l-teal-500 bg-linear-to-br from-teal-50 to-transparent dark:border-l-teal-500 dark:from-teal-950/30">
@@ -49,7 +51,7 @@ export default function RealizedPnLCard() {
             <BarChart3 className="w-6 h-6 text-green-600 dark:text-yellow-400" />
           </div>
           <div className="min-w-0">
-            <h3 className="text-base font-semibold">Realized P&L</h3>
+            <h3 className="text-base font-semibold">{t('realizedPnl')}</h3>
             <p className="text-sm text-muted-foreground mt-0.5">{countParts.join(' • ')}</p>
             <p className="text-2xl font-bold mt-2">{formatCurrency(totalPnL)}</p>
           </div>

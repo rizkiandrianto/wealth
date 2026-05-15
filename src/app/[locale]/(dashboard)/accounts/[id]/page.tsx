@@ -9,6 +9,7 @@
 import { useEffect, useMemo, useState, use } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import {
   ArrowLeft,
@@ -19,7 +20,7 @@ import {
 } from "lucide-react";
 import DashboardLayout from "@/components/DashboardLayout";
 import AccountForm from "@/components/AccountForm";
-import { useFormatCurrency, formatDateTime } from "@/lib/format";
+import { useFormatCurrency, useFormatDateTime } from "@/lib/format";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -40,19 +41,28 @@ import {
   useTransactionsQuery,
 } from "@/lib/queries/transactions";
 
-function TransactionListWrapper(
-  transactions: Transaction[],
-  account: Account,
-  accounts: Account[],
-  formatCurrency: (amount: number, currency?: string) => string,
-) {
+interface TxListProps {
+  transactions: Transaction[];
+  account: Account;
+  accounts: Account[];
+  formatCurrency: (amount: number, currency?: string) => string;
+  formatDateTime: (ts: number) => string;
+}
+
+function AccountTransactionList({
+  transactions,
+  account,
+  accounts,
+  formatCurrency,
+  formatDateTime,
+}: TxListProps) {
+  const t = useTranslations("accountDetail");
+  const tTx = useTranslations("transactions");
   if (transactions.length === 0) {
     return (
       <Card className="p-8 text-center">
         <ArrowRight className="w-12 h-12 mx-auto text-muted-foreground mb-4 opacity-50" />
-        <p className="text-muted-foreground">
-          No transactions for this account yet
-        </p>
+        <p className="text-muted-foreground">{t("noTransactions")}</p>
       </Card>
     );
   }
@@ -63,22 +73,23 @@ function TransactionListWrapper(
         {transactions.map((tx) => {
           const isIncoming = tx.toAccountId === account.id;
           const counterpartId = isIncoming ? tx.fromAccountId : tx.toAccountId;
-          let counterpartName: string;
-          if (counterpartId) {
-            counterpartName =
-              accounts.find((a) => a.id === counterpartId)?.name ?? "Unknown";
-          } else {
-            counterpartName = isIncoming ? "Topup" : "Withdrawal";
-          }
+          const counterpart = counterpartId
+            ? accounts.find((a) => a.id === counterpartId)
+            : null;
 
-          const isTopupOrWithdrawal =
-            counterpartName === "Topup" || counterpartName === "Withdrawal";
+          const counterpartName = counterpart
+            ? counterpart.name
+            : isIncoming
+              ? tTx("topup")
+              : tTx("withdrawal");
+
+          const isTopupOrWithdrawal = !counterpart;
 
           const amountColor = isIncoming ? "text-green-600" : "text-orange-600";
           const amountPrefix = isIncoming ? "+" : "-";
           const label = isIncoming
-            ? `Credit From ${counterpartName}`
-            : `Debit To ${counterpartName}`;
+            ? t("creditFrom", { name: counterpartName })
+            : t("debitTo", { name: counterpartName });
           const finalLabel = isTopupOrWithdrawal ? counterpartName : label;
 
           return (
@@ -111,8 +122,13 @@ export default function AccountDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = use(params);
+  const t = useTranslations("accountDetail");
+  const tAccounts = useTranslations("accounts");
+  const tCommon = useTranslations("common");
+  const tDash = useTranslations("dashboard");
   const router = useRouter();
   const formatCurrency = useFormatCurrency();
+  const formatDateTime = useFormatDateTime();
   const qc = useQueryClient();
   useEffect(() => {
     qc.prefetchQuery(accountsQueryOptions());
@@ -186,17 +202,16 @@ export default function AccountDetailPage({
             className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
           >
             <ArrowLeft className="w-4 h-4" />
-            Back to Accounts
+            {t("backToAccounts")}
           </Link>
           <Card className="p-8 text-center">
             <Wallet className="w-16 h-16 mx-auto text-muted-foreground mb-4 opacity-30" />
-            <h3 className="text-xl font-semibold mb-2">Account not found</h3>
+            <h3 className="text-xl font-semibold mb-2">{t("notFound")}</h3>
             <p className="text-muted-foreground mb-6">
-              The account you&apos;re looking for doesn&apos;t exist or has been
-              deleted.
+              {t("notFoundHint")}
             </p>
             <Link href="/accounts">
-              <Button>Back to Accounts</Button>
+              <Button>{t("backToAccounts")}</Button>
             </Link>
           </Card>
         </div>
@@ -216,7 +231,7 @@ export default function AccountDetailPage({
           className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
         >
           <ArrowLeft className="w-4 h-4" />
-          Back to Accounts
+          {t("backToAccounts")}
         </Link>
 
         <Card className={`p-6 bg-linear-to-br ${colorClass}`}>
@@ -235,7 +250,7 @@ export default function AccountDetailPage({
                 {formatCurrency(Math.max(balance, 0), account.currency)}
               </p>
               <p className="text-xs text-muted-foreground mt-2">
-                Currency: {account.currency}
+                {tAccounts("currency")}: {account.currency}
               </p>
             </div>
 
@@ -248,7 +263,7 @@ export default function AccountDetailPage({
                   className="gap-2"
                 >
                   <Pencil className="w-4 h-4" />
-                  Edit
+                  {tCommon("edit")}
                 </Button>
                 <Button
                   variant="outline"
@@ -257,7 +272,7 @@ export default function AccountDetailPage({
                   className="gap-2 text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
                 >
                   <Trash2 className="w-4 h-4" />
-                  Delete
+                  {tCommon("delete")}
                 </Button>
               </div>
             )}
@@ -266,7 +281,7 @@ export default function AccountDetailPage({
 
         {isEditing && (
           <Card className="p-6">
-            <h2 className="text-lg font-semibold mb-4">Edit Account</h2>
+            <h2 className="text-lg font-semibold mb-4">{t("editTitle")}</h2>
             <AccountForm
               initialData={{
                 name: account.name,
@@ -277,13 +292,13 @@ export default function AccountDetailPage({
               onCancel={() => setIsEditing(false)}
             />
             {isSubmitting && (
-              <p className="text-sm text-muted-foreground mt-3">Saving…</p>
+              <p className="text-sm text-muted-foreground mt-3">{tCommon("saving")}</p>
             )}
           </Card>
         )}
 
         <div>
-          <h2 className="text-lg font-semibold mb-3">Recent Transactions</h2>
+          <h2 className="text-lg font-semibold mb-3">{tDash("recentTransactions")}</h2>
           {txLoading ? (
             <Card className="p-4 space-y-3">
               {[0, 1, 2].map((i) => (
@@ -291,12 +306,13 @@ export default function AccountDetailPage({
               ))}
             </Card>
           ) : (
-            TransactionListWrapper(
-              sortedTransactions,
-              account,
-              accounts,
-              formatCurrency,
-            )
+            <AccountTransactionList
+              transactions={sortedTransactions}
+              account={account}
+              accounts={accounts}
+              formatCurrency={formatCurrency}
+              formatDateTime={formatDateTime}
+            />
           )}
         </div>
       </div>
@@ -304,10 +320,10 @@ export default function AccountDetailPage({
       <ConfirmDialog
         open={showDeleteDialog}
         onOpenChange={setShowDeleteDialog}
-        title={`Delete ${account.name}?`}
-        description="This will permanently delete this account and all of its transactions. This action cannot be undone."
-        confirmLabel="Delete"
-        loadingLabel="Deleting…"
+        title={tAccounts("deleteConfirmTitle", { name: account.name })}
+        description={tAccounts("deleteConfirmDescriptionFull")}
+        confirmLabel={tCommon("delete")}
+        loadingLabel={tCommon("deleting")}
         isLoading={isSubmitting}
         destructive
         onConfirm={handleDelete}

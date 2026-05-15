@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { CryptoHolding } from '@/lib/types'
 import { useFormatCurrency } from '@/lib/format'
 import { useDeleteCrypto, useSellCrypto, useSellCryptoBatch } from '@/lib/queries/crypto'
@@ -23,6 +24,9 @@ interface CryptosListProps {
 }
 
 export default function CryptosList({ cryptos, onEdit }: CryptosListProps) {
+  const t = useTranslations('holdings.crypto')
+  const tCommon = useTranslations('common')
+  const tStocks = useTranslations('holdings.stocks')
   const { data: cryptoLocations = [] } = useCryptoLocationsQuery()
   const { data: assetPrices = [] } = useAssetPricesQuery()
   const deleteCrypto = useDeleteCrypto()
@@ -100,19 +104,19 @@ export default function CryptosList({ cryptos, onEdit }: CryptosListProps) {
                 <div className="space-y-3">
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm bg-muted/50 p-2 rounded">
                     <div>
-                      <p className="text-muted-foreground text-xs">Quantity</p>
+                      <p className="text-muted-foreground text-xs">{t('quantity')}</p>
                       <p className="font-semibold">{totalQuantity.toFixed(8)}</p>
                     </div>
                     <div>
-                      <p className="text-muted-foreground text-xs">Avg Price</p>
+                      <p className="text-muted-foreground text-xs">{t('averagePrice')}</p>
                       <p className="font-semibold">{formatCurrency(averagePrice)}</p>
                     </div>
                     <div>
-                      <p className="text-muted-foreground text-xs">Current Price</p>
+                      <p className="text-muted-foreground text-xs">{t('currentPrice')}</p>
                       <p className="font-semibold">{price > 0 ? formatCurrency(price) : '—'}</p>
                     </div>
                     <div>
-                      <p className="text-muted-foreground text-xs">Total Cost</p>
+                      <p className="text-muted-foreground text-xs">{tStocks('totalCost')}</p>
                       <p className="font-semibold">{formatCurrency(totalCost)}</p>
                     </div>
                   </div>
@@ -172,7 +176,7 @@ export default function CryptosList({ cryptos, onEdit }: CryptosListProps) {
                                     size="sm"
                                     variant="ghost"
                                     onClick={() => {
-                                      if (confirm('Delete this crypto holding?')) {
+                                      if (confirm(t('deleteConfirmPrompt'))) {
                                         deleteCrypto.mutate(lot.id)
                                       }
                                     }}
@@ -196,7 +200,7 @@ export default function CryptosList({ cryptos, onEdit }: CryptosListProps) {
                                 className="flex-1 gap-2"
                               >
                                 <Edit2 className="w-3 h-3" />
-                                Edit
+                                {tCommon('edit')}
                               </Button>
                               <Button
                                 size="sm"
@@ -205,20 +209,20 @@ export default function CryptosList({ cryptos, onEdit }: CryptosListProps) {
                                 className="flex-1 gap-2 bg-green-50 text-green-700 hover:bg-green-100"
                               >
                                 <DollarSign className="w-3 h-3" />
-                                Sell
+                                {t('sell')}
                               </Button>
                               <Button
                                 size="sm"
                                 variant="outline"
                                 onClick={() => {
-                                  if (confirm('Delete this crypto holding?')) {
+                                  if (confirm(t('deleteConfirmPrompt'))) {
                                     deleteCrypto.mutate(locLots[0].id)
                                   }
                                 }}
                                 className="flex-1 gap-2 text-red-600 hover:text-red-700"
                               >
                                 <Trash2 className="w-3 h-3" />
-                                Hapus
+                                {tCommon('delete')}
                               </Button>
                             </>
                           ) : (
@@ -229,7 +233,7 @@ export default function CryptosList({ cryptos, onEdit }: CryptosListProps) {
                               className="flex-1 gap-2 bg-green-50 text-green-700 hover:bg-green-100"
                             >
                               <DollarSign className="w-3 h-3" />
-                              Sell from {getLocationName(locationId)} (FIFO)
+                              {tStocks('sellFromLocation', { location: getLocationName(locationId) })}
                             </Button>
                           )}
                         </div>

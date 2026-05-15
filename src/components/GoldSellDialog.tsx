@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { GoldHolding } from '@/lib/types'
 import { useFormatCurrency } from '@/lib/format'
 import { useAssetPricesQuery } from '@/lib/queries/prices'
@@ -16,6 +17,10 @@ interface GoldSellDialogProps {
 }
 
 export default function GoldSellDialog({ gold, onSell, onClose }: GoldSellDialogProps) {
+  const t = useTranslations('sellDialog')
+  const tGold = useTranslations('holdings.gold')
+  const tCommon = useTranslations('common')
+  const tDash = useTranslations('dashboard')
   const { data: assetPrices = [] } = useAssetPricesQuery()
   const formatCurrency = useFormatCurrency()
   const currentPrice = assetPrices.find((p) => p.ticker === 'XAU')?.price ?? 0
@@ -29,7 +34,7 @@ export default function GoldSellDialog({ gold, onSell, onClose }: GoldSellDialog
     const price = parseFloat(salePrice)
 
     if (!w || w <= 0 || w > gold.weight || !price || price <= 0) {
-      alert('Berat atau harga tidak valid')
+      alert(t('invalidWeightOrPrice'))
       return
     }
 
@@ -46,7 +51,7 @@ export default function GoldSellDialog({ gold, onSell, onClose }: GoldSellDialog
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
       <Card className="w-full max-w-md p-6 space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-xl font-bold">Jual Emas</h2>
+          <h2 className="text-xl font-bold">{tGold('sellTitle')}</h2>
           <button onClick={onClose} className="text-muted-foreground hover:text-foreground">
             <X className="w-5 h-5" />
           </button>
@@ -54,13 +59,13 @@ export default function GoldSellDialog({ gold, onSell, onClose }: GoldSellDialog
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="bg-muted/50 p-3 rounded-lg text-sm space-y-1">
-            <p><span className="text-muted-foreground">Tersedia:</span> <span className="font-semibold">{gold.weight.toFixed(4)} gram</span></p>
-            <p><span className="text-muted-foreground">Harga Beli:</span> <span className="font-semibold">{formatCurrency(gold.purchasePrice)}/gram</span></p>
-            <p><span className="text-muted-foreground">Harga Terkini:</span> <span className="font-semibold">{currentPrice > 0 ? `${formatCurrency(currentPrice)}/gram` : '—'}</span></p>
+            <p><span className="text-muted-foreground">{t('available')}:</span> <span className="font-semibold">{gold.weight.toFixed(4)} gram</span></p>
+            <p><span className="text-muted-foreground">{tGold('purchasePrice')}:</span> <span className="font-semibold">{formatCurrency(gold.purchasePrice)}/gram</span></p>
+            <p><span className="text-muted-foreground">{tGold('currentPrice')}:</span> <span className="font-semibold">{currentPrice > 0 ? `${formatCurrency(currentPrice)}/gram` : '—'}</span></p>
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-2">Berat yang Dijual (gram)</label>
+            <label className="block text-sm font-medium mb-2">{t('weightSold')}</label>
             <Input
               type="number"
               step="0.0001"
@@ -71,7 +76,7 @@ export default function GoldSellDialog({ gold, onSell, onClose }: GoldSellDialog
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-2">Harga Jual (IDR/gram)</label>
+            <label className="block text-sm font-medium mb-2">{t('salePricePerGram')}</label>
             <Input
               type="number"
               step="0.01"
@@ -83,20 +88,20 @@ export default function GoldSellDialog({ gold, onSell, onClose }: GoldSellDialog
 
           {weight && salePrice && (
             <div className="bg-blue-50 p-3 rounded-lg space-y-2 text-sm">
-              <p><span className="text-muted-foreground">Total Nilai Jual:</span> <span className="font-semibold">{formatCurrency(totalSaleValue)}</span></p>
-              <p><span className="text-muted-foreground">Total Nilai Beli:</span> <span className="font-semibold">{formatCurrency(totalCostValue)}</span></p>
+              <p><span className="text-muted-foreground">{t('totalSaleValue')}:</span> <span className="font-semibold">{formatCurrency(totalSaleValue)}</span></p>
+              <p><span className="text-muted-foreground">{t('totalCostValue')}:</span> <span className="font-semibold">{formatCurrency(totalCostValue)}</span></p>
               <p className={`font-semibold ${profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                Realized P&L: {formatCurrency(profit)} ({profitPercent.toFixed(2)}%)
+                {tDash('realizedPnl')}: {formatCurrency(profit)} ({profitPercent.toFixed(2)}%)
               </p>
             </div>
           )}
 
           <div className="flex gap-2 pt-2">
             <Button type="button" variant="outline" onClick={onClose} className="flex-1">
-              Batal
+              {tCommon('cancel')}
             </Button>
             <Button type="submit" className="flex-1 bg-yellow-600 hover:bg-yellow-700">
-              Jual
+              {tGold('sell')}
             </Button>
           </div>
         </form>

@@ -1,13 +1,14 @@
 'use client'
 
 import { useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { Plus, TrendingUp, Bitcoin, ArrowLeftRight, Gem } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import AssetFormSheet, { type AssetFormType } from '@/components/AssetFormSheet'
 
 type Action = {
   type: AssetFormType
-  label: string
+  labelKey: 'gold' | 'stocks' | 'crypto' | 'transactions'
   icon: React.ComponentType<{ className?: string }>
   gradient: string
 }
@@ -15,31 +16,33 @@ type Action = {
 const ACTIONS: Action[] = [
   {
     type: 'gold',
-    label: 'Emas',
+    labelKey: 'gold',
     icon: Gem,
     gradient: 'from-yellow-500 to-amber-500',
   },
   {
     type: 'stock',
-    label: 'Saham',
+    labelKey: 'stocks',
     icon: TrendingUp,
     gradient: 'from-blue-500 to-blue-600',
   },
   {
     type: 'crypto',
-    label: 'Kripto',
+    labelKey: 'crypto',
     icon: Bitcoin,
     gradient: 'from-orange-500 to-amber-600',
   },
   {
     type: 'transaction',
-    label: 'Transaksi',
+    labelKey: 'transactions',
     icon: ArrowLeftRight,
     gradient: 'from-emerald-500 to-teal-600',
   },
 ]
 
 export default function QuickAddFab() {
+  const tNav = useTranslations('nav')
+  const tQuick = useTranslations('quickAdd')
   const [open, setOpen] = useState(false)
   const [activeType, setActiveType] = useState<AssetFormType | null>(null)
 
@@ -53,7 +56,7 @@ export default function QuickAddFab() {
       {open && (
         <button
           type="button"
-          aria-label="Tutup menu tambah"
+          aria-label={tQuick('closeMenu')}
           className="fixed inset-0 bg-black/20 backdrop-blur-sm top-0 z-50"
           onClick={() => setOpen(false)}
         />
@@ -75,12 +78,12 @@ export default function QuickAddFab() {
               style={{ transitionDelay: open ? `${reverseIndex * 40}ms` : '0ms' }}
             >
               <span className="hidden md:inline-flex rounded-full border bg-background px-3 py-1 text-sm font-medium shadow-sm">
-                {action.label}
+                {tNav(action.labelKey)}
               </span>
               <button
                 type="button"
                 onClick={() => handlePick(action.type)}
-                aria-label={`Tambah ${action.label}`}
+                aria-label={tQuick('add', { label: tNav(action.labelKey) })}
                 className={cn(
                   'flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br text-white shadow-lg transition-transform hover:scale-105 active:scale-95',
                   action.gradient,
@@ -95,7 +98,7 @@ export default function QuickAddFab() {
         <button
           type="button"
           onClick={() => setOpen((v) => !v)}
-          aria-label={open ? 'Tutup menu tambah' : 'Buka menu tambah'}
+          aria-label={open ? tQuick('closeMenu') : tQuick('openMenu')}
           aria-expanded={open}
           className="flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg transition-all hover:shadow-xl active:scale-95 border-4 border-white dark:border-background"
         >

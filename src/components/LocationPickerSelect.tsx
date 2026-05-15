@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useTranslations } from 'next-intl'
 import {
   Select,
   SelectContent,
@@ -36,6 +37,8 @@ export default function LocationPickerSelect({
   onChange,
   onAddLocation,
 }: LocationPickerSelectProps) {
+  const t = useTranslations('locationPicker')
+  const tCommon = useTranslations('common')
   const [selectOpen, setSelectOpen] = useState(false)
   const [dialogOpen, setDialogOpen] = useState(false)
   const [newName, setNewName] = useState('')
@@ -70,7 +73,7 @@ export default function LocationPickerSelect({
               setDialogOpen(true)
             }}
           >
-            + Tambah lokasi baru
+            + {t('addNew')}
           </button>
         </SelectContent>
       </Select>
@@ -78,10 +81,10 @@ export default function LocationPickerSelect({
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="max-w-sm">
           <DialogHeader>
-            <DialogTitle>Tambah Lokasi Baru</DialogTitle>
+            <DialogTitle>{t('addTitle')}</DialogTitle>
           </DialogHeader>
           <Input
-            placeholder="Nama lokasi"
+            placeholder={t('namePlaceholder')}
             value={newName}
             onChange={(e) => setNewName(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleSave()}
@@ -89,9 +92,9 @@ export default function LocationPickerSelect({
           />
           <DialogFooter>
             <Button variant="outline" onClick={() => setDialogOpen(false)}>
-              Batal
+              {tCommon('cancel')}
             </Button>
-            <Button onClick={handleSave}>Simpan</Button>
+            <Button onClick={handleSave}>{tCommon('save')}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

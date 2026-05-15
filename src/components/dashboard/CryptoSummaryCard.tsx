@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { useTranslations } from 'next-intl'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -9,6 +10,7 @@ import { useCryptosSummaryQuery } from '@/lib/queries/crypto'
 import { ArrowRight, TrendingDown, TrendingUp } from 'lucide-react'
 
 export default function CryptoSummaryCard() {
+  const t = useTranslations('summaryCards')
   const formatCurrency = useFormatCurrency()
   const { data: summary, isLoading } = useCryptosSummaryQuery()
 
@@ -29,9 +31,9 @@ export default function CryptoSummaryCard() {
     <Card className="p-6 border-l-4 border-l-orange-500 bg-linear-to-br from-orange-50 to-transparent dark:from-orange-950/40">
       <div className="flex items-start justify-between">
         <div>
-          <h3 className="text-lg font-semibold">Portfolio Crypto</h3>
+          <h3 className="text-lg font-semibold">{t('cryptoTitle')}</h3>
           <p className="text-sm text-muted-foreground mt-1 font-bold">
-            {uniqueCount} crypto dimiliki
+            {t('cryptoOwned', { count: uniqueCount })}
           </p>
           <div className="mt-3 space-y-2">
             <p className="text-2xl font-bold">{formatCurrency(totalValue)}</p>
@@ -51,7 +53,7 @@ export default function CryptoSummaryCard() {
         </div>
         <Link href="/crypto">
           <Button variant="outline" className="gap-2">
-            Detail
+            {t('detail')}
             <ArrowRight className="w-4 h-4" />
           </Button>
         </Link>

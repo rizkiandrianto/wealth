@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { CryptoHolding, CryptoLocation } from '@/lib/types'
 import { useFormatCurrency } from '@/lib/format'
 import { useDeleteCrypto, useSellCrypto, useSellCryptoBatch } from '@/lib/queries/crypto'
@@ -24,6 +25,9 @@ interface CryptosByLocationProps {
 }
 
 export default function CryptosByLocation({ cryptos, locations, onEdit }: CryptosByLocationProps) {
+  const t = useTranslations('holdings.crypto')
+  const tCommon = useTranslations('common')
+  const tStocks = useTranslations('holdings.stocks')
   const { data: assetPrices = [] } = useAssetPricesQuery()
   const deleteCrypto = useDeleteCrypto()
   const sellCrypto = useSellCrypto()
@@ -119,15 +123,15 @@ export default function CryptosByLocation({ cryptos, locations, onEdit }: Crypto
                               <p className="text-sm text-muted-foreground">{lots[0].name}</p>
                               <div className="mt-2 grid grid-cols-3 gap-2 text-sm">
                                 <div>
-                                  <p className="text-muted-foreground text-xs">Quantity</p>
+                                  <p className="text-muted-foreground text-xs">{t('quantity')}</p>
                                   <p className="font-semibold">{totalQty.toFixed(8)}{lots.length > 1 ? ` • ${lots.length} lots` : ''}</p>
                                 </div>
                                 <div>
-                                  <p className="text-muted-foreground text-xs">Avg Price</p>
+                                  <p className="text-muted-foreground text-xs">{t('averagePrice')}</p>
                                   <p className="font-semibold">{formatCurrency(weightedAvg)}</p>
                                 </div>
                                 <div>
-                                  <p className="text-muted-foreground text-xs">Current Price</p>
+                                  <p className="text-muted-foreground text-xs">{t('currentPrice')}</p>
                                   <p className="font-semibold">{price > 0 ? formatCurrency(price) : '—'}</p>
                                 </div>
                               </div>
@@ -169,7 +173,7 @@ export default function CryptosByLocation({ cryptos, locations, onEdit }: Crypto
                                       size="sm"
                                       variant="ghost"
                                       onClick={() => {
-                                        if (confirm('Delete this crypto holding?')) {
+                                        if (confirm(t('deleteConfirmPrompt'))) {
                                           deleteCrypto.mutate(lot.id)
                                         }
                                       }}
@@ -193,7 +197,7 @@ export default function CryptosByLocation({ cryptos, locations, onEdit }: Crypto
                                   className="gap-2"
                                 >
                                   <Edit2 className="w-4 h-4" />
-                                  Edit
+                                  {tCommon('edit')}
                                 </Button>
                                 <Button
                                   variant="ghost"
@@ -202,20 +206,20 @@ export default function CryptosByLocation({ cryptos, locations, onEdit }: Crypto
                                   className="gap-2 text-green-600 hover:text-green-700 hover:bg-green-50"
                                 >
                                   <DollarSign className="w-4 h-4" />
-                                  Sell
+                                  {t('sell')}
                                 </Button>
                                 <Button
                                   variant="ghost"
                                   size="sm"
                                   onClick={() => {
-                                    if (confirm('Delete this crypto holding?')) {
+                                    if (confirm(t('deleteConfirmPrompt'))) {
                                       deleteCrypto.mutate(lots[0].id)
                                     }
                                   }}
                                   className="gap-2 text-red-600 hover:text-red-700 hover:bg-red-50"
                                 >
                                   <Trash2 className="w-4 h-4" />
-                                  Delete
+                                  {tCommon('delete')}
                                 </Button>
                               </>
                             ) : (
@@ -226,7 +230,7 @@ export default function CryptosByLocation({ cryptos, locations, onEdit }: Crypto
                                 className="flex-1 gap-2 text-green-600 hover:text-green-700 hover:bg-green-50"
                               >
                                 <DollarSign className="w-4 h-4" />
-                                Sell {symbol} (FIFO)
+                                {tStocks('sellTickerFifo', { ticker: symbol })}
                               </Button>
                             )}
                           </div>

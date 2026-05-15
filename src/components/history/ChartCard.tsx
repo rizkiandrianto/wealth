@@ -1,12 +1,14 @@
 'use client'
 
 import { useEffect, type ReactNode } from 'react'
+import { useTranslations, useLocale } from 'next-intl'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Calendar as CalendarPicker } from '@/components/ui/calendar'
 import { Calendar, X } from 'lucide-react'
 import { format } from 'date-fns'
+import { id as idLocale, enUS as enLocale } from 'date-fns/locale'
 import type { DateRange } from 'react-day-picker'
 import RangeSelector from '@/components/RangeSelector'
 import ChartBody from '@/components/history/ChartBody'
@@ -25,16 +27,6 @@ interface ChartCardProps {
   children: ReactNode
 }
 
-function describeDateFilter(dateFilter: DateRange | undefined): string {
-  if (!dateFilter?.from && !dateFilter?.to) return 'All dates'
-  if (dateFilter?.from && dateFilter?.to) {
-    return `${format(dateFilter.from, 'dd MMM yyyy')} – ${format(dateFilter.to, 'dd MMM yyyy')}`
-  }
-  if (dateFilter?.from) return `From ${format(dateFilter.from, 'dd MMM yyyy')}`
-  if (dateFilter?.to) return `Until ${format(dateFilter.to, 'dd MMM yyyy')}`
-  return 'All dates'
-}
-
 export default function ChartCard({
   title,
   headerRight,
@@ -44,9 +36,21 @@ export default function ChartCard({
   onDateFilterChange,
   isLoading,
   isEmpty,
-  emptyMessage = 'No data available for the selected range.',
+  emptyMessage,
   children,
 }: ChartCardProps) {
+  const t = useTranslations('history')
+  const locale = useLocale()
+  const dateLocale = locale === 'id' ? idLocale : enLocale
+  const fmt = (d: Date) => format(d, 'dd MMM yyyy', { locale: dateLocale })
+
+  const describeDateFilter = (df: DateRange | undefined): string => {
+    if (!df?.from && !df?.to) return t('dateFilter.all')
+    if (df?.from && df?.to) return `${fmt(df.from)} – ${fmt(df.to)}`
+    if (df?.from) return t('dateFilter.from', { date: fmt(df.from) })
+    if (df?.to) return t('dateFilter.until', { date: fmt(df.to) })
+    return t('dateFilter.all')
+  }
   // Auto-reset the fine-grained date popover whenever the server-side range
   // preset changes, so users don't end up filtering to a window outside the
   // fetched data. onDateFilterChange is treated as stable (typical for useState setters).
@@ -60,7 +64,7 @@ export default function ChartCard({
 
   return (
     <Card className="p-6">
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex flex-col md:flex-row md:items-center justify-between mb-4 gap-4">
         <h3 className="text-lg font-semibold text-foreground">{title}</h3>
         {headerRight}
       </div>
@@ -68,7 +72,7 @@ export default function ChartCard({
       <div className="flex flex-wrap items-center gap-3 mb-6">
         <RangeSelector value={range} onChange={onRangeChange} />
 
-        <div className="ml-auto flex items-center gap-2">
+        <div className="md:ml-auto flex items-center gap-2">
           <Popover>
             <PopoverTrigger asChild>
               <Button variant="outline" className="justify-start gap-2">
@@ -90,7 +94,7 @@ export default function ChartCard({
               variant="ghost"
               size="icon-sm"
               onClick={() => onDateFilterChange(undefined)}
-              aria-label="Clear date filter"
+              aria-label={t('dateFilter.clear')}
             >
               <X className="w-4 h-4" />
             </Button>
@@ -98,7 +102,7 @@ export default function ChartCard({
         </div>
       </div>
 
-      <ChartBody isLoading={isLoading} isEmpty={isEmpty} emptyMessage={emptyMessage}>
+      <ChartBody isLoading={isLoading} isEmpty={isEmpty} emptyMessage={emptyMessage ?? t('noDataRange')}>
         {children}
       </ChartBody>
     </Card>

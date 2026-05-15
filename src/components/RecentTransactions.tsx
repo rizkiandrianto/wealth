@@ -1,10 +1,11 @@
 'use client'
 
 import Link from 'next/link'
+import { useTranslations } from 'next-intl'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Transaction } from '@/lib/types'
-import { useFormatCurrency, formatDateTime } from '@/lib/format'
+import { useFormatCurrency, useFormatDateTime } from '@/lib/format'
 import { ArrowRight } from 'lucide-react'
 import { useAccountsQuery } from '@/lib/queries/accounts'
 
@@ -13,11 +14,14 @@ interface RecentTransactionsProps {
 }
 
 export default function RecentTransactions({ transactions }: RecentTransactionsProps) {
+  const t = useTranslations('dashboard')
+  const tTx = useTranslations('transactions')
   const { data: accounts = [] } = useAccountsQuery()
   const formatCurrency = useFormatCurrency()
+  const formatDateTime = useFormatDateTime()
 
   const getAccountName = (accountId: string) => {
-    return accounts.find((a) => a.id === accountId)?.name || 'Topup'
+    return accounts.find((a) => a.id === accountId)?.name || tTx('topup')
   }
 
   if (transactions.length === 0) {
@@ -25,10 +29,10 @@ export default function RecentTransactions({ transactions }: RecentTransactionsP
       <Card className="p-8">
         <div className="text-center">
           <ArrowRight className="w-12 h-12 mx-auto text-muted-foreground mb-4 opacity-50" />
-          <h3 className="text-lg font-semibold mb-2">No Transactions Yet</h3>
-          <p className="text-muted-foreground mb-6">Start by recording your first transaction</p>
+          <h3 className="text-lg font-semibold mb-2">{t('noTransactions')}</h3>
+          <p className="text-muted-foreground mb-6">{t('noTransactionsHint')}</p>
           <Link href="/transactions">
-            <Button>Record Transaction</Button>
+            <Button>{tTx('addTransaction')}</Button>
           </Link>
         </div>
       </Card>
@@ -38,10 +42,10 @@ export default function RecentTransactions({ transactions }: RecentTransactionsP
   return (
     <div>
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-2xl font-bold text-foreground">Recent Transactions</h2>
+        <h2 className="text-2xl font-bold text-foreground">{t('recentTransactions')}</h2>
         <Link href="/transactions">
           <Button variant="outline" size="sm">
-            View All
+            {t('viewAll')}
           </Button>
         </Link>
       </div>

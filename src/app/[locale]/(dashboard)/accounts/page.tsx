@@ -7,6 +7,7 @@
 
 import { useEffect, useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
+import { useTranslations } from 'next-intl'
 import DashboardLayout from '@/components/DashboardLayout'
 import AccountForm from '@/components/AccountForm'
 import AccountCard from '@/components/AccountCard'
@@ -23,6 +24,7 @@ import {
 import { Wallet } from 'lucide-react'
 
 export default function AccountsPage() {
+  const t = useTranslations('accounts')
   const qc = useQueryClient()
   useEffect(() => {
     qc.prefetchQuery(accountsQueryOptions())
@@ -50,8 +52,8 @@ export default function AccountsPage() {
     <DashboardLayout>
       <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-bold text-foreground mb-2">Manage Accounts</h1>
-          <p className="text-muted-foreground">Create and manage your bank, deposit, and cash accounts</p>
+          <h1 className="text-3xl font-bold text-foreground mb-2">{t('manageTitle')}</h1>
+          <p className="text-muted-foreground">{t('manageSubtitle')}</p>
         </div>
 
         {showForm && (
@@ -67,7 +69,7 @@ export default function AccountsPage() {
               className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
             >
               <Wallet className="w-4 h-4" />
-              Add New Account
+              {t('addNewAccount')}
             </button>
 
             {accounts.length > 0 && (
@@ -81,7 +83,7 @@ export default function AccountsPage() {
                   htmlFor="accounts-page-hide-zero"
                   className="text-sm font-normal cursor-pointer"
                 >
-                  Hide 0 balance
+                  {t('hideZeroBalance')}
                   {hiddenCount > 0 && hideZeroBalance && (
                     <span className="text-muted-foreground"> ({hiddenCount})</span>
                   )}
@@ -112,15 +114,15 @@ export default function AccountsPage() {
 
         {!isLoading && accounts.length > 0 && visibleAccounts.length === 0 && (
           <div className="text-center py-12 text-sm text-muted-foreground">
-            All accounts have a 0 balance. Uncheck &ldquo;Hide 0 balance&rdquo; to see them.
+            {t('allZeroBalance', { label: t('hideZeroBalance') })}
           </div>
         )}
 
         {!isLoading && accounts.length === 0 && !showForm && (
           <div className="text-center py-12">
             <Wallet className="w-16 h-16 mx-auto text-muted-foreground mb-4 opacity-30" />
-            <h3 className="text-xl font-semibold mb-2">No accounts yet</h3>
-            <p className="text-muted-foreground mb-6">Create your first account to get started</p>
+            <h3 className="text-xl font-semibold mb-2">{t('noAccounts')}</h3>
+            <p className="text-muted-foreground mb-6">{t('createFirstHint')}</p>
           </div>
         )}
       </div>

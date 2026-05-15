@@ -4,7 +4,8 @@ import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useSession, signOut } from 'next-auth/react'
-import { useTheme } from 'next-themes'
+import { useTheme } from '@/components/theme-provider'
+import { useTranslations } from 'next-intl'
 import {
   LayoutDashboard,
   Wallet,
@@ -17,6 +18,7 @@ import {
   ChevronDown,
   LogOut,
   Moon,
+  Languages,
   User,
   Bitcoin,
   ArrowLeftRight,
@@ -30,6 +32,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Switch } from '@/components/ui/switch'
+import LanguageSwitcher from '@/components/LanguageSwitcher'
 import { cn } from '@/lib/utils'
 
 interface DashboardLayoutProps {
@@ -37,25 +40,26 @@ interface DashboardLayoutProps {
 }
 
 const FINANCE_ITEMS = [
-  { href: '/accounts', label: 'Accounts', icon: Wallet },
-  { href: '/transactions', label: 'Transactions', icon: ArrowLeftRight },
-]
+  { href: '/accounts', labelKey: 'accounts', icon: Wallet },
+  { href: '/transactions', labelKey: 'transactions', icon: ArrowLeftRight },
+] as const
 
 const PORTFOLIO_ITEMS = [
-  { href: '/stocks', label: 'Stocks', icon: TrendingUp },
-  { href: '/crypto', label: 'Crypto', icon: Bitcoin },
-  { href: '/gold', label: 'Gold', icon: Gem },
-]
+  { href: '/stocks', labelKey: 'stocks', icon: TrendingUp },
+  { href: '/crypto', labelKey: 'crypto', icon: Bitcoin },
+  { href: '/gold', labelKey: 'gold', icon: Gem },
+] as const
 
 // Bottom nav: 4 items — Finance goes to /accounts, Portfolio goes to /stocks
 const BOTTOM_NAV = [
-  { href: '/', label: 'Overview', icon: LayoutDashboard },
-  { href: '/crypto', label: 'Crypto', icon: Bitcoin },
-  { href: '/stocks', label: 'Stocks', icon: TrendingUp },
-  { href: '/history', label: 'History', icon: Calendar },
-]
+  { href: '/', labelKey: 'dashboard', icon: LayoutDashboard },
+  { href: '/crypto', labelKey: 'crypto', icon: Bitcoin },
+  { href: '/stocks', labelKey: 'stocks', icon: TrendingUp },
+  { href: '/history', labelKey: 'history', icon: Calendar },
+] as const
 
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
+  const t = useTranslations('nav')
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [mounted, setMounted] = useState(false)
   const currentPath = usePathname()
@@ -95,7 +99,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               <Link href="/">
                 <Button variant={currentPath === '/' ? 'default' : 'ghost'} size="sm" className="gap-2">
                   <LayoutDashboard className="w-4 h-4" />
-                  <span>Dashboard</span>
+                  <span>{t('dashboard')}</span>
                 </Button>
               </Link>
 
@@ -104,7 +108,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 <DropdownMenuTrigger asChild>
                   <Button variant={isFinanceActive ? 'default' : 'ghost'} size="sm" className="gap-2">
                     <Wallet className="w-4 h-4" />
-                    <span>Finance</span>
+                    <span>{t('finance')}</span>
                     <ChevronDown className="w-3 h-3" />
                   </Button>
                 </DropdownMenuTrigger>
@@ -115,7 +119,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                       <DropdownMenuItem key={item.href} asChild>
                         <Link href={item.href} className="flex items-center gap-2 cursor-pointer">
                           <Icon className="w-4 h-4" />
-                          {item.label}
+                          {t(item.labelKey)}
                         </Link>
                       </DropdownMenuItem>
                     )
@@ -128,7 +132,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 <DropdownMenuTrigger asChild>
                   <Button variant={isPortfolioActive ? 'default' : 'ghost'} size="sm" className="gap-2">
                     <PieChart className="w-4 h-4" />
-                    <span>Portfolio</span>
+                    <span>{t('portfolio')}</span>
                     <ChevronDown className="w-3 h-3" />
                   </Button>
                 </DropdownMenuTrigger>
@@ -139,7 +143,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                       <DropdownMenuItem key={item.href} asChild>
                         <Link href={item.href} className="flex items-center gap-2 cursor-pointer">
                           <Icon className="w-4 h-4" />
-                          {item.label}
+                          {t(item.labelKey)}
                         </Link>
                       </DropdownMenuItem>
                     )
@@ -151,7 +155,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               <Link href="/history">
                 <Button variant={currentPath === '/history' ? 'default' : 'ghost'} size="sm" className="gap-2">
                   <Calendar className="w-4 h-4" />
-                  <span>History</span>
+                  <span>{t('history')}</span>
                 </Button>
               </Link>
 
@@ -170,12 +174,17 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                   </div>
                   <DropdownMenuSeparator />
                   <div className="flex items-center gap-2 px-2 py-1.5 text-sm">
+                    <Languages className="w-4 h-4" />
+                    <span className="flex-1">{t('language')}</span>
+                    <LanguageSwitcher variant="pill" />
+                  </div>
+                  <div className="flex items-center gap-2 px-2 py-1.5 text-sm">
                     <Moon className="w-4 h-4" />
-                    <span className="flex-1">Dark mode</span>
+                    <span className="flex-1">{t('darkMode')}</span>
                     <Switch
                       checked={isDark}
                       onCheckedChange={(checked) => setTheme(checked ? 'dark' : 'light')}
-                      aria-label="Toggle dark mode"
+                      aria-label={t('darkMode')}
                     />
                   </div>
                   <DropdownMenuSeparator />
@@ -184,7 +193,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                     onClick={() => signOut({ callbackUrl: '/login' })}
                   >
                     <LogOut className="w-4 h-4" />
-                    Sign Out
+                    {t('logout')}
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -209,11 +218,11 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   <LayoutDashboard className="w-5 h-5" />
-                  Dashboard
+                  {t('dashboard')}
                 </Button>
               </Link>
               <div className="px-3 pt-3 pb-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                Finance
+                {t('finance')}
               </div>
               {FINANCE_ITEMS.map((item) => {
                 const Icon = item.icon
@@ -225,13 +234,13 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                       onClick={() => setMobileMenuOpen(false)}
                     >
                       <Icon className="w-5 h-5" />
-                      {item.label}
+                      {t(item.labelKey)}
                     </Button>
                   </Link>
                 )
               })}
               <div className="px-3 pt-3 pb-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                Portfolio
+                {t('portfolio')}
               </div>
               {PORTFOLIO_ITEMS.map((item) => {
                 const Icon = item.icon
@@ -243,7 +252,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                       onClick={() => setMobileMenuOpen(false)}
                     >
                       <Icon className="w-5 h-5" />
-                      {item.label}
+                      {t(item.labelKey)}
                     </Button>
                   </Link>
                 )
@@ -255,17 +264,22 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   <Calendar className="w-5 h-5" />
-                  History
+                  {t('history')}
                 </Button>
               </Link>
               <div className="pt-2 border-t border-border">
                 <div className="flex items-center gap-3 px-3 py-2 text-sm">
+                  <Languages className="w-5 h-5" />
+                  <span className="flex-1">{t('language')}</span>
+                  <LanguageSwitcher variant="pill" />
+                </div>
+                <div className="flex items-center gap-3 px-3 py-2 text-sm">
                   <Moon className="w-5 h-5" />
-                  <span className="flex-1">Dark mode</span>
+                  <span className="flex-1">{t('darkMode')}</span>
                   <Switch
                     checked={isDark}
                     onCheckedChange={(checked) => setTheme(checked ? 'dark' : 'light')}
-                    aria-label="Toggle dark mode"
+                    aria-label={t('darkMode')}
                   />
                 </div>
                 <Button
@@ -274,7 +288,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                   onClick={() => signOut({ callbackUrl: '/login' })}
                 >
                   <LogOut className="w-5 h-5" />
-                  Sign Out ({userName})
+                  {t('logout')} ({userName})
                 </Button>
               </div>
             </nav>
@@ -302,7 +316,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                   )}
                 >
                   <Icon className="w-5 h-5" />
-                  <span>{nav.label}</span>
+                  <span>{t(nav.labelKey)}</span>
                 </div>
               </Link>
             )

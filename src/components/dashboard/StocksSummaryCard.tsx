@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { useTranslations } from 'next-intl'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -9,6 +10,8 @@ import { useStocksSummaryQuery } from '@/lib/queries/stocks'
 import { ArrowRight, TrendingDown, TrendingUp } from 'lucide-react'
 
 export default function StocksSummaryCard() {
+  const t = useTranslations('summaryCards')
+  const tStocks = useTranslations('holdings.stocks')
   const formatCurrency = useFormatCurrency()
   const { data: summary, isLoading } = useStocksSummaryQuery()
 
@@ -29,9 +32,9 @@ export default function StocksSummaryCard() {
     <Card className="p-6 border-l-4 border-l-blue-500 bg-linear-to-br from-blue-50 to-transparent dark:from-blue-950/40">
       <div className="flex items-start justify-between">
         <div>
-          <h3 className="text-lg font-semibold">Portfolio Saham</h3>
+          <h3 className="text-lg font-semibold">{t('stocksTitle')}</h3>
           <p className="text-sm text-muted-foreground mt-1 font-bold">
-            {uniqueCount} saham dimiliki
+            {t('stocksOwned', { count: uniqueCount })}
           </p>
           <div className="mt-3 space-y-2">
             <p className="text-2xl font-bold">{formatCurrency(totalValue)}</p>
@@ -51,7 +54,7 @@ export default function StocksSummaryCard() {
         </div>
         <Link href="/stocks">
           <Button variant="outline" className="gap-2">
-            Detail
+            {t('detail')}
             <ArrowRight className="w-4 h-4" />
           </Button>
         </Link>

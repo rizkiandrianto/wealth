@@ -7,6 +7,7 @@
 
 import { useEffect } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
+import { useTranslations } from 'next-intl'
 import DashboardLayout from '@/components/DashboardLayout'
 import AccountsHistoryChart from '@/components/AccountsHistoryChart'
 import PortfolioHistoryChart from '@/components/PortfolioHistoryChart'
@@ -20,6 +21,7 @@ import { Calendar } from 'lucide-react'
 import { useUIStore } from '@/lib/store/useUIStore'
 
 export default function HistoryPage() {
+  const t = useTranslations('history')
   const qc = useQueryClient()
   const initialRange = useUIStore((s) => s.historyRange)
   useEffect(() => {
@@ -47,16 +49,16 @@ export default function HistoryPage() {
       <DashboardLayout>
         <div className="space-y-6">
           <div>
-            <h1 className="text-3xl font-bold text-foreground mb-2">Historical Data</h1>
-            <p className="text-muted-foreground">View your balance history over time</p>
+            <h1 className="text-3xl font-bold text-foreground mb-2">{t('title')}</h1>
+            <p className="text-muted-foreground">{t('subtitleShort')}</p>
           </div>
 
           <Card className="p-8">
             <div className="text-center">
               <Calendar className="w-16 h-16 mx-auto text-muted-foreground mb-4 opacity-30" />
-              <h3 className="text-xl font-semibold mb-2">No data yet</h3>
+              <h3 className="text-xl font-semibold mb-2">{t('noData')}</h3>
               <p className="text-muted-foreground">
-                Create accounts and record transactions to see your balance history
+                {t('noDataHint')}
               </p>
             </div>
           </Card>
@@ -69,14 +71,14 @@ export default function HistoryPage() {
     <DashboardLayout>
       <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-bold text-foreground mb-2">Historical Data</h1>
-          <p className="text-muted-foreground">View your portfolio and balance trends</p>
+          <h1 className="text-3xl font-bold text-foreground mb-2">{t('title')}</h1>
+          <p className="text-muted-foreground">{t('subtitle')}</p>
         </div>
 
         <Tabs defaultValue="accounts" className="gap-6">
           <TabsList>
-            <TabsTrigger value="accounts">Accounts</TabsTrigger>
-            <TabsTrigger value="portfolio">Portfolio</TabsTrigger>
+            <TabsTrigger value="accounts">{t('tabs.accounts')}</TabsTrigger>
+            <TabsTrigger value="portfolio">{t('tabs.portfolio')}</TabsTrigger>
           </TabsList>
 
           <TabsContent value="accounts">

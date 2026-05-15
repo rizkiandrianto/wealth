@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useTranslations } from 'next-intl'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -28,6 +29,9 @@ const EMPTY_STOCKS: StockHolding[] = []
 const EMPTY_LOCATIONS: StockLocation[] = []
 
 export default function StockForm({ editingId, onClose }: StockFormProps) {
+  const t = useTranslations('holdings.stocks')
+  const tCommon = useTranslations('common')
+  const tError = useTranslations('errors')
   const { data: stocks = EMPTY_STOCKS } = useStocksQuery()
   const { data: stockLocations = EMPTY_LOCATIONS } = useStockLocationsQuery()
   const addStock = useAddStock()
@@ -73,7 +77,7 @@ export default function StockForm({ editingId, onClose }: StockFormProps) {
     e.preventDefault()
 
     if (!formData.ticker || !formData.locationId || !formData.quantity || !formData.averagePrice) {
-      alert('Semua field harus diisi')
+      alert(tError('allFieldsRequired'))
       return
     }
 
@@ -104,14 +108,14 @@ export default function StockForm({ editingId, onClose }: StockFormProps) {
 
   return (
     <FormShell
-      title={editingId ? 'Edit Saham' : 'Tambah Saham Baru'}
+      title={editingId ? t('editTitle') : t('addStock')}
       theme="blue"
       onClose={onClose}
     >
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="text-sm font-medium">Ticker</label>
+            <label className="text-sm font-medium">{t('ticker')}</label>
             <Input
               placeholder="BBRI"
               value={formData.ticker}
@@ -121,7 +125,7 @@ export default function StockForm({ editingId, onClose }: StockFormProps) {
           </div>
 
           <div className='flex flex-col'>
-            <label className="text-sm font-medium flex-1">Pasar</label>
+            <label className="text-sm font-medium flex-1">{t('market')}</label>
             <Select
               value={formData.market}
               onValueChange={(v) => setFormData({ ...formData, market: v as StockMarket })}
@@ -130,8 +134,8 @@ export default function StockForm({ editingId, onClose }: StockFormProps) {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="IDX">Indonesia (IDX)</SelectItem>
-                <SelectItem value="US">US (NASDAQ/NYSE)</SelectItem>
+                <SelectItem value="IDX">{t('marketIDX')}</SelectItem>
+                <SelectItem value="US">{t('marketUS')}</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -139,7 +143,7 @@ export default function StockForm({ editingId, onClose }: StockFormProps) {
 
         <div className="grid grid-cols-1">
           <div>
-            <label className="text-sm font-medium flex-1">Lokasi Pembelian</label>
+            <label className="text-sm font-medium flex-1">{t('locationPurchase')}</label>
             <LocationPickerSelect
               locations={stockLocations}
               value={formData.locationId}
@@ -151,7 +155,7 @@ export default function StockForm({ editingId, onClose }: StockFormProps) {
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="text-sm font-medium">Quantity (lot)</label>
+            <label className="text-sm font-medium">{t('quantity')}</label>
             <Input
               type="number"
               placeholder="100"
@@ -164,7 +168,7 @@ export default function StockForm({ editingId, onClose }: StockFormProps) {
           </div>
 
           <div>
-            <label className="text-sm font-medium">Harga Rata-rata (IDR)</label>
+            <label className="text-sm font-medium">{t('averagePriceIDR')}</label>
             <Input
               type="number"
               placeholder="15000"
@@ -179,10 +183,10 @@ export default function StockForm({ editingId, onClose }: StockFormProps) {
 
         <div className="md:flex gap-2 md:justify-end grid grid-cols-2 pt-2">
           <Button type="button" variant="outline" onClick={onClose}>
-            Batal
+            {tCommon('cancel')}
           </Button>
           <Button type="submit" className="bg-blue-600 hover:bg-blue-700">
-            {editingId ? 'Update Saham' : 'Tambah Saham'}
+            {editingId ? t('updateStock') : t('addStock')}
           </Button>
         </div>
       </form>

@@ -1,5 +1,6 @@
 'use client'
 
+import { useTranslations } from 'next-intl'
 import { useFormatCurrency } from '@/lib/format'
 import { Card } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -8,6 +9,8 @@ import { useCryptosQuery } from '@/lib/queries/crypto'
 import { useAssetPricesQuery } from '@/lib/queries/prices'
 
 export default function CryptosSummary() {
+  const t = useTranslations('summaryCards')
+  const tStocks = useTranslations('holdings.stocks')
   const { data: cryptos = [], isLoading: cryptosLoading } = useCryptosQuery()
   const { data: prices = [], isLoading: pricesLoading } = useAssetPricesQuery()
   const formatCurrency = useFormatCurrency()
@@ -34,19 +37,19 @@ export default function CryptosSummary() {
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
       <Card className="p-6 border-l-4 border-l-purple-500">
-        <p className="text-sm font-medium text-muted-foreground">Total Value</p>
+        <p className="text-sm font-medium text-muted-foreground">{t('totalValue')}</p>
         <p className="text-3xl font-bold mt-2">{formatCurrency(totalValue)}</p>
       </Card>
 
       <Card className="p-6 border-l-4 border-l-blue-500">
-        <p className="text-sm font-medium text-muted-foreground">Total Cost</p>
+        <p className="text-sm font-medium text-muted-foreground">{tStocks('totalCost')}</p>
         <p className="text-3xl font-bold mt-2">{formatCurrency(totalCost)}</p>
       </Card>
 
       <Card className={`p-6 border-l-4 ${isPositive ? 'border-l-green-500' : 'border-l-red-500'}`}>
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm font-medium text-muted-foreground">Profit / Loss</p>
+            <p className="text-sm font-medium text-muted-foreground">{t('profitLoss')}</p>
             <p className={`text-3xl font-bold mt-2 ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
               {formatCurrency(profitLoss)}
             </p>
