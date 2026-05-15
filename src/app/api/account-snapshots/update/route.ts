@@ -12,7 +12,7 @@ type AuthResult =
 
 async function resolveAuth(req: NextRequest, bodyUserEmail?: string): Promise<AuthResult> {
   const apiKeyHeader = req.headers.get('x-api-key')
-  const configured = process.env.WEALTH_INGEST_API_KEY
+  const configured = process.env.INTERNAL_API_KEY
 
   if (apiKeyHeader && configured && apiKeyHeader === configured) {
     if (bodyUserEmail) {
