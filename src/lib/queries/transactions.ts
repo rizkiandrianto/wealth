@@ -42,7 +42,7 @@ export function useAddTransaction() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: queryKeys.transactions })
       qc.invalidateQueries({ queryKey: queryKeys.accounts })
-      qc.invalidateQueries({ queryKey: queryKeys.accountSnapshots })
+      qc.invalidateQueries({ queryKey: queryKeys.accountSnapshots.all })
     },
   })
 }
@@ -57,7 +57,7 @@ export function useDeleteTransaction() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: queryKeys.transactions })
       qc.invalidateQueries({ queryKey: queryKeys.accounts })
-      qc.invalidateQueries({ queryKey: queryKeys.accountSnapshots })
+      qc.invalidateQueries({ queryKey: queryKeys.accountSnapshots.all })
     },
   })
 }

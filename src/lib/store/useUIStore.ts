@@ -1,5 +1,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import type { SnapshotRange } from '@/lib/snapshot'
+import type { ViewType } from '@/components/history/ViewTypeSelector'
 
 export type PortfolioKey = 'cash' | 'stock' | 'crypto' | 'gold'
 
@@ -9,6 +11,10 @@ interface UIStore {
   setHideValues: (value: boolean) => void
   excludedPortfolios: PortfolioKey[]
   togglePortfolioExclusion: (key: PortfolioKey) => void
+  historyRange: SnapshotRange
+  setHistoryRange: (range: SnapshotRange) => void
+  historyViewType: ViewType
+  setHistoryViewType: (viewType: ViewType) => void
 }
 
 export const useUIStore = create<UIStore>()(
@@ -24,6 +30,10 @@ export const useUIStore = create<UIStore>()(
             ? s.excludedPortfolios.filter((k) => k !== key)
             : [...s.excludedPortfolios, key],
         })),
+      historyRange: '3m',
+      setHistoryRange: (historyRange) => set({ historyRange }),
+      historyViewType: 'month',
+      setHistoryViewType: (historyViewType) => set({ historyViewType }),
     }),
     { name: 'wealth-ui' }
   )

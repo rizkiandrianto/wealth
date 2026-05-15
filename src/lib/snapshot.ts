@@ -23,6 +23,41 @@ export function appDateStr(d: Date): string {
   return APP_DATE_FMT.format(d)
 }
 
+export type SnapshotRange = '1m' | '3m' | '6m' | '1y' | 'ytd' | 'all'
+
+const VALID_RANGES: ReadonlySet<string> = new Set([
+  '1m',
+  '3m',
+  '6m',
+  '1y',
+  'ytd',
+  'all',
+])
+
+export function parseSnapshotRange(input: string | null | undefined): SnapshotRange {
+  const v = (input ?? '').toLowerCase()
+  return (VALID_RANGES.has(v) ? v : '3m') as SnapshotRange
+}
+
+/**
+ * Resolve a range preset to a YYYY-MM-DD cutoff in Asia/Jakarta. Returns null
+ * for 'all' (no lower bound). Uses local Date math then projects via appDateStr,
+ * so callers should compare the result against snapshot.date (also Jakarta-keyed).
+ */
+export function rangeStartDate(range: SnapshotRange, now: Date = new Date()): string | null {
+  if (range === 'all') return null
+  if (range === 'ytd') {
+    const jakartaYear = appDateStr(now).slice(0, 4)
+    return `${jakartaYear}-01-01`
+  }
+  const d = new Date(now)
+  if (range === '1m') d.setMonth(d.getMonth() - 1)
+  else if (range === '3m') d.setMonth(d.getMonth() - 3)
+  else if (range === '6m') d.setMonth(d.getMonth() - 6)
+  else if (range === '1y') d.setFullYear(d.getFullYear() - 1)
+  return appDateStr(d)
+}
+
 /**
  * Compute running balance for an account as of end-of-day on `date` (inclusive).
  * Compares against the stored wall-clock date (PG TZ = Asia/Jakarta) by casting

@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
+export type BalanceChartMode = 'total' | 'per-account'
 import {
   LineChart,
   Line,
@@ -10,7 +11,6 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from 'recharts'
-import { Card } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
 import { DailyBalance, Account } from '@/lib/types'
 import {
@@ -25,11 +25,10 @@ interface BalanceChartProps {
   data: DailyBalance[]
   accounts: Account[]
   viewType: 'day' | 'month' | 'year'
+  mode: BalanceChartMode
 }
 
 const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899']
-
-type ChartMode = 'total' | 'per-account'
 
 function formatTooltipDate(rawDate: string, viewType: 'day' | 'month' | 'year'): string {
   const [year, _month, date] = rawDate.split('-')
@@ -56,12 +55,23 @@ function getPrefixLabel(viewType: BalanceChartProps['viewType']) {
   return 'Year';
 }
 
+function getName(item: DailyBalance, viewType: 'day' | 'month' | 'year') {
+  switch (viewType) {
+    case 'day':
+      return formatDateShort(item.date);
+    case 'month':
+      return formatMonth(item.date)
+    default:
+      return item.date
+  }
+}
+
 export default function BalanceChart({
   data,
   accounts,
   viewType,
+  mode,
 }: BalanceChartProps) {
-  const [mode, setMode] = useState<ChartMode>('total')
   const [hiddenAccounts, setHiddenAccounts] = useState<Set<string>>(new Set())
   const formatCurrency = useFormatCurrency()
   const hideValues = useUIStore((s) => s.hideValues)
@@ -87,12 +97,7 @@ export default function BalanceChart({
         ...item,
         total,
         rawDate: item.date,
-        name:
-          viewType === 'day'
-            ? formatDateShort(item.date)
-            : viewType === 'month'
-              ? formatMonth(item.date)
-              : item.date,
+        name: getName(item, viewType),
       }
     })
   }, [data, viewType, hiddenAccounts])
@@ -112,26 +117,7 @@ export default function BalanceChart({
   }
 
   return (
-    <Card className="p-6">
-      <div className="flex items-center justify-between mb-6">
-        <h3 className="text-lg font-semibold text-foreground">Account Balance Trend</h3>
-        <div className="flex gap-1 p-1 bg-muted rounded-lg">
-          {(['total', 'per-account'] as const).map((m) => (
-            <button
-              key={m}
-              onClick={() => setMode(m)}
-              className={`px-3 py-1 text-sm rounded-md transition-colors ${
-                mode === m
-                  ? 'bg-background shadow-sm font-medium'
-                  : 'text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              {m === 'total' ? 'Total' : 'Per Account'}
-            </button>
-          ))}
-        </div>
-      </div>
-
+    <div>
       {mode === 'per-account' && accounts.length > 0 && (
         <div className="flex flex-wrap gap-x-4 gap-y-2 mb-4">
           {accounts.map((account, index) => {
@@ -198,6 +184,7 @@ export default function BalanceChart({
               const raw = payload?.[0]?.payload?.rawDate as string | undefined;
               return `${getPrefixLabel(viewType)}: ${raw ? formatTooltipDate(raw, viewType) : _label}`
             }}
+            labelClassName='text-black'
           />
 
           {mode === 'total' ? (
@@ -231,6 +218,6 @@ export default function BalanceChart({
           )}
         </LineChart>
       </ResponsiveContainer>
-    </Card>
+    </div>
   )
 }

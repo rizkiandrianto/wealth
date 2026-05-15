@@ -1,7 +1,12 @@
+import type { SnapshotRange } from '@/lib/snapshot'
+
 export const queryKeys = {
   accounts: ['accounts'] as const,
   transactions: ['transactions'] as const,
-  accountSnapshots: ['accountSnapshots'] as const,
+  accountSnapshots: {
+    all: ['accountSnapshots'] as const,
+    range: (range: SnapshotRange) => ['accountSnapshots', range] as const,
+  },
   stocks: ['stocks'] as const,
   stocksSummary: ['stocks', 'summary'] as const,
   stocksTickers: ['stocks', 'tickers'] as const,
@@ -21,5 +26,8 @@ export const queryKeys = {
   goldSales: ['goldSales'] as const,
   goldSalesSummary: ['goldSales', 'summary'] as const,
   assetPrices: ['assetPrices'] as const,
-  portfolioSnapshots: ['portfolioSnapshots'] as const,
+  portfolioSnapshots: {
+    all: ['portfolioSnapshots'] as const,
+    range: (range: SnapshotRange) => ['portfolioSnapshots', range] as const,
+  },
 } as const

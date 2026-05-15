@@ -36,6 +36,9 @@ export default function HistoryTable({
               <th className="px-6 py-3 text-left text-sm font-semibold text-foreground">
                 {viewType === 'day' ? 'Date' : viewType === 'month' ? 'Month' : 'Year'}
               </th>
+              <th className="px-6 py-3 text-right text-sm font-semibold text-foreground">
+                Total Balance
+              </th>
               {accounts.map((account) => (
                 <th
                   key={account.id}
@@ -44,9 +47,6 @@ export default function HistoryTable({
                   {account.name}
                 </th>
               ))}
-              <th className="px-6 py-3 text-right text-sm font-semibold text-foreground">
-                Total Balance
-              </th>
             </tr>
           </thead>
           <tbody className="divide-y divide-border">
@@ -62,6 +62,9 @@ export default function HistoryTable({
                         ? formatMonth(item.date)
                         : item.date}
                   </td>
+                  <td className="px-6 py-3 text-right text-sm font-bold text-blue-600 dark:text-primary">
+                    {formatCurrency(total, 'IDR')}
+                  </td>
                   {accounts.map((account) => (
                     <td
                       key={account.id}
@@ -70,9 +73,6 @@ export default function HistoryTable({
                       {formatCurrency(item.balances[account.id] || 0, account.currency)}
                     </td>
                   ))}
-                  <td className="px-6 py-3 text-right text-sm font-bold text-blue-600">
-                    {formatCurrency(total, 'IDR')}
-                  </td>
                 </tr>
               )
             })}

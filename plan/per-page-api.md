@@ -82,7 +82,7 @@ Tambahkan prefetch ke semua 7 pages. Lihat tabel "Required APIs per Page" di baw
 | `/crypto` | `/api/crypto`, `/api/crypto-locations`, `/api/market/prices`, `/api/crypto/sales` |
 | `/gold` | `/api/gold`, `/api/gold-locations`, `/api/market/prices`, `/api/gold/sales` |
 | `/transactions` | `/api/accounts`, `/api/transactions` |
-| `/history` | `/api/accounts`, `/api/account-snapshots`, `/api/portfolio-snapshots` (kalau Portfolio Snapshot plan sudah landed) |
+| `/history` | `/api/accounts`, `/api/account-snapshots?range=3m`, `/api/portfolio-snapshots?range=3m` |
 
 Tambah komentar di tiap page file (top of file, sebelum export default):
 ```tsx
@@ -136,7 +136,7 @@ Pastikan `CLAUDE.md` di root punya rule: "setiap page/komponen baru yang fetch d
 | `/crypto` | 4: crypto, crypto-locations, prices, crypto/sales |
 | `/gold` | 4: gold, gold-locations, prices, gold/sales |
 | `/transactions` | 2: accounts, transactions |
-| `/history` | 2-3: accounts, account-snapshots, (portfolio-snapshots) |
+| `/history` | 3: accounts, account-snapshots?range=3m, portfolio-snapshots?range=3m |
 | `/` Dashboard | 9 (lihat tabel di atas) |
 
 Plus:

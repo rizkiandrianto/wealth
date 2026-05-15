@@ -64,7 +64,7 @@ export function useDeleteAccount() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: queryKeys.accounts })
       qc.invalidateQueries({ queryKey: queryKeys.transactions })
-      qc.invalidateQueries({ queryKey: queryKeys.accountSnapshots })
+      qc.invalidateQueries({ queryKey: queryKeys.accountSnapshots.all })
     },
   })
 }

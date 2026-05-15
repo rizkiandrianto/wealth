@@ -2,99 +2,33 @@
 
 // Required APIs:
 //   GET /api/accounts
-//   GET /api/account-snapshots
+//   GET /api/account-snapshots?range=3m
+//   GET /api/portfolio-snapshots?range=3m
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import DashboardLayout from '@/components/DashboardLayout'
-import BalanceChart from '@/components/BalanceChart'
-import HistoryTable from '@/components/HistoryTable'
+import AccountsHistoryChart from '@/components/AccountsHistoryChart'
+import PortfolioHistoryChart from '@/components/PortfolioHistoryChart'
 import { accountsQueryOptions, useAccountsQuery } from '@/lib/queries/accounts'
-import {
-  accountSnapshotsQueryOptions,
-  useAccountSnapshotsQuery,
-} from '@/lib/queries/accountSnapshots'
-import { buildDailyBalancesFromSnapshots } from '@/lib/calculations/dailyBalances'
-import { getMonthFromDate, getYearFromDate } from '@/lib/format'
+import { accountSnapshotsQueryOptions } from '@/lib/queries/accountSnapshots'
+import { portfolioSnapshotsQueryOptions } from '@/lib/queries/portfolioSnapshots'
 import { Card } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { Calendar as CalendarPicker } from '@/components/ui/calendar'
-import { Calendar, X } from 'lucide-react'
-import { format } from 'date-fns'
-import type { DateRange } from 'react-day-picker'
-
-type ViewType = 'day' | 'month' | 'year'
-
-function toIsoDate(date: Date): string {
-  const y = date.getFullYear()
-  const m = String(date.getMonth() + 1).padStart(2, '0')
-  const d = String(date.getDate()).padStart(2, '0')
-  return `${y}-${m}-${d}`
-}
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
+import { Calendar } from 'lucide-react'
+import { useUIStore } from '@/lib/store/useUIStore'
 
 export default function HistoryPage() {
   const qc = useQueryClient()
+  const initialRange = useUIStore((s) => s.historyRange)
   useEffect(() => {
     qc.prefetchQuery(accountsQueryOptions())
-    qc.prefetchQuery(accountSnapshotsQueryOptions())
-  }, [qc])
+    qc.prefetchQuery(accountSnapshotsQueryOptions(initialRange))
+    qc.prefetchQuery(portfolioSnapshotsQueryOptions(initialRange))
+  }, [qc, initialRange])
 
   const { data: accounts = [], isLoading: accountsLoading } = useAccountsQuery()
-  const { data: snapshots = [], isLoading: snapshotsLoading } = useAccountSnapshotsQuery()
-  const [viewType, setViewType] = useState<ViewType>('month')
-  const [range, setRange] = useState<DateRange | undefined>(undefined)
-
-  const dailyBalances = useMemo(
-    () => buildDailyBalancesFromSnapshots(accounts, snapshots),
-    [accounts, snapshots]
-  )
-
-  const rangedBalances = useMemo(() => {
-    if (!range?.from && !range?.to) return dailyBalances
-    const fromStr = range?.from ? toIsoDate(range.from) : ''
-    const toStr = range?.to ? toIsoDate(range.to) : ''
-    return dailyBalances.filter((item) => {
-      if (fromStr && item.date < fromStr) return false
-      if (toStr && item.date > toStr) return false
-      return true
-    })
-  }, [dailyBalances, range])
-
-  const filteredData = useMemo(() => {
-    if (rangedBalances.length === 0) return []
-
-    if (viewType === 'day') {
-      return rangedBalances
-    }
-
-    if (viewType === 'month') {
-      const byMonth = new Map<string, typeof rangedBalances[0]>()
-      rangedBalances.forEach((item) => {
-        const month = getMonthFromDate(item.date)
-        byMonth.set(month, item)
-      })
-      return Array.from(byMonth.values()).sort((a, b) => a.date.localeCompare(b.date))
-    }
-
-    const byYear = new Map<string, typeof rangedBalances[0]>()
-    rangedBalances.forEach((item) => {
-      const year = getYearFromDate(item.date)
-      byYear.set(year, item)
-    })
-    return Array.from(byYear.values()).sort((a, b) => a.date.localeCompare(b.date))
-  }, [rangedBalances, viewType])
-
-  const rangeLabel = useMemo(() => {
-    if (!range?.from && !range?.to) return 'All dates'
-    if (range?.from && range?.to) {
-      return `${format(range.from, 'dd MMM yyyy')} – ${format(range.to, 'dd MMM yyyy')}`
-    }
-    if (range?.from) return `From ${format(range.from, 'dd MMM yyyy')}`
-    if (range?.to) return `Until ${format(range.to, 'dd MMM yyyy')}`
-    return 'All dates'
-  }, [range])
 
   if (accountsLoading) {
     return (
@@ -136,71 +70,23 @@ export default function HistoryPage() {
       <div className="space-y-6">
         <div>
           <h1 className="text-3xl font-bold text-foreground mb-2">Historical Data</h1>
-          <p className="text-muted-foreground">View your balance trends and history</p>
+          <p className="text-muted-foreground">View your portfolio and balance trends</p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="flex gap-2">
-            {(['day', 'month', 'year'] as const).map((type) => (
-              <button
-                key={type}
-                onClick={() => setViewType(type)}
-                className={`px-4 py-2 rounded-lg font-medium transition-colors capitalize ${
-                  viewType === type
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-muted text-muted-foreground hover:bg-muted/80'
-                }`}
-              >
-                By {type}
-              </button>
-            ))}
-          </div>
+        <Tabs defaultValue="accounts" className="gap-6">
+          <TabsList>
+            <TabsTrigger value="accounts">Accounts</TabsTrigger>
+            <TabsTrigger value="portfolio">Portfolio</TabsTrigger>
+          </TabsList>
 
-          <div className="ml-auto flex items-center gap-2">
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button variant="outline" className="justify-start gap-2">
-                  <Calendar className="w-4 h-4" />
-                  {rangeLabel}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="end">
-                <CalendarPicker
-                  mode="range"
-                  selected={range}
-                  onSelect={setRange}
-                  numberOfMonths={2}
-                />
-              </PopoverContent>
-            </Popover>
-            {(range?.from || range?.to) && (
-              <Button
-                variant="ghost"
-                size="icon-sm"
-                onClick={() => setRange(undefined)}
-                aria-label="Clear date filter"
-              >
-                <X className="w-4 h-4" />
-              </Button>
-            )}
-          </div>
-        </div>
+          <TabsContent value="accounts">
+            <AccountsHistoryChart accounts={accounts} />
+          </TabsContent>
 
-        {snapshotsLoading ? (
-          <Skeleton className="h-96 w-full rounded-xl" />
-        ) : filteredData.length > 0 ? (
-          <BalanceChart data={filteredData} accounts={accounts} viewType={viewType} />
-        ) : (
-          <Card className="p-8 text-center">
-            <p className="text-muted-foreground">No data available for the selected range.</p>
-          </Card>
-        )}
-
-        {snapshotsLoading ? (
-          <Skeleton className="h-64 w-full rounded-xl" />
-        ) : (
-          <HistoryTable data={filteredData} accounts={accounts} viewType={viewType} />
-        )}
+          <TabsContent value="portfolio">
+            <PortfolioHistoryChart />
+          </TabsContent>
+        </Tabs>
       </div>
     </DashboardLayout>
   )
