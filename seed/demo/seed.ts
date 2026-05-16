@@ -32,7 +32,7 @@ import {
 
 loadEnv({ path: '.env.local' })
 
-const DEMO_EMAIL = 'demo@mailinator.com'
+const DEMO_EMAIL = 'demo@rizkiandrianto.com'
 const DEMO_NAME = 'Demo User'
 const DEMO_PASSWORD = 'demo1234'
 

@@ -342,7 +342,7 @@
     "dialogTitle": "Demo account",
     "dialogDescription": "This is a demo account. Adding, editing, and deleting data is disabled. Sign up with your own email to save real data.",
     "dialogAck": "Got it",
-    "loginHint": "Want to look around first? Log in as <b>demo@mailinator.com</b> / <b>demo1234</b> (read-only)."
+    "loginHint": "Want to look around first? Log in as <b>demo@rizkiandrianto.com</b> / <b>demo1234</b> (read-only)."
   },
   "common": {
     "save": "Save",

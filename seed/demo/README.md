@@ -11,7 +11,7 @@ pnpm seed:demo
 
 This seeds:
 
-- User `demo@mailinator.com` (password `demo1234`) with `is_demo = true`
+- User `demo@rizkiandrianto.com` (password `demo1234`) with `is_demo = true`
 - **Accounts**: BCA + Sinarmas (bank), Alami (deposit), Dompet (cash)
 - **IDX stocks @ Ajaib**: BBCA (5 entry lots), PTBA, BBRI
 - **US stocks**: AAPL & TSLA @ Nanovest, NVDA @ Ajaib Crypto
@@ -26,7 +26,7 @@ in the DB.
 
 ## Idempotency
 
-The seed is idempotent on the **user row**: if `demo@mailinator.com` already
+The seed is idempotent on the **user row**: if `demo@rizkiandrianto.com` already
 exists it does not re-insert sample data (it only flips `is_demo` to `true`
 if needed). For a fresh seed, run `pnpm seed:demo:reset --yes` first to
 remove the user — then run `pnpm seed:demo` again.
