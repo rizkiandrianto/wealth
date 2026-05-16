@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
+import { useTranslations } from 'next-intl'
 import { RefreshCw, Check } from 'lucide-react'
 import { toast } from 'sonner'
 import DashboardLayout from '@/components/DashboardLayout'
@@ -37,6 +38,7 @@ export default function SyncBalancePageClient({
 }: {
   defaultYear: number
 }) {
+  const t = useTranslations('syncBalance')
   const qc = useQueryClient()
   useEffect(() => {
     qc.prefetchQuery(settingsQueryOptions('sync.'))
@@ -75,7 +77,7 @@ export default function SyncBalancePageClient({
     if (!preview) return
     const actionable = preview.diffs.filter((d) => d.action !== 'no-op')
     if (actionable.length === 0) {
-      toast.info('Nothing to sync — all accounts already match.')
+      toast.info(t('nothingToSync'))
       return
     }
 
@@ -89,13 +91,12 @@ export default function SyncBalancePageClient({
           sheetBalance: d.sheetBalance,
         })),
       })
-      toast.success(`Synced ${res.created.length} transaction(s)`)
-      // Re-fetch preview so DB/Sheet columns line up after commit.
+      toast.success(t('syncedToast', { count: res.created.length }))
       const refreshed = await previewMutation.mutateAsync({ year })
       setPreview(refreshed)
     } catch (err) {
       if (err instanceof SyncRequestError && err.status === 409) {
-        toast.error('Balance changed since preview — refreshing.')
+        toast.error(t('balanceChanged'))
         try {
           const refreshed = await previewMutation.mutateAsync({ year })
           setPreview(refreshed)
@@ -115,10 +116,8 @@ export default function SyncBalancePageClient({
     <DashboardLayout>
       <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-bold text-foreground mb-2">Sync Balance</h1>
-          <p className="text-muted-foreground">
-            Compare DB balances against Google Sheet Saldo Akhir and post adjustments.
-          </p>
+          <h1 className="text-3xl font-bold text-foreground mb-2">{t('title')}</h1>
+          <p className="text-muted-foreground">{t('subtitle')}</p>
         </div>
 
         {settingsLoading ? (
@@ -136,9 +135,9 @@ export default function SyncBalancePageClient({
             <RefreshCw
               className={`w-4 h-4 ${previewMutation.isPending ? 'animate-spin' : ''}`}
             />
-            {previewMutation.isPending ? 'Running…' : 'Run Sync'}
+            {previewMutation.isPending ? t('running') : t('runSync')}
           </Button>
-          <span className="text-sm text-muted-foreground">Year {year}</span>
+          <span className="text-sm text-muted-foreground">{t('yearLabel', { year })}</span>
         </div>
 
         {previewMutation.isPending && !preview && (
@@ -151,7 +150,7 @@ export default function SyncBalancePageClient({
 
             <div className="flex flex-col sm:flex-row sm:items-end gap-3 sm:justify-between border border-border rounded-lg p-4">
               <div className="space-y-2 max-w-xs">
-                <Label htmlFor="adjustment-date">Adjustment date</Label>
+                <Label htmlFor="adjustment-date">{t('adjustmentDate')}</Label>
                 <Input
                   id="adjustment-date"
                   type="date"
@@ -160,9 +159,7 @@ export default function SyncBalancePageClient({
                   max={today}
                   onChange={(e) => setAdjustmentDate(e.target.value)}
                 />
-                <p className="text-xs text-muted-foreground">
-                  Transactions are dated for this day in Asia/Jakarta.
-                </p>
+                <p className="text-xs text-muted-foreground">{t('adjustmentDateHint')}</p>
               </div>
               <Button
                 onClick={handleConfirm}
@@ -170,14 +167,12 @@ export default function SyncBalancePageClient({
                 className="gap-2"
               >
                 <Check className="w-4 h-4" />
-                {commitMutation.isPending ? 'Syncing…' : 'Confirm sync'}
+                {commitMutation.isPending ? t('syncing') : t('confirmSync')}
               </Button>
             </div>
 
             {allNoOp && (
-              <p className="text-sm text-muted-foreground">
-                Everything already matches the sheet — nothing to commit.
-              </p>
+              <p className="text-sm text-muted-foreground">{t('allMatch')}</p>
             )}
           </div>
         )}

@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { AlertCircle } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { Button } from '@/components/ui/button'
 import { AppSettingRow } from '@/lib/queries/settings'
 
@@ -19,6 +20,7 @@ const REQUIRED_SUFFIXES = [
 ] as const
 
 export default function SyncConfigCheck({ year, rows }: SyncConfigCheckProps) {
+  const t = useTranslations('syncBalance')
   const map = new Map(rows.map((r) => [r.key, r.value]))
   const missing = REQUIRED_SUFFIXES.filter(
     (suffix) => !map.get(`sync.${year}.${suffix}`)?.trim(),
@@ -31,9 +33,9 @@ export default function SyncConfigCheck({ year, rows }: SyncConfigCheckProps) {
       <div className="flex gap-2 items-start">
         <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
         <div>
-          <p className="font-medium">Sync config incomplete for {year}</p>
+          <p className="font-medium">{t('configIncomplete', { year })}</p>
           <p className="text-sm mt-1">
-            Missing keys:{' '}
+            {t('missingKeys')}{' '}
             {missing.map((suffix) => (
               <span
                 key={suffix}
@@ -47,7 +49,7 @@ export default function SyncConfigCheck({ year, rows }: SyncConfigCheckProps) {
       </div>
       <Link href="/settings">
         <Button variant="outline" size="sm">
-          Configure
+          {t('configure')}
         </Button>
       </Link>
     </div>

@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { ChevronDown, ChevronRight } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { AppSettingRow } from '@/lib/queries/settings'
 import SettingRow from './SettingRow'
 
@@ -16,6 +17,7 @@ export default function SettingsGroup({
   rows,
   defaultOpen = true,
 }: SettingsGroupProps) {
+  const t = useTranslations('settings')
   const [open, setOpen] = useState(defaultOpen)
   const Icon = open ? ChevronDown : ChevronRight
 
@@ -29,7 +31,7 @@ export default function SettingsGroup({
         <Icon className="w-4 h-4" />
         <span className="font-mono">{prefix}.*</span>
         <span className="text-muted-foreground font-sans font-normal">
-          ({rows.length})
+          {t('groupCount', { count: rows.length })}
         </span>
       </button>
       {open && (

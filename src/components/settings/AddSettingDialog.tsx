@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { toast } from 'sonner'
+import { useTranslations } from 'next-intl'
 import {
   Dialog,
   DialogContent,
@@ -21,6 +22,7 @@ interface AddSettingDialogProps {
 }
 
 export default function AddSettingDialog({ open, onOpenChange }: AddSettingDialogProps) {
+  const t = useTranslations('settings')
   const upsert = useUpsertSetting()
   const [key, setKey] = useState('')
   const [value, setValue] = useState('')
@@ -36,7 +38,7 @@ export default function AddSettingDialog({ open, onOpenChange }: AddSettingDialo
     e.preventDefault()
     const trimmedKey = key.trim()
     if (!trimmedKey) {
-      toast.error('Key is required')
+      toast.error(t('keyRequired'))
       return
     }
     try {
@@ -45,7 +47,7 @@ export default function AddSettingDialog({ open, onOpenChange }: AddSettingDialo
         value,
         description: description.trim() || undefined,
       })
-      toast.success('Setting added')
+      toast.success(t('added'))
       reset()
       onOpenChange(false)
     } catch (err) {
@@ -63,43 +65,44 @@ export default function AddSettingDialog({ open, onOpenChange }: AddSettingDialo
     >
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Add config</DialogTitle>
+          <DialogTitle>{t('addDialogTitle')}</DialogTitle>
           <DialogDescription>
-            Create a new key-value setting. Use dot-separated names to group, e.g.{' '}
-            <span className="font-mono">sync.2027.sheetId</span>.
+            {t.rich('addDialogDescription', {
+              example: () => <span className="font-mono">sync.2027.sheetId</span>,
+            })}
           </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="setting-key">Key</Label>
+            <Label htmlFor="setting-key">{t('keyLabel')}</Label>
             <Input
               id="setting-key"
               value={key}
               onChange={(e) => setKey(e.target.value)}
-              placeholder="sync.2027.sheetId"
+              placeholder={t('keyPlaceholder')}
               autoFocus
               required
               className="font-mono"
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="setting-value">Value</Label>
+            <Label htmlFor="setting-value">{t('valueLabel')}</Label>
             <Input
               id="setting-value"
               value={value}
               onChange={(e) => setValue(e.target.value)}
-              placeholder="(empty)"
+              placeholder={t('emptyValue')}
               className="font-mono"
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="setting-description">Description (optional)</Label>
+            <Label htmlFor="setting-description">{t('descriptionLabel')}</Label>
             <Input
               id="setting-description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="What this setting controls"
+              placeholder={t('descriptionPlaceholder')}
             />
           </div>
 
@@ -110,10 +113,10 @@ export default function AddSettingDialog({ open, onOpenChange }: AddSettingDialo
               onClick={() => onOpenChange(false)}
               disabled={upsert.isPending}
             >
-              Cancel
+              {t('cancel')}
             </Button>
             <Button type="submit" disabled={upsert.isPending}>
-              {upsert.isPending ? 'Saving…' : 'Save'}
+              {upsert.isPending ? t('saving') : t('save')}
             </Button>
           </DialogFooter>
         </form>

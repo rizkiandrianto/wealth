@@ -43,8 +43,8 @@ interface DashboardLayoutProps {
 
 type NavItem = {
   href: string
-  labelKey?: string
-  label?: string
+  labelKey: string
+  labelNs?: string
   icon: React.ComponentType<{ className?: string }>
 }
 
@@ -53,7 +53,12 @@ const FINANCE_ITEMS: readonly NavItem[] = [
   { href: '/transactions', labelKey: 'transactions', icon: ArrowLeftRight },
 ]
 
-const SYNC_ITEM: NavItem = { href: '/sync-balance', label: 'Sync Balance', icon: RefreshCw }
+const SYNC_ITEM: NavItem = {
+  href: '/sync-balance',
+  labelKey: 'title',
+  labelNs: 'syncBalance',
+  icon: RefreshCw,
+}
 
 const PORTFOLIO_ITEMS: readonly NavItem[] = [
   { href: '/stocks', labelKey: 'stocks', icon: TrendingUp },
@@ -71,6 +76,7 @@ const BOTTOM_NAV = [
 
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const t = useTranslations('nav')
+  const tSync = useTranslations('syncBalance')
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [mounted, setMounted] = useState(false)
   const currentPath = usePathname()
@@ -86,7 +92,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     : FINANCE_ITEMS
   const isFinanceActive = financeItems.some((i) => i.href === currentPath)
   const isPortfolioActive = PORTFOLIO_ITEMS.some((i) => i.href === currentPath)
-  const renderLabel = (item: NavItem) => item.label ?? (item.labelKey ? t(item.labelKey) : '')
+  const renderLabel = (item: NavItem) =>
+    item.labelNs === 'syncBalance' ? tSync(item.labelKey) : t(item.labelKey)
 
   // Bottom nav active: Finance tab is active on /accounts or /transactions
   const getBottomActive = (href: string) => {

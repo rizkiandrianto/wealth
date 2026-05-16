@@ -6,7 +6,7 @@ import SettingsGroup from './SettingsGroup'
 
 export default function SettingsList({ rows }: { rows: AppSettingRow[] }) {
   if (rows.length === 0) {
-    return <SettingsEmpty message="No settings yet. Click ‘Add config’ to create one." />
+    return <SettingsEmpty />
   }
 
   const groups = new Map<string, AppSettingRow[]>()

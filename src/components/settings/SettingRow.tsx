@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { Pencil, Save, Trash2, X } from 'lucide-react'
 import { toast } from 'sonner'
+import { useTranslations } from 'next-intl'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import ConfirmDialog from '@/components/ConfirmDialog'
@@ -13,6 +14,7 @@ import {
 } from '@/lib/queries/settings'
 
 export default function SettingRow({ row }: { row: AppSettingRow }) {
+  const t = useTranslations('settings')
   const upsert = useUpsertSetting()
   const remove = useDeleteSetting()
 
@@ -28,7 +30,7 @@ export default function SettingRow({ row }: { row: AppSettingRow }) {
         description: row.description ?? undefined,
       })
       setEditing(false)
-      toast.success('Saved')
+      toast.success(t('saved'))
     } catch (err) {
       if (err instanceof Error) toast.error(err.message)
     }
@@ -43,7 +45,7 @@ export default function SettingRow({ row }: { row: AppSettingRow }) {
     try {
       await remove.mutateAsync(row.key)
       setConfirmOpen(false)
-      toast.success('Deleted')
+      toast.success(t('deleted'))
     } catch (err) {
       if (err instanceof Error) toast.error(err.message)
     }
@@ -70,7 +72,7 @@ export default function SettingRow({ row }: { row: AppSettingRow }) {
                 variant="ghost"
                 onClick={handleSave}
                 disabled={upsert.isPending}
-                aria-label="Save"
+                aria-label={t('save')}
               >
                 <Save className="w-4 h-4" />
               </Button>
@@ -79,7 +81,7 @@ export default function SettingRow({ row }: { row: AppSettingRow }) {
                 variant="ghost"
                 onClick={handleCancel}
                 disabled={upsert.isPending}
-                aria-label="Cancel"
+                aria-label={t('cancel')}
               >
                 <X className="w-4 h-4" />
               </Button>
@@ -90,7 +92,7 @@ export default function SettingRow({ row }: { row: AppSettingRow }) {
                 size="sm"
                 variant="ghost"
                 onClick={() => setEditing(true)}
-                aria-label="Edit"
+                aria-label={t('edit')}
               >
                 <Pencil className="w-4 h-4" />
               </Button>
@@ -98,7 +100,7 @@ export default function SettingRow({ row }: { row: AppSettingRow }) {
                 size="sm"
                 variant="ghost"
                 onClick={() => setConfirmOpen(true)}
-                aria-label="Delete"
+                aria-label={t('delete')}
                 className="text-destructive hover:text-destructive"
               >
                 <Trash2 className="w-4 h-4" />
@@ -112,21 +114,21 @@ export default function SettingRow({ row }: { row: AppSettingRow }) {
         <Input
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
-          placeholder="(empty)"
+          placeholder={t('emptyValue')}
           className="font-mono text-sm"
           autoFocus
         />
       ) : (
         <p className="font-mono text-sm text-muted-foreground break-all">
-          {row.value || <span className="italic">(empty)</span>}
+          {row.value || <span className="italic">{t('emptyValue')}</span>}
         </p>
       )}
 
       <ConfirmDialog
         open={confirmOpen}
         onOpenChange={setConfirmOpen}
-        title="Delete this setting?"
-        description={`Key "${row.key}" will be removed.`}
+        title={t('deleteTitle')}
+        description={t('deleteDescription', { key: row.key })}
         destructive
         isLoading={remove.isPending}
         onConfirm={handleDelete}

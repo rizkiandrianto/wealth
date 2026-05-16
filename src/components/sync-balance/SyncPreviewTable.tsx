@@ -1,16 +1,18 @@
 'use client'
 
 import { ArrowDown, ArrowUp, Minus } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { Badge } from '@/components/ui/badge'
 import { useFormatCurrency } from '@/lib/format'
 import { SyncBalanceDiff } from '@/lib/queries/syncBalance'
 
 function ActionBadge({ action }: { action: SyncBalanceDiff['action'] }) {
+  const t = useTranslations('syncBalance')
   if (action === 'topup') {
     return (
       <Badge className="gap-1 bg-emerald-600 hover:bg-emerald-600 text-white">
         <ArrowUp className="w-3 h-3" />
-        Top-up
+        {t('actionTopup')}
       </Badge>
     )
   }
@@ -18,26 +20,28 @@ function ActionBadge({ action }: { action: SyncBalanceDiff['action'] }) {
     return (
       <Badge className="gap-1 bg-orange-600 hover:bg-orange-600 text-white">
         <ArrowDown className="w-3 h-3" />
-        Withdrawal
+        {t('actionWithdrawal')}
       </Badge>
     )
   }
   return (
     <Badge variant="outline" className="gap-1">
       <Minus className="w-3 h-3" />
-      No-op
+      {t('actionNoOp')}
     </Badge>
   )
 }
 
 export default function SyncPreviewTable({ diffs }: { diffs: SyncBalanceDiff[] }) {
+  const t = useTranslations('syncBalance')
   const formatCurrency = useFormatCurrency()
 
   if (diffs.length === 0) {
     return (
       <div className="border border-border rounded-lg p-6 text-center text-muted-foreground text-sm">
-        No data returned for either bank. Check the sheet ranges in{' '}
-        <span className="font-mono">sync.&lt;year&gt;.*</span>.
+        {t.rich('noData', {
+          keys: () => <span className="font-mono">sync.&lt;year&gt;.*</span>,
+        })}
       </div>
     )
   }
@@ -45,12 +49,12 @@ export default function SyncPreviewTable({ diffs }: { diffs: SyncBalanceDiff[] }
   return (
     <div className="border border-border rounded-lg overflow-hidden">
       <div className="grid grid-cols-12 gap-2 px-4 py-2 bg-muted/40 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-        <div className="col-span-3">Account</div>
-        <div className="col-span-2">Sheet month</div>
-        <div className="col-span-2 text-right">Sheet saldo</div>
-        <div className="col-span-2 text-right">DB saldo</div>
-        <div className="col-span-2 text-right">Delta</div>
-        <div className="col-span-1 text-right">Action</div>
+        <div className="col-span-3">{t('columnAccount')}</div>
+        <div className="col-span-2">{t('columnSheetMonth')}</div>
+        <div className="col-span-2 text-right">{t('columnSheetSaldo')}</div>
+        <div className="col-span-2 text-right">{t('columnDbSaldo')}</div>
+        <div className="col-span-2 text-right">{t('columnDelta')}</div>
+        <div className="col-span-1 text-right">{t('columnAction')}</div>
       </div>
       <div className="divide-y divide-border">
         {diffs.map((diff) => {
