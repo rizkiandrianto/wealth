@@ -16,3 +16,5 @@ node_modules
 public/sw.js
 tsconfig.tsbuildinfo
 next-env.d.ts
+plan/*
+scripts/*
