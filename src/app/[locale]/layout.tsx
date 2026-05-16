@@ -57,7 +57,7 @@ export default async function RootLayout({
       style={{ colorScheme: resolvedTheme }}
       suppressHydrationWarning
     >
-      <body className="antialiased bg-background text-foreground">
+      <body className="antialiased bg-background text-foreground" suppressHydrationWarning>
         <ThemeProvider disableTransitionOnChange>
           <NextIntlClientProvider>
             <Providers>{children}</Providers>

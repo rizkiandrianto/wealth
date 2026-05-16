@@ -8,6 +8,7 @@ import {
   numeric,
   boolean,
   uniqueIndex,
+  unique,
 } from "drizzle-orm/pg-core";
 import type { AdapterAccountType } from "next-auth/adapters";
 
@@ -21,6 +22,7 @@ export const users = pgTable("users", {
   emailVerified: timestamp("email_verified", { mode: "date" }),
   image: text("image"),
   isDemo: boolean("is_demo").default(false),
+  isOwner: boolean("is_owner").notNull().default(false),
   createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
 });
 
@@ -235,6 +237,22 @@ export const accountBalanceSnapshots = pgTable(
     updatedAt: timestamp("updated_at", { mode: "date" }).defaultNow().notNull(),
   },
   (t) => [uniqueIndex("uq_snapshot_user_account_date").on(t.userId, t.accountId, t.date)]
+);
+
+export const appSettings = pgTable(
+  "app_settings",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    key: text("key").notNull(),
+    value: text("value").notNull().default(""),
+    description: text("description"),
+    createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { mode: "date" }).defaultNow().notNull(),
+  },
+  (t) => [unique("uq_app_settings_user_key").on(t.userId, t.key)]
 );
 
 export const portfolioValueSnapshots = pgTable(

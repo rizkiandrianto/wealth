@@ -22,6 +22,8 @@ import {
   User,
   Bitcoin,
   ArrowLeftRight,
+  Settings as SettingsIcon,
+  RefreshCw,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
@@ -39,16 +41,30 @@ interface DashboardLayoutProps {
   children: React.ReactNode
 }
 
-const FINANCE_ITEMS = [
+type NavItem = {
+  href: string
+  labelKey: string
+  labelNs?: string
+  icon: React.ComponentType<{ className?: string }>
+}
+
+const FINANCE_ITEMS: readonly NavItem[] = [
   { href: '/accounts', labelKey: 'accounts', icon: Wallet },
   { href: '/transactions', labelKey: 'transactions', icon: ArrowLeftRight },
-] as const
+]
 
-const PORTFOLIO_ITEMS = [
+const SYNC_ITEM: NavItem = {
+  href: '/sync-balance',
+  labelKey: 'title',
+  labelNs: 'syncBalance',
+  icon: RefreshCw,
+}
+
+const PORTFOLIO_ITEMS: readonly NavItem[] = [
   { href: '/stocks', labelKey: 'stocks', icon: TrendingUp },
   { href: '/crypto', labelKey: 'crypto', icon: Bitcoin },
   { href: '/gold', labelKey: 'gold', icon: Gem },
-] as const
+]
 
 // Bottom nav: 4 items — Finance goes to /accounts, Portfolio goes to /stocks
 const BOTTOM_NAV = [
@@ -60,17 +76,24 @@ const BOTTOM_NAV = [
 
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const t = useTranslations('nav')
+  const tSync = useTranslations('syncBalance')
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [mounted, setMounted] = useState(false)
   const currentPath = usePathname()
   const { data: session } = useSession()
   const userName = session?.user?.name ?? session?.user?.email ?? 'User'
+  const isOwner = !!session?.user?.isOwner
   const { resolvedTheme, setTheme } = useTheme()
   useEffect(() => setMounted(true), [])
   const isDark = mounted && resolvedTheme === 'dark'
 
-  const isFinanceActive = FINANCE_ITEMS.some((i) => i.href === currentPath)
+  const financeItems: readonly NavItem[] = isOwner
+    ? [...FINANCE_ITEMS, SYNC_ITEM]
+    : FINANCE_ITEMS
+  const isFinanceActive = financeItems.some((i) => i.href === currentPath)
   const isPortfolioActive = PORTFOLIO_ITEMS.some((i) => i.href === currentPath)
+  const renderLabel = (item: NavItem) =>
+    item.labelNs === 'syncBalance' ? tSync(item.labelKey) : t(item.labelKey)
 
   // Bottom nav active: Finance tab is active on /accounts or /transactions
   const getBottomActive = (href: string) => {
@@ -113,13 +136,13 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="start">
-                  {FINANCE_ITEMS.map((item) => {
+                  {financeItems.map((item) => {
                     const Icon = item.icon
                     return (
                       <DropdownMenuItem key={item.href} asChild>
                         <Link href={item.href} className="flex items-center gap-2 cursor-pointer">
                           <Icon className="w-4 h-4" />
-                          {t(item.labelKey)}
+                          {renderLabel(item)}
                         </Link>
                       </DropdownMenuItem>
                     )
@@ -143,7 +166,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                       <DropdownMenuItem key={item.href} asChild>
                         <Link href={item.href} className="flex items-center gap-2 cursor-pointer">
                           <Icon className="w-4 h-4" />
-                          {t(item.labelKey)}
+                          {renderLabel(item)}
                         </Link>
                       </DropdownMenuItem>
                     )
@@ -188,6 +211,14 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                     />
                   </div>
                   <DropdownMenuSeparator />
+                  {isOwner && (
+                    <DropdownMenuItem asChild>
+                      <Link href="/settings" className="flex items-center gap-2 cursor-pointer">
+                        <SettingsIcon className="w-4 h-4" />
+                        {t('settings')}
+                      </Link>
+                    </DropdownMenuItem>
+                  )}
                   <DropdownMenuItem
                     className="gap-2 text-destructive focus:text-destructive cursor-pointer"
                     onClick={() => signOut({ callbackUrl: '/login' })}
@@ -224,7 +255,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               <div className="px-3 pt-3 pb-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                 {t('finance')}
               </div>
-              {FINANCE_ITEMS.map((item) => {
+              {financeItems.map((item) => {
                 const Icon = item.icon
                 return (
                   <Link key={item.href} href={item.href}>
@@ -234,7 +265,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                       onClick={() => setMobileMenuOpen(false)}
                     >
                       <Icon className="w-5 h-5" />
-                      {t(item.labelKey)}
+                      {renderLabel(item)}
                     </Button>
                   </Link>
                 )
@@ -252,7 +283,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                       onClick={() => setMobileMenuOpen(false)}
                     >
                       <Icon className="w-5 h-5" />
-                      {t(item.labelKey)}
+                      {renderLabel(item)}
                     </Button>
                   </Link>
                 )
@@ -282,6 +313,18 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                     aria-label={t('darkMode')}
                   />
                 </div>
+                {isOwner && (
+                  <Link href="/settings">
+                    <Button
+                      variant={currentPath === '/settings' ? 'default' : 'ghost'}
+                      className="w-full justify-start gap-3"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      <SettingsIcon className="w-5 h-5" />
+                      {t('settings')}
+                    </Button>
+                  </Link>
+                )}
                 <Button
                   variant="ghost"
                   className="w-full justify-start gap-3 text-destructive hover:text-destructive"

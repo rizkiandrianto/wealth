@@ -3,8 +3,16 @@ import bcrypt from "bcryptjs";
 import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { users } from "@/db/schema";
+import { isRegistrationEnabled } from "@/lib/settings";
 
 export async function POST(req: Request) {
+  if (!(await isRegistrationEnabled())) {
+    return NextResponse.json(
+      { error: "Registration is currently disabled", code: "REGISTRATION_DISABLED" },
+      { status: 403 },
+    );
+  }
+
   const body = await req.json().catch(() => null);
   const { name, email, password } = body ?? {};
 

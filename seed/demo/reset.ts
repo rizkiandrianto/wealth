@@ -37,7 +37,7 @@ import {
 
 loadEnv({ path: '.env.local' })
 
-const DEMO_EMAIL = 'demo@mailinator.com'
+const DEMO_EMAIL = 'demo@rizkiandrianto.com'
 
 // Tables previewed in the dry-run output. Order is purely cosmetic;
 // the actual delete is a single `DELETE FROM users` that cascades.

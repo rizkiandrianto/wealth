@@ -5,6 +5,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { signIn } from "next-auth/react";
 import { useTranslations } from "next-intl";
+import { toast } from "sonner";
+import { Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -23,6 +25,25 @@ function RegisterForm() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [registrationEnabled, setRegistrationEnabled] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/register/status")
+      .then((r) => (r.ok ? r.json() : { enabled: true }))
+      .then((data) => {
+        if (cancelled) return;
+        const enabled = data?.enabled !== false;
+        setRegistrationEnabled(enabled);
+        if (!enabled) toast.error(t("disabled"));
+      })
+      .catch(() => {
+        if (!cancelled) setRegistrationEnabled(true);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [t]);
 
   useEffect(() => {
     setName(prefillName);
@@ -31,6 +52,10 @@ function RegisterForm() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (registrationEnabled === false) {
+      toast.error(t("disabled"));
+      return;
+    }
     setError("");
     setLoading(true);
 
@@ -42,7 +67,13 @@ function RegisterForm() {
 
     if (!res.ok) {
       const data = await res.json().catch(() => ({}));
-      setError(data.error ?? t("failed"));
+      if (data?.code === "REGISTRATION_DISABLED") {
+        setRegistrationEnabled(false);
+        toast.error(t("disabled"));
+        setError(t("disabled"));
+      } else {
+        setError(data.error ?? t("failed"));
+      }
       setLoading(false);
       return;
     }
@@ -63,6 +94,8 @@ function RegisterForm() {
     }
   }
 
+  const isDisabled = registrationEnabled === false;
+
   return (
     <div className="space-y-6">
       <div className="space-y-2 text-center">
@@ -71,6 +104,16 @@ function RegisterForm() {
           {fromGoogle ? t("subtitleGoogle") : t("subtitle")}
         </p>
       </div>
+
+      {isDisabled && (
+        <div className="flex items-start gap-2 rounded-md border border-amber-300 bg-amber-50 dark:bg-amber-950/30 dark:border-amber-800 dark:text-amber-200 text-amber-900 px-3.5 py-3">
+          <Lock className="w-4 h-4 shrink-0 mt-0.5" />
+          <div className="text-sm">
+            <p className="font-medium">{t("disabledTitle")}</p>
+            <p className="text-xs mt-1 opacity-90">{t("disabled")}</p>
+          </div>
+        </div>
+      )}
 
       {fromGoogle && (
         <div className="flex items-center gap-2 bg-blue-50 border border-blue-100 rounded-md px-3.5 py-2.5">
@@ -141,7 +184,7 @@ function RegisterForm() {
           <p className="text-sm text-red-500 text-center">{error}</p>
         )}
 
-        <Button type="submit" className="w-full" disabled={loading}>
+        <Button type="submit" className="w-full" disabled={loading || isDisabled}>
           {loading ? t("submitting") : t("submit")}
         </Button>
       </form>

@@ -1,6 +1,6 @@
 {
-  "id": "5977d809-a37f-476e-b1da-3678ba1ae214",
-  "prevId": "ca8a491c-f635-4fad-b6d3-144f0fe3eef2",
+  "id": "01e7036a-3886-43e0-8f52-58641f7c58ee",
+  "prevId": "5977d809-a37f-476e-b1da-3678ba1ae214",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -78,37 +78,37 @@
             }
           ],
           "isUnique": true,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "account_balance_snapshots_user_id_users_id_fk": {
           "name": "account_balance_snapshots_user_id_users_id_fk",
           "tableFrom": "account_balance_snapshots",
-          "tableTo": "users",
           "columnsFrom": [
             "user_id"
           ],
+          "tableTo": "users",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         },
         "account_balance_snapshots_account_id_wealth_accounts_id_fk": {
           "name": "account_balance_snapshots_account_id_wealth_accounts_id_fk",
           "tableFrom": "account_balance_snapshots",
-          "tableTo": "wealth_accounts",
           "columnsFrom": [
             "account_id"
           ],
+          "tableTo": "wealth_accounts",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -193,15 +193,15 @@
         "accounts_user_id_users_id_fk": {
           "name": "accounts_user_id_users_id_fk",
           "tableFrom": "accounts",
-          "tableTo": "users",
           "columnsFrom": [
             "user_id"
           ],
+          "tableTo": "users",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {
@@ -274,26 +274,26 @@
         "app_settings_user_id_users_id_fk": {
           "name": "app_settings_user_id_users_id_fk",
           "tableFrom": "app_settings",
-          "tableTo": "users",
           "columnsFrom": [
             "user_id"
           ],
+          "tableTo": "users",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
         "uq_app_settings_user_key": {
           "name": "uq_app_settings_user_key",
-          "nullsNotDistinct": false,
           "columns": [
             "user_id",
             "key"
-          ]
+          ],
+          "nullsNotDistinct": false
         }
       },
       "policies": {},
@@ -424,28 +424,28 @@
         "crypto_holdings_user_id_users_id_fk": {
           "name": "crypto_holdings_user_id_users_id_fk",
           "tableFrom": "crypto_holdings",
-          "tableTo": "users",
           "columnsFrom": [
             "user_id"
           ],
+          "tableTo": "users",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         },
         "crypto_holdings_location_id_crypto_locations_id_fk": {
           "name": "crypto_holdings_location_id_crypto_locations_id_fk",
           "tableFrom": "crypto_holdings",
-          "tableTo": "crypto_locations",
           "columnsFrom": [
             "location_id"
           ],
+          "tableTo": "crypto_locations",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -490,15 +490,15 @@
         "crypto_locations_user_id_users_id_fk": {
           "name": "crypto_locations_user_id_users_id_fk",
           "tableFrom": "crypto_locations",
-          "tableTo": "users",
           "columnsFrom": [
             "user_id"
           ],
+          "tableTo": "users",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -585,15 +585,15 @@
         "crypto_sales_user_id_users_id_fk": {
           "name": "crypto_sales_user_id_users_id_fk",
           "tableFrom": "crypto_sales",
-          "tableTo": "users",
           "columnsFrom": [
             "user_id"
           ],
+          "tableTo": "users",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -656,28 +656,28 @@
         "gold_holdings_user_id_users_id_fk": {
           "name": "gold_holdings_user_id_users_id_fk",
           "tableFrom": "gold_holdings",
-          "tableTo": "users",
           "columnsFrom": [
             "user_id"
           ],
+          "tableTo": "users",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         },
         "gold_holdings_location_id_gold_locations_id_fk": {
           "name": "gold_holdings_location_id_gold_locations_id_fk",
           "tableFrom": "gold_holdings",
-          "tableTo": "gold_locations",
           "columnsFrom": [
             "location_id"
           ],
+          "tableTo": "gold_locations",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -722,15 +722,15 @@
         "gold_locations_user_id_users_id_fk": {
           "name": "gold_locations_user_id_users_id_fk",
           "tableFrom": "gold_locations",
-          "tableTo": "users",
           "columnsFrom": [
             "user_id"
           ],
+          "tableTo": "users",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -811,15 +811,15 @@
         "gold_sales_user_id_users_id_fk": {
           "name": "gold_sales_user_id_users_id_fk",
           "tableFrom": "gold_sales",
-          "tableTo": "users",
           "columnsFrom": [
             "user_id"
           ],
+          "tableTo": "users",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -918,24 +918,24 @@
             }
           ],
           "isUnique": true,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "portfolio_value_snapshots_user_id_users_id_fk": {
           "name": "portfolio_value_snapshots_user_id_users_id_fk",
           "tableFrom": "portfolio_value_snapshots",
-          "tableTo": "users",
           "columnsFrom": [
             "user_id"
           ],
+          "tableTo": "users",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -972,15 +972,15 @@
         "sessions_user_id_users_id_fk": {
           "name": "sessions_user_id_users_id_fk",
           "tableFrom": "sessions",
-          "tableTo": "users",
           "columnsFrom": [
             "user_id"
           ],
+          "tableTo": "users",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -1056,28 +1056,28 @@
         "stock_holdings_user_id_users_id_fk": {
           "name": "stock_holdings_user_id_users_id_fk",
           "tableFrom": "stock_holdings",
-          "tableTo": "users",
           "columnsFrom": [
             "user_id"
           ],
+          "tableTo": "users",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         },
         "stock_holdings_location_id_stock_locations_id_fk": {
           "name": "stock_holdings_location_id_stock_locations_id_fk",
           "tableFrom": "stock_holdings",
-          "tableTo": "stock_locations",
           "columnsFrom": [
             "location_id"
           ],
+          "tableTo": "stock_locations",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -1122,15 +1122,15 @@
         "stock_locations_user_id_users_id_fk": {
           "name": "stock_locations_user_id_users_id_fk",
           "tableFrom": "stock_locations",
-          "tableTo": "users",
           "columnsFrom": [
             "user_id"
           ],
+          "tableTo": "users",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -1217,15 +1217,15 @@
         "stock_sales_user_id_users_id_fk": {
           "name": "stock_sales_user_id_users_id_fk",
           "tableFrom": "stock_sales",
-          "tableTo": "users",
           "columnsFrom": [
             "user_id"
           ],
+          "tableTo": "users",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -1294,15 +1294,15 @@
         "transactions_user_id_users_id_fk": {
           "name": "transactions_user_id_users_id_fk",
           "tableFrom": "transactions",
-          "tableTo": "users",
           "columnsFrom": [
             "user_id"
           ],
+          "tableTo": "users",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -1380,10 +1380,10 @@
       "uniqueConstraints": {
         "users_email_unique": {
           "name": "users_email_unique",
-          "nullsNotDistinct": false,
           "columns": [
             "email"
-          ]
+          ],
+          "nullsNotDistinct": false
         }
       },
       "policies": {},
@@ -1485,15 +1485,15 @@
         "wealth_accounts_user_id_users_id_fk": {
           "name": "wealth_accounts_user_id_users_id_fk",
           "tableFrom": "wealth_accounts",
-          "tableTo": "users",
           "columnsFrom": [
             "user_id"
           ],
+          "tableTo": "users",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -1505,10 +1505,10 @@
   },
   "enums": {},
   "schemas": {},
+  "views": {},
   "sequences": {},
   "roles": {},
   "policies": {},
-  "views": {},
   "_meta": {
     "columns": {},
     "schemas": {},

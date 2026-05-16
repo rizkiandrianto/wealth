@@ -38,7 +38,7 @@ The app is open for anyone to try without signing up. Use:
 
 | Field    | Value              |
 | -------- | ------------------ |
-| Email    | demo@mailinator.com |
+| Email    | demo@rizkiandrianto.com |
 | Password | demo1234           |
 
 The demo account is **read-only**. You can browse every page and see sample

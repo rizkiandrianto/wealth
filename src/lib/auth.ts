@@ -49,6 +49,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           email: user.email,
           name: user.name,
           isDemo: user.isDemo ?? false,
+          isOwner: user.isOwner ?? false,
         };
       },
     }),
@@ -73,17 +74,45 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       }
       return true;
     },
-    jwt({ token, user }) {
+    async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
         token.isDemo = user.isDemo ?? false;
+        token.isOwner = user.isOwner ?? false;
+      }
+      // Hydrate isOwner from DB when token created via OAuth (no Credentials user payload),
+      // or when the flag is missing (e.g., existing JWTs from before this field shipped).
+      if (token.id && token.isOwner === undefined) {
+        const [row] = await db
+          .select({ isOwner: users.isOwner })
+          .from(users)
+          .where(eq(users.id, token.id as string))
+          .limit(1);
+        token.isOwner = row?.isOwner ?? false;
       }
       return token;
     },
     session({ session, token }) {
       if (token.id) session.user.id = token.id as string;
       session.user.isDemo = !!token.isDemo;
+      session.user.isOwner = !!token.isOwner;
       return session;
     },
   },
 });
+
+export async function requireOwner() {
+  const session = await auth();
+  if (!session?.user?.id) {
+    throw new Response("Unauthorized", { status: 401 });
+  }
+  const [user] = await db
+    .select({ isOwner: users.isOwner })
+    .from(users)
+    .where(eq(users.id, session.user.id))
+    .limit(1);
+  if (!user?.isOwner) {
+    throw new Response("Forbidden", { status: 403 });
+  }
+  return session;
+}
