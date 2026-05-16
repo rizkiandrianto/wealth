@@ -1,8 +1,9 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { apiFetch } from '@/lib/apiFetch'
 import { toStockLocation, Row } from '@/lib/normalizers'
 import { StockLocation } from '@/lib/types'
 import { queryKeys } from './keys'
+import { useGuardedMutation } from './useGuardedMutation'
 
 export const stockLocationsQueryOptions = () => ({
   queryKey: queryKeys.stockLocations,
@@ -18,7 +19,7 @@ export function useStockLocationsQuery() {
 
 export function useAddStockLocation() {
   const qc = useQueryClient()
-  return useMutation({
+  return useGuardedMutation({
     mutationFn: async (input: Omit<StockLocation, 'id' | 'createdAt'>) => {
       const row = await apiFetch('/api/stock-locations', {
         method: 'POST',
@@ -34,7 +35,7 @@ export function useAddStockLocation() {
 
 export function useUpdateStockLocation() {
   const qc = useQueryClient()
-  return useMutation({
+  return useGuardedMutation({
     mutationFn: async ({
       id,
       updates,
@@ -56,7 +57,7 @@ export function useUpdateStockLocation() {
 
 export function useDeleteStockLocation() {
   const qc = useQueryClient()
-  return useMutation({
+  return useGuardedMutation({
     mutationFn: async (id: string) => {
       await apiFetch(`/api/stock-locations/${id}`, { method: 'DELETE' })
       return id

@@ -336,6 +336,12 @@
     "profitLoss": "Untung / Rugi",
     "avg": "rata-rata"
   },
+  "demo": {
+    "dialogTitle": "Akun demo",
+    "dialogDescription": "Ini akun demo. Menambah, mengubah, dan menghapus data dinonaktifkan. Daftar dengan email Anda sendiri untuk menyimpan data sungguhan.",
+    "dialogAck": "Mengerti",
+    "loginHint": "Mau lihat-lihat dulu? Login sebagai <b>demo@mailinator.com</b> / <b>demo1234</b> (read-only)."
+  },
   "common": {
     "save": "Simpan",
     "saving": "Menyimpan...",

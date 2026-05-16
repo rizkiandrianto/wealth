@@ -44,7 +44,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         );
         if (!valid) return null;
 
-        return { id: user.id, email: user.email, name: user.name };
+        return {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          isDemo: user.isDemo ?? false,
+        };
       },
     }),
   ],
@@ -69,11 +74,15 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       return true;
     },
     jwt({ token, user }) {
-      if (user) token.id = user.id;
+      if (user) {
+        token.id = user.id;
+        token.isDemo = user.isDemo ?? false;
+      }
       return token;
     },
     session({ session, token }) {
       if (token.id) session.user.id = token.id as string;
+      session.user.isDemo = !!token.isDemo;
       return session;
     },
   },

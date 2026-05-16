@@ -10,7 +10,9 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:push": "drizzle-kit push",
-    "import-snapshots": "tsx scripts/import-snapshots.ts"
+    "import-snapshots": "tsx scripts/import-snapshots.ts",
+    "seed:demo": "tsx seed/demo/seed.ts",
+    "seed:demo:reset": "tsx seed/demo/reset.ts"
   },
   "dependencies": {
     "@auth/drizzle-adapter": "^1.11.2",

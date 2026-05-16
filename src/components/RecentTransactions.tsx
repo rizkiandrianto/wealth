@@ -8,6 +8,8 @@ import { Transaction } from '@/lib/types'
 import { useFormatCurrency, useFormatDateTime } from '@/lib/format'
 import { ArrowRight } from 'lucide-react'
 import { useAccountsQuery } from '@/lib/queries/accounts'
+import { cn } from '@/lib/utils'
+import { getTransactionSymbol } from '@/lib/transaction'
 
 interface RecentTransactionsProps {
   transactions: Transaction[]
@@ -20,8 +22,24 @@ export default function RecentTransactions({ transactions }: RecentTransactionsP
   const formatCurrency = useFormatCurrency()
   const formatDateTime = useFormatDateTime()
 
-  const getAccountName = (accountId: string) => {
+  const getAccountName = (accountId: string | undefined) => {
     return accounts.find((a) => a.id === accountId)?.name || tTx('topup')
+  }
+
+  const getFlowLabel = (fromAccount: string | undefined, toAccount: string | undefined) => {
+    const destinationName = getAccountName(toAccount);
+    
+    if (!fromAccount) {
+      return `Topup to ${destinationName}`;
+    }
+
+    const sourceName = getAccountName(fromAccount)
+    if (!toAccount) {
+      return `Witdrawal from ${sourceName}`;
+    }
+
+
+    return `${sourceName} → ${destinationName}`;
   }
 
   if (transactions.length === 0) {
@@ -58,7 +76,7 @@ export default function RecentTransactions({ transactions }: RecentTransactionsP
                 <div className="flex-1">
                   <div className="md:flex flex-col md:flex-row items-center gap-2 mb-1">
                     <p className="font-medium text-foreground">
-                      {getAccountName(tx.fromAccountId ?? "")} → {getAccountName(tx.toAccountId ?? "")}
+                      {getFlowLabel(tx.fromAccountId, tx.toAccountId)}                      
                     </p>
                     {tx.description && (
                       <span className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded">
@@ -68,8 +86,12 @@ export default function RecentTransactions({ transactions }: RecentTransactionsP
                   </div>
                   <p className="text-sm text-muted-foreground">{formatDateTime(tx.date)}</p>
                 </div>
-                <p className="text-lg font-bold text-green-600">
-                  +{formatCurrency(tx.amount)}
+                <p className={cn("text-lg font-bold", {
+                  'text-green-600': !tx.fromAccountId && tx.toAccountId,
+                  'text-red-600': !tx.toAccountId,
+                  'text-foreground': tx.fromAccountId && tx.toAccountId
+                })}>
+                  {getTransactionSymbol(tx)}{formatCurrency(tx.amount)}
                 </p>
               </div>
             </div>

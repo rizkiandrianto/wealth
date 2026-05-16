@@ -4,9 +4,9 @@ import { Analytics } from '@vercel/analytics/next'
 import { NextIntlClientProvider, hasLocale } from 'next-intl'
 import { setRequestLocale } from 'next-intl/server'
 import { notFound } from 'next/navigation'
+import { cookies } from 'next/headers'
 import { Providers } from './providers'
-import { ThemeProvider } from '@/components/theme-provider'
-import ThemeScript from '@/components/ThemeScript'
+import { ThemeProvider, RESOLVED_THEME_COOKIE } from '@/components/theme-provider'
 import { routing } from '@/i18n/routing'
 import '../globals.css'
 
@@ -46,11 +46,17 @@ export default async function RootLayout({
   }
   setRequestLocale(locale)
 
+  const cookieStore = await cookies()
+  const resolvedCookie = cookieStore.get(RESOLVED_THEME_COOKIE)?.value || 'dark'
+  const resolvedTheme = resolvedCookie === 'light' ? 'light' : 'dark'
+
   return (
-    <html lang={locale} className={`bg-background ${geist.className}`} suppressHydrationWarning>
-      <head>
-        <ThemeScript />
-      </head>
+    <html
+      lang={locale}
+      className={`${resolvedTheme} bg-background ${geist.className}`}
+      style={{ colorScheme: resolvedTheme }}
+      suppressHydrationWarning
+    >
       <body className="antialiased bg-background text-foreground">
         <ThemeProvider disableTransitionOnChange>
           <NextIntlClientProvider>

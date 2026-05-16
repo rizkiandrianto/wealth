@@ -8,7 +8,7 @@ a pre-seeded user that can read every screen but is **blocked from any mutation*
 server-side (defense) and UI-side (graceful UX with a warning dialog).
 
 Decisions (confirmed):
-- **Credentials**: `demo@wealth.app` / `demo1234` (documented in README).
+- **Credentials**: `demo@mailinator.com` / `demo1234` (documented in README).
 - **DB flag**: `users.is_demo BOOLEAN DEFAULT FALSE` (nullable per requirement).
 - **Server guard**: single `src/middleware.ts` returns **401** on POST/PUT/PATCH/DELETE
   to `/api/*` when `session.user.isDemo === true`. Covers all 28 mutation routes
@@ -154,12 +154,12 @@ The signature is identical, so this is a one-line swap per file.
 
 **Create** `scripts/seed-demo.ts`:
 - Hashes `demo1234` with `bcryptjs` (rounds: 12, matching `/api/register`).
-- Upserts user `demo@wealth.app` with `isDemo: true` (idempotent on conflict).
+- Upserts user `demo@mailinator.com` with `isDemo: true` (idempotent on conflict).
 - Inserts minimal sample data **only if the demo user is newly created** (so
   re-running the script doesn't duplicate rows):
   - 1 bank account (BCA, IDR), 1 cash account (IDR).
-  - 1 stock location ("IPOT"), 1 holding (`BBCA`, IDR, ~10 shares).
-  - 1 crypto location ("Binance"), 1 holding (`BTC`).
+  - 1 stock location ("Ajaib"), 1 holding (`BBCA`, IDR, ~10 shares).
+  - 1 crypto location ("Nanovest"), 1 holding (`BTC`).
   - 1 transaction (deposit into BCA).
 - Uses the existing `db` instance from `src/db/index.ts`.
 
@@ -175,7 +175,7 @@ swap to whatever script runner the repo uses.)
 
 **Modify** the login page (likely `src/app/login/page.tsx`) — add a small
 "Try the demo" hint under the form:
-> Want to look around first? Log in as **demo@wealth.app** / **demo1234** (read-only).
+> Want to look around first? Log in as **demo@mailinator.com** / **demo1234** (read-only).
 
 Optional but high-leverage for a public-facing app.
 
@@ -191,7 +191,7 @@ The app is open for anyone to try without signing up. Use:
 
 | Field    | Value              |
 | -------- | ------------------ |
-| Email    | demo@wealth.app    |
+| Email    | demo@mailinator.com    |
 | Password | demo1234           |
 
 The demo account is **read-only**. You can browse every page and see sample data,
@@ -243,7 +243,7 @@ After each commit:
 
 End-to-end manual test (after seed step):
 1. `pnpm seed:demo` → demo user created with sample data.
-2. Sign in as `demo@wealth.app` / `demo1234` → dashboard renders with seeded
+2. Sign in as `demo@mailinator.com` / `demo1234` → dashboard renders with seeded
    accounts, stock, crypto, transaction.
 3. Click "Add account" → fill form → submit. **Expected**: `DemoNoticeDialog`
    opens immediately; no `POST /api/accounts` in DevTools Network tab.
@@ -271,25 +271,25 @@ Edge cases to spot-check:
 ## Tracker
 
 ### Phase 1 — Schema & session plumbing
-- [ ] **DA.1** Add `isDemo` to `users` in `src/db/schema.ts`; generate + apply migration `drizzle/0003_add_is_demo_to_users.sql`
-- [ ] **DA.2** Extend NextAuth callbacks (`authorize`, `jwt`, `session`) to propagate `isDemo`; add `src/types/next-auth.d.ts`
+- [x] **DA.1** Add `isDemo` to `users` in `src/db/schema.ts`; migration `drizzle/0003_add_is_demo_to_users.sql` (+ journal entry)
+- [x] **DA.2** Extend NextAuth callbacks (`authorize`, `jwt`, `session`) to propagate `isDemo`; add `src/types/next-auth.d.ts`
 
 ### Phase 2 — Server guard
-- [ ] **DA.3** Add `src/middleware.ts` blocking POST/PUT/PATCH/DELETE for demo users on `/api/*`
+- [x] **DA.3** Demo guard integrated into existing `src/proxy.ts` (Next.js 16 renames `middleware.ts` → `proxy.ts`); blocks POST/PUT/PATCH/DELETE on `/api/*` for demo users (excludes `/api/auth/*` and `/api/register`)
 
 ### Phase 3 — Client guard
-- [ ] **DA.4** Create `DemoGuardProvider.tsx` + mount in root providers
-- [ ] **DA.5** Create `src/lib/queries/useGuardedMutation.ts` (+ `DemoBlockedError`)
-- [ ] **DA.6** Swap `useMutation` → `useGuardedMutation` across all mutation hook files
+- [x] **DA.4** `src/components/providers/DemoGuardProvider.tsx` + mounted in `src/app/[locale]/providers.tsx`
+- [x] **DA.5** `src/lib/queries/useGuardedMutation.ts` (+ `DemoBlockedError`) — signatures updated for TanStack Query v5.100 `MutationFunctionContext`
+- [x] **DA.6** Swapped `useMutation` → `useGuardedMutation` across all 8 mutation hook files
 
 ### Phase 4 — Seed & docs
-- [ ] **DA.7** `scripts/seed-demo.ts` + `pnpm seed:demo` npm script
-- [ ] **DA.8** Login page hint (optional)
-- [ ] **DA.9** README "Demo Account" section
+- [x] **DA.7** `seed/demo/seed.ts` + `seed/demo/README.md` + `pnpm seed:demo` (relocated from `scripts/` per user direction)
+- [x] **DA.8** Login page hint via new `demo.loginHint` i18n key (EN + ID)
+- [x] **DA.9** README root "Demo Account" section
 
 ### Phase 5 — Verify
 - [ ] **DA.10** Run `pnpm seed:demo`, then full manual checklist (steps 2–7 above)
-- [ ] **DA.11** `pnpm build` clean
+- [x] **DA.11** `pnpm build` clean
 - [ ] **DA.12** Open PR to `develop`
 
 Each item = 1 commit + stop & test before next.

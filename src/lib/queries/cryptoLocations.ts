@@ -1,8 +1,9 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { apiFetch } from '@/lib/apiFetch'
 import { toCryptoLocation, Row } from '@/lib/normalizers'
 import { CryptoLocation } from '@/lib/types'
 import { queryKeys } from './keys'
+import { useGuardedMutation } from './useGuardedMutation'
 
 export const cryptoLocationsQueryOptions = () => ({
   queryKey: queryKeys.cryptoLocations,
@@ -18,7 +19,7 @@ export function useCryptoLocationsQuery() {
 
 export function useAddCryptoLocation() {
   const qc = useQueryClient()
-  return useMutation({
+  return useGuardedMutation({
     mutationFn: async (input: Omit<CryptoLocation, 'id' | 'createdAt'>) => {
       const row = await apiFetch('/api/crypto-locations', {
         method: 'POST',
@@ -34,7 +35,7 @@ export function useAddCryptoLocation() {
 
 export function useUpdateCryptoLocation() {
   const qc = useQueryClient()
-  return useMutation({
+  return useGuardedMutation({
     mutationFn: async ({
       id,
       updates,
@@ -56,7 +57,7 @@ export function useUpdateCryptoLocation() {
 
 export function useDeleteCryptoLocation() {
   const qc = useQueryClient()
-  return useMutation({
+  return useGuardedMutation({
     mutationFn: async (id: string) => {
       await apiFetch(`/api/crypto-locations/${id}`, { method: 'DELETE' })
       return id

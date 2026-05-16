@@ -1,8 +1,9 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { apiFetch } from '@/lib/apiFetch'
 import { toStock, toStockSale, Row } from '@/lib/normalizers'
 import { StockHolding, StockSale } from '@/lib/types'
 import { queryKeys } from './keys'
+import { useGuardedMutation } from './useGuardedMutation'
 
 export const stocksQueryOptions = () => ({
   queryKey: queryKeys.stocks,
@@ -74,7 +75,7 @@ export function useStocksTickersQuery() {
 
 export function useAddStock() {
   const qc = useQueryClient()
-  return useMutation({
+  return useGuardedMutation({
     mutationFn: async (input: Omit<StockHolding, 'id' | 'createdAt'>) => {
       const row = await apiFetch('/api/stocks', {
         method: 'POST',
@@ -90,7 +91,7 @@ export function useAddStock() {
 
 export function useUpdateStock() {
   const qc = useQueryClient()
-  return useMutation({
+  return useGuardedMutation({
     mutationFn: async ({
       id,
       updates,
@@ -112,7 +113,7 @@ export function useUpdateStock() {
 
 export function useDeleteStock() {
   const qc = useQueryClient()
-  return useMutation({
+  return useGuardedMutation({
     mutationFn: async (id: string) => {
       await apiFetch(`/api/stocks/${id}`, { method: 'DELETE' })
       return id
@@ -125,7 +126,7 @@ export function useDeleteStock() {
 
 export function useSellStock() {
   const qc = useQueryClient()
-  return useMutation({
+  return useGuardedMutation({
     mutationFn: async ({
       stockId,
       quantity,
@@ -151,7 +152,7 @@ export function useSellStock() {
 
 export function useSellStockBatch() {
   const qc = useQueryClient()
-  return useMutation({
+  return useGuardedMutation({
     mutationFn: async (input: {
       ticker: string
       locationId: string

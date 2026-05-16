@@ -14,6 +14,7 @@ interface ThemeContextValue {
 const ThemeContext = React.createContext<ThemeContextValue | undefined>(undefined)
 
 const STORAGE_KEY = 'theme'
+export const RESOLVED_THEME_COOKIE = 'theme-resolved'
 
 function readStoredTheme(): Theme {
   if (typeof window === 'undefined') return 'system'
@@ -29,12 +30,18 @@ function getSystemTheme(): ResolvedTheme {
   return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
 }
 
+function writeResolvedThemeCookie(resolved: ResolvedTheme) {
+  if (typeof document === 'undefined') return
+  document.cookie = `${RESOLVED_THEME_COOKIE}=${resolved}; path=/; max-age=${60 * 60 * 24 * 365}; SameSite=Lax`
+}
+
 function applyTheme(resolved: ResolvedTheme) {
   if (typeof document === 'undefined') return
   const root = document.documentElement
   root.classList.remove('light', 'dark')
   root.classList.add(resolved)
   root.style.colorScheme = resolved
+  writeResolvedThemeCookie(resolved)
 }
 
 interface ThemeProviderProps {

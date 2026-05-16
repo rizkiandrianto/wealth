@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label";
 
 export default function LoginPage() {
   const t = useTranslations("auth.login");
+  const tDemo = useTranslations("demo");
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -112,6 +113,10 @@ export default function LoginPage() {
           {t("register")}
         </Link>
       </p>
+
+      <div className="rounded-md border border-dashed border-muted-foreground/30 bg-muted/30 px-3 py-2 text-center text-xs text-muted-foreground">
+        {tDemo.rich("loginHint", { b: (chunks) => <b>{chunks}</b> })}
+      </div>
     </div>
   );
 }

@@ -1,8 +1,9 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { apiFetch } from '@/lib/apiFetch'
 import { toGoldLocation, Row } from '@/lib/normalizers'
 import { GoldLocation } from '@/lib/types'
 import { queryKeys } from './keys'
+import { useGuardedMutation } from './useGuardedMutation'
 
 export const goldLocationsQueryOptions = () => ({
   queryKey: queryKeys.goldLocations,
@@ -18,7 +19,7 @@ export function useGoldLocationsQuery() {
 
 export function useAddGoldLocation() {
   const qc = useQueryClient()
-  return useMutation({
+  return useGuardedMutation({
     mutationFn: async (input: Omit<GoldLocation, 'id' | 'createdAt'>) => {
       const row = await apiFetch('/api/gold-locations', {
         method: 'POST',
@@ -34,7 +35,7 @@ export function useAddGoldLocation() {
 
 export function useUpdateGoldLocation() {
   const qc = useQueryClient()
-  return useMutation({
+  return useGuardedMutation({
     mutationFn: async ({
       id,
       updates,
@@ -56,7 +57,7 @@ export function useUpdateGoldLocation() {
 
 export function useDeleteGoldLocation() {
   const qc = useQueryClient()
-  return useMutation({
+  return useGuardedMutation({
     mutationFn: async (id: string) => {
       await apiFetch(`/api/gold-locations/${id}`, { method: 'DELETE' })
       return id

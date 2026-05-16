@@ -1,8 +1,9 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { apiFetch } from '@/lib/apiFetch'
 import { toGold, toGoldSale, Row } from '@/lib/normalizers'
 import { GoldHolding, GoldSale } from '@/lib/types'
 import { queryKeys } from './keys'
+import { useGuardedMutation } from './useGuardedMutation'
 
 export const goldsQueryOptions = () => ({
   queryKey: queryKeys.golds,
@@ -78,7 +79,7 @@ export function useGoldsTickerQuery() {
 
 export function useAddGold() {
   const qc = useQueryClient()
-  return useMutation({
+  return useGuardedMutation({
     mutationFn: async (input: Omit<GoldHolding, 'id' | 'createdAt'>) => {
       const row = await apiFetch('/api/gold', {
         method: 'POST',
@@ -94,7 +95,7 @@ export function useAddGold() {
 
 export function useUpdateGold() {
   const qc = useQueryClient()
-  return useMutation({
+  return useGuardedMutation({
     mutationFn: async ({
       id,
       updates,
@@ -116,7 +117,7 @@ export function useUpdateGold() {
 
 export function useDeleteGold() {
   const qc = useQueryClient()
-  return useMutation({
+  return useGuardedMutation({
     mutationFn: async (id: string) => {
       await apiFetch(`/api/gold/${id}`, { method: 'DELETE' })
       return id
@@ -129,7 +130,7 @@ export function useDeleteGold() {
 
 export function useSellGold() {
   const qc = useQueryClient()
-  return useMutation({
+  return useGuardedMutation({
     mutationFn: async ({
       goldId,
       weight,

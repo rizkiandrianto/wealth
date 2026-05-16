@@ -32,6 +32,38 @@ Copy `.env.local.example` to `.env.local` and fill in the values:
 
 Manual single-ticker override: `PUT /api/market/prices/{ticker}` (requires user session).
 
+## Demo Account
+
+The app is open for anyone to try without signing up. Use:
+
+| Field    | Value              |
+| -------- | ------------------ |
+| Email    | demo@mailinator.com |
+| Password | demo1234           |
+
+The demo account is **read-only**. You can browse every page and see sample
+data, but any attempt to add, edit, or delete will:
+
+1. **Server**: return `401 Unauthorized` from `POST/PUT/PATCH/DELETE` on
+   `/api/*` (enforced by `src/proxy.ts` checking `session.user.isDemo`).
+2. **UI**: open a "Demo account" notice dialog explaining the limitation,
+   *before* the network request is fired (via `useGuardedMutation`).
+
+### How a user is marked as demo
+
+The `users` table has an `is_demo BOOLEAN DEFAULT FALSE` column. Only rows
+where `is_demo = true` are subject to the read-only guard.
+
+### Seeding / resetting the demo account
+
+```bash
+pnpm seed:demo
+```
+
+Creates the demo user (idempotent) and inserts a minimal portfolio (bank +
+cash accounts, one stock, one crypto, one transaction) so the dashboard is
+non-empty. See `seed/demo/README.md` for details.
+
 ## Getting Started
 
 First, run the development server:

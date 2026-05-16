@@ -1,8 +1,9 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { apiFetch } from '@/lib/apiFetch'
 import { toCrypto, toCryptoSale, Row } from '@/lib/normalizers'
 import { CryptoHolding, CryptoSale } from '@/lib/types'
 import { queryKeys } from './keys'
+import { useGuardedMutation } from './useGuardedMutation'
 
 export const cryptosQueryOptions = () => ({
   queryKey: queryKeys.cryptos,
@@ -73,7 +74,7 @@ export function useCryptosTickersQuery() {
 
 export function useAddCrypto() {
   const qc = useQueryClient()
-  return useMutation({
+  return useGuardedMutation({
     mutationFn: async (input: Omit<CryptoHolding, 'id' | 'createdAt'>) => {
       const row = await apiFetch('/api/crypto', {
         method: 'POST',
@@ -89,7 +90,7 @@ export function useAddCrypto() {
 
 export function useUpdateCrypto() {
   const qc = useQueryClient()
-  return useMutation({
+  return useGuardedMutation({
     mutationFn: async ({
       id,
       updates,
@@ -111,7 +112,7 @@ export function useUpdateCrypto() {
 
 export function useDeleteCrypto() {
   const qc = useQueryClient()
-  return useMutation({
+  return useGuardedMutation({
     mutationFn: async (id: string) => {
       await apiFetch(`/api/crypto/${id}`, { method: 'DELETE' })
       return id
@@ -124,7 +125,7 @@ export function useDeleteCrypto() {
 
 export function useSellCrypto() {
   const qc = useQueryClient()
-  return useMutation({
+  return useGuardedMutation({
     mutationFn: async ({
       cryptoId,
       quantity,
@@ -150,7 +151,7 @@ export function useSellCrypto() {
 
 export function useSellCryptoBatch() {
   const qc = useQueryClient()
-  return useMutation({
+  return useGuardedMutation({
     mutationFn: async (input: {
       symbol: string
       locationId: string

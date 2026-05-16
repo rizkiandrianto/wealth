@@ -5,11 +5,28 @@ import { routing } from '@/i18n/routing'
 
 const intlMiddleware = createMiddleware(routing)
 
+const MUTATING_METHODS = new Set(['POST', 'PUT', 'PATCH', 'DELETE'])
+const DEMO_OPEN_API = /^\/api\/(auth|register)(\/|$)/
+
 async function handle(req: NextRequest) {
+  const { pathname } = req.nextUrl
+
+  if (pathname.startsWith('/api/')) {
+    if (!MUTATING_METHODS.has(req.method)) return
+    if (DEMO_OPEN_API.test(pathname)) return
+    const session = await auth()
+    if (session?.user?.isDemo) {
+      return NextResponse.json(
+        { error: 'Demo account is read-only' },
+        { status: 401 },
+      )
+    }
+    return
+  }
+
   const intlResponse = intlMiddleware(req)
   const session = await auth()
   const isLoggedIn = !!session
-  const { pathname } = req.nextUrl
 
   const isAuthPage = pathname.startsWith('/login') || pathname.startsWith('/register')
 
@@ -27,5 +44,8 @@ async function handle(req: NextRequest) {
 export default handle
 
 export const config = {
-  matcher: ['/((?!api|_next|.*\\..*).*)'],
+  matcher: [
+    '/((?!_next|.*\\..*).*)',
+    '/api/((?!auth|register).*)',
+  ],
 }

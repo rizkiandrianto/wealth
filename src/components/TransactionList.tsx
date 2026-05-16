@@ -5,7 +5,8 @@ import { Account, Transaction } from '@/lib/types'
 import { useFormatCurrency, useFormatDateTime } from '@/lib/format'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { ArrowRight, Trash2 } from 'lucide-react'
+import { ArrowRight, SquareArrowOutUpRight, SquareArrowRight, Trash2 } from 'lucide-react'
+import { getTransactionTextColor, getTransactionSymbol } from '@/lib/transaction'
 
 interface TransactionListProps {
   transactions: Transaction[]
@@ -76,27 +77,27 @@ export default function TransactionList({
               {groupedByDate[date].map((tx) => {
                 const isTopup = !tx.fromAccountId && tx.toAccountId
                 const isWithdrawal = tx.fromAccountId && !tx.toAccountId
-                const isTransfer = tx.fromAccountId && tx.toAccountId
                 
                 let label = ''
-                let bgColor = 'from-blue-50 to-blue-100'
-                let iconColor = 'text-blue-600'
-                let amountColor = 'text-green-600'
-                let amountPrefix = '+'
-                
+                let bgColor = 'bg-blue-500'
+                let amountColor = getTransactionTextColor(tx);
+                let iconColor = amountColor;
+                const amountPrefix = getTransactionSymbol(tx);
+
                 if (isTopup) {
                   label = `${t('topup')} → ${getAccountName(tx.toAccountId!)}`
-                  bgColor = 'from-green-50 to-green-100'
-                  iconColor = 'text-green-600'
+                  bgColor = 'bg-emerald-500';
+                  iconColor = 'text-white';
+
                 } else if (isWithdrawal) {
                   label = `${getAccountName(tx.fromAccountId!)} → ${t('withdrawal')}`
-                  bgColor = 'from-orange-50 to-orange-100'
-                  iconColor = 'text-orange-600'
-                  amountColor = 'text-orange-600'
-                  amountPrefix = '-'
+                  bgColor = 'bg-secondary'
                 } else {
                   label = `${getAccountName(tx.fromAccountId!)} → ${getAccountName(tx.toAccountId!)}`
+                  iconColor = 'text-white';
                 }
+
+                const iconClass = `w-5 h-5 ${iconColor}`;
 
                 return (
                   <div
@@ -105,8 +106,10 @@ export default function TransactionList({
                   >
                     <div className="flex-1">
                       <div className="flex items-center gap-3">
-                        <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${bgColor} flex items-center justify-center`}>
-                          <ArrowRight className={`w-5 h-5 ${iconColor}`} />
+                        <div className={`w-10 h-10 rounded-lg bg-linear-to-br ${bgColor} flex items-center justify-center`}>
+                          {isTopup && <SquareArrowRight className={iconClass} />}
+                          {isWithdrawal && <SquareArrowOutUpRight className={iconClass} />}
+                          {!isTopup && !isWithdrawal && <ArrowRight className={iconClass} />}
                         </div>
                         <div className="flex-1">
                           <p className="font-medium text-foreground">

@@ -1,5 +1,6 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { apiFetch } from '@/lib/apiFetch'
+import { useGuardedMutation } from './useGuardedMutation'
 import { toAccount, Row } from '@/lib/normalizers'
 import { Account } from '@/lib/types'
 import { queryKeys } from './keys'
@@ -18,7 +19,7 @@ export function useAccountsQuery() {
 
 export function useAddAccount() {
   const qc = useQueryClient()
-  return useMutation({
+  return useGuardedMutation({
     mutationFn: async (input: Omit<Account, 'id' | 'createdAt' | 'balance'>) => {
       const row = await apiFetch('/api/accounts', {
         method: 'POST',
@@ -34,7 +35,7 @@ export function useAddAccount() {
 
 export function useUpdateAccount() {
   const qc = useQueryClient()
-  return useMutation({
+  return useGuardedMutation({
     mutationFn: async ({
       id,
       updates,
@@ -56,7 +57,7 @@ export function useUpdateAccount() {
 
 export function useDeleteAccount() {
   const qc = useQueryClient()
-  return useMutation({
+  return useGuardedMutation({
     mutationFn: async (id: string) => {
       await apiFetch(`/api/accounts/${id}`, { method: 'DELETE' })
       return id
