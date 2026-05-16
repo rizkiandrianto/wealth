@@ -22,6 +22,8 @@ import {
   User,
   Bitcoin,
   ArrowLeftRight,
+  Settings as SettingsIcon,
+  RefreshCw,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
@@ -65,6 +67,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const currentPath = usePathname()
   const { data: session } = useSession()
   const userName = session?.user?.name ?? session?.user?.email ?? 'User'
+  const isOwner = !!session?.user?.isOwner
   const { resolvedTheme, setTheme } = useTheme()
   useEffect(() => setMounted(true), [])
   const isDark = mounted && resolvedTheme === 'dark'
@@ -158,6 +161,31 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                   <span>{t('history')}</span>
                 </Button>
               </Link>
+
+              {isOwner && (
+                <>
+                  <Link href="/sync-balance">
+                    <Button
+                      variant={currentPath === '/sync-balance' ? 'default' : 'ghost'}
+                      size="sm"
+                      className="gap-2"
+                    >
+                      <RefreshCw className="w-4 h-4" />
+                      <span>Sync</span>
+                    </Button>
+                  </Link>
+                  <Link href="/settings">
+                    <Button
+                      variant={currentPath === '/settings' ? 'default' : 'ghost'}
+                      size="sm"
+                      className="gap-2"
+                    >
+                      <SettingsIcon className="w-4 h-4" />
+                      <span>{t('settings')}</span>
+                    </Button>
+                  </Link>
+                </>
+              )}
 
               {/* User dropdown */}
               <DropdownMenu>
@@ -267,6 +295,30 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                   {t('history')}
                 </Button>
               </Link>
+              {isOwner && (
+                <>
+                  <Link href="/sync-balance">
+                    <Button
+                      variant={currentPath === '/sync-balance' ? 'default' : 'ghost'}
+                      className="w-full justify-start gap-3"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      <RefreshCw className="w-5 h-5" />
+                      Sync Balance
+                    </Button>
+                  </Link>
+                  <Link href="/settings">
+                    <Button
+                      variant={currentPath === '/settings' ? 'default' : 'ghost'}
+                      className="w-full justify-start gap-3"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      <SettingsIcon className="w-5 h-5" />
+                      {t('settings')}
+                    </Button>
+                  </Link>
+                </>
+              )}
               <div className="pt-2 border-t border-border">
                 <div className="flex items-center gap-3 px-3 py-2 text-sm">
                   <Languages className="w-5 h-5" />
