@@ -377,7 +377,7 @@
     "deleteDescription": "Key \"{key}\" akan dihapus.",
     "saving": "Menyimpan…",
     "addDialogTitle": "Tambah config",
-    "addDialogDescription": "Buat pengaturan key-value baru. Pakai nama dipisah titik untuk pengelompokan, contoh: {example}.",
+    "addDialogDescription": "Buat pengaturan key-value baru. Pakai nama dipisah titik untuk pengelompokan, contoh: <example>sync.2027.sheetId</example>.",
     "keyLabel": "Key",
     "keyPlaceholder": "sync.2027.sheetId",
     "valueLabel": "Value",

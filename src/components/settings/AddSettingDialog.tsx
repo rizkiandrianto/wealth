@@ -68,7 +68,7 @@ export default function AddSettingDialog({ open, onOpenChange }: AddSettingDialo
           <DialogTitle>{t('addDialogTitle')}</DialogTitle>
           <DialogDescription>
             {t.rich('addDialogDescription', {
-              example: () => <span className="font-mono">sync.2027.sheetId</span>,
+              example: (chunks) => <span className="font-mono">{chunks}</span>,
             })}
           </DialogDescription>
         </DialogHeader>
