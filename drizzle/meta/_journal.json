@@ -29,6 +29,13 @@
       "when": 1779148800000,
       "tag": "0003_add_is_demo_to_users",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1778935584282,
+      "tag": "0004_unusual_sauron",
+      "breakpoints": true
     }
   ]
 }
