@@ -1,0 +1,155 @@
+import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { apiFetch } from '@/lib/apiFetch'
+import { toGold, toGoldSale, Row } from '@/lib/normalizers'
+import { GoldHolding, GoldSale } from '@/lib/types'
+import { queryKeys } from './keys'
+import { useGuardedMutation } from './useGuardedMutation'
+
+export const goldsQueryOptions = () => ({
+  queryKey: queryKeys.golds,
+  queryFn: async (): Promise<GoldHolding[]> => {
+    const rows: Row[] = await apiFetch('/api/gold')
+    return rows.map(toGold)
+  },
+})
+
+export const goldSalesQueryOptions = () => ({
+  queryKey: queryKeys.goldSales,
+  queryFn: async (): Promise<GoldSale[]> => {
+    const rows: Row[] = await apiFetch('/api/gold/sales')
+    return rows.map(toGoldSale)
+  },
+})
+
+export type GoldSalesSummary = { totalRealizedPnL: number; count: number }
+export type GoldsSummary = {
+  totalValue: number
+  totalCost: number
+  totalWeight: number
+  goldPrice: number
+}
+export type GoldTicker = {
+  totalWeight: number
+  avgCost: number
+  price: number
+  currency: string
+  changePercentage: number | null
+}
+
+export const goldSalesSummaryQueryOptions = () => ({
+  queryKey: queryKeys.goldSalesSummary,
+  queryFn: async (): Promise<GoldSalesSummary> => {
+    return apiFetch('/api/gold/sales/summary')
+  },
+})
+
+export const goldsSummaryQueryOptions = () => ({
+  queryKey: queryKeys.goldsSummary,
+  queryFn: async (): Promise<GoldsSummary> => {
+    return apiFetch('/api/gold/summary')
+  },
+})
+
+export const goldsTickerQueryOptions = () => ({
+  queryKey: queryKeys.goldsTicker,
+  queryFn: async (): Promise<GoldTicker | null> => {
+    return apiFetch('/api/gold/tickers')
+  },
+})
+
+export function useGoldsQuery() {
+  return useQuery(goldsQueryOptions())
+}
+
+export function useGoldSalesQuery() {
+  return useQuery(goldSalesQueryOptions())
+}
+
+export function useGoldSalesSummaryQuery() {
+  return useQuery(goldSalesSummaryQueryOptions())
+}
+
+export function useGoldsSummaryQuery() {
+  return useQuery(goldsSummaryQueryOptions())
+}
+
+export function useGoldsTickerQuery() {
+  return useQuery(goldsTickerQueryOptions())
+}
+
+export function useAddGold() {
+  const qc = useQueryClient()
+  return useGuardedMutation({
+    mutationFn: async (input: Omit<GoldHolding, 'id' | 'createdAt'>) => {
+      const row = await apiFetch('/api/gold', {
+        method: 'POST',
+        body: JSON.stringify(input),
+      })
+      return toGold(row)
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: queryKeys.golds })
+    },
+  })
+}
+
+export function useUpdateGold() {
+  const qc = useQueryClient()
+  return useGuardedMutation({
+    mutationFn: async ({
+      id,
+      updates,
+    }: {
+      id: string
+      updates: Partial<Omit<GoldHolding, 'id' | 'createdAt'>>
+    }) => {
+      const row = await apiFetch(`/api/gold/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify(updates),
+      })
+      return toGold(row)
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: queryKeys.golds })
+    },
+  })
+}
+
+export function useDeleteGold() {
+  const qc = useQueryClient()
+  return useGuardedMutation({
+    mutationFn: async (id: string) => {
+      await apiFetch(`/api/gold/${id}`, { method: 'DELETE' })
+      return id
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: queryKeys.golds })
+    },
+  })
+}
+
+export function useSellGold() {
+  const qc = useQueryClient()
+  return useGuardedMutation({
+    mutationFn: async ({
+      goldId,
+      weight,
+      salePrice,
+    }: {
+      goldId: string
+      weight: number
+      salePrice: number
+    }) => {
+      const row = await apiFetch(`/api/gold/${goldId}/sell`, {
+        method: 'POST',
+        body: JSON.stringify({ weight, salePrice }),
+      })
+      return toGoldSale(row)
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: queryKeys.golds })
+      qc.invalidateQueries({ queryKey: queryKeys.goldSales })
+      qc.invalidateQueries({ queryKey: queryKeys.accounts })
+    },
+  })
+}

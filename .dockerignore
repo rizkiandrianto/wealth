@@ -1,0 +1,7 @@
+.git
+.next
+node_modules
+drizzle
+*.md
+.env*
+.DS_Store
