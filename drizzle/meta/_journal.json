@@ -36,6 +36,13 @@
       "when": 1778935584282,
       "tag": "0004_unusual_sauron",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1778935724002,
+      "tag": "0005_seed_sync_settings",
+      "breakpoints": true
     }
   ]
 }
