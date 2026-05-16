@@ -1,6 +1,6 @@
 import { and, eq, inArray, like } from 'drizzle-orm'
 import { db } from '@/db'
-import { appSettings } from '@/db/schema'
+import { appSettings, users } from '@/db/schema'
 
 export type AppSetting = typeof appSettings.$inferSelect
 
@@ -114,5 +114,22 @@ export function parseBool(value: string | null | undefined, defaultValue: boolea
   if (v === 'true' || v === '1' || v === 'yes' || v === 'on') return true
   if (v === 'false' || v === '0' || v === 'no' || v === 'off') return false
   return defaultValue
+}
+
+/**
+ * Read the registration flag from the first owner's settings. Defaults to
+ * true when no owner exists or the key is unset, so a fresh install is open.
+ * Persisted under the owner's `register.enabled` setting so the same UI at
+ * /settings can flip it.
+ */
+export async function isRegistrationEnabled(): Promise<boolean> {
+  const [owner] = await db
+    .select({ id: users.id })
+    .from(users)
+    .where(eq(users.isOwner, true))
+    .limit(1)
+  if (!owner) return true
+  const value = await getSetting(owner.id, 'register.enabled')
+  return parseBool(value, true)
 }
 

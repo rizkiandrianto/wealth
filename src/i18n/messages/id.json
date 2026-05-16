@@ -33,7 +33,9 @@
       "submitting": "Memproses...",
       "haveAccount": "Sudah punya akun?",
       "login": "Masuk",
-      "failed": "Gagal mendaftar, coba lagi"
+      "failed": "Gagal mendaftar, coba lagi",
+      "disabledTitle": "Pendaftaran dimatikan",
+      "disabled": "Pendaftaran akun baru sedang dimatikan oleh admin."
     }
   },
   "nav": {

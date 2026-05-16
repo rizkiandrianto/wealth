@@ -43,6 +43,13 @@
       "when": 1778935724002,
       "tag": "0005_seed_sync_settings",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1778937495949,
+      "tag": "0006_seed_register_settings",
+      "breakpoints": true
     }
   ]
 }

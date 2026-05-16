@@ -33,7 +33,9 @@
       "submitting": "Processing...",
       "haveAccount": "Already have an account?",
       "login": "Sign In",
-      "failed": "Registration failed, please try again"
+      "failed": "Registration failed, please try again",
+      "disabledTitle": "Registration is disabled",
+      "disabled": "New sign-ups are currently turned off by the administrator."
     }
   },
   "nav": {
