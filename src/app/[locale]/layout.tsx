@@ -15,10 +15,7 @@ const geist = Geist({ subsets: ['latin'] })
 export const metadata: Metadata = {
   title: 'Wealth',
   description: 'Track your assets across different accounts - bank, deposit, and more',
-  icons: {
-    icon: '/mywealth.png',
-    apple: '/mywealth.png',
-  },
+  manifest: '/manifest.json',
 }
 
 export const viewport: Viewport = {

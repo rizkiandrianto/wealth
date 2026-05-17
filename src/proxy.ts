@@ -29,7 +29,7 @@ async function handle(req: NextRequest) {
   const isLoggedIn = !!session
 
   const isAuthPage = pathname.startsWith('/login') || pathname.startsWith('/register')
-  const isPublicPage = pathname === '/' || isAuthPage
+  const isPublicPage = pathname === '/' || pathname === '/terms' || isAuthPage
 
   if (!isLoggedIn && !isPublicPage) {
     return NextResponse.redirect(new URL('/login', req.url))

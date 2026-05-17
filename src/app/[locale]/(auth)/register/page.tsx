@@ -8,9 +8,18 @@ import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import TermsContent from "@/components/terms/TermsContent";
 
 function RegisterForm() {
   const t = useTranslations("auth.register");
+  const tTerms = useTranslations("landing.terms");
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -144,6 +153,26 @@ function RegisterForm() {
         <Button type="submit" className="w-full" disabled={loading}>
           {loading ? t("submitting") : t("submit")}
         </Button>
+
+        <p className="text-center text-xs text-muted-foreground">
+          {t("termsAgreement")}{" "}
+          <Dialog>
+            <DialogTrigger asChild>
+              <button
+                type="button"
+                className="font-medium underline underline-offset-4 hover:text-primary"
+              >
+                {t("termsLink")}
+              </button>
+            </DialogTrigger>
+            <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>{tTerms("title")}</DialogTitle>
+              </DialogHeader>
+              <TermsContent showHeading={false} />
+            </DialogContent>
+          </Dialog>
+        </p>
       </form>
 
       {!fromGoogle && (
