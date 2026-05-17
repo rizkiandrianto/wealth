@@ -58,7 +58,7 @@ function RegisterForm() {
     if (loginRes?.error) {
       router.push("/login");
     } else {
-      router.push("/");
+      router.push("/dashboard");
       router.refresh();
     }
   }

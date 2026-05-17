@@ -35,14 +35,14 @@ export default function LoginPage() {
     if (res?.error) {
       setError(t("invalidCredentials"));
     } else {
-      router.push("/");
+      router.push("/dashboard");
       router.refresh();
     }
   }
 
   async function handleGoogle() {
     setGoogleLoading(true);
-    await signIn("google", { callbackUrl: "/" });
+    await signIn("google", { callbackUrl: "/dashboard" });
   }
 
   return (
