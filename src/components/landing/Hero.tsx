@@ -1,10 +1,12 @@
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
-import { ArrowRight } from 'lucide-react'
+import { ArrowRight, Github } from 'lucide-react'
 import Logo from '@/components/Logo'
 import LanguageSwitcher from '@/components/LanguageSwitcher'
 import ThemeToggle from '@/components/ThemeToggle'
 import { Button } from '@/components/ui/button'
+
+const GITHUB_URL = 'https://github.com/rizkiandrianto/wealth'
 
 export default function Hero() {
   const t = useTranslations('landing.hero')
@@ -18,6 +20,15 @@ export default function Hero() {
       <header className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
         <Logo />
         <div className="flex items-center gap-1">
+          <a
+            href={GITHUB_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="GitHub repository"
+            className="inline-flex items-center justify-center h-9 w-9 rounded-md text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+          >
+            <Github className="w-4 h-4" />
+          </a>
           <LanguageSwitcher variant="compact" />
           <ThemeToggle />
         </div>

@@ -1,8 +1,11 @@
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
+import { Github } from 'lucide-react'
 import Logo from '@/components/Logo'
 import LanguageSwitcher from '@/components/LanguageSwitcher'
 import ThemeToggle from '@/components/ThemeToggle'
+
+const GITHUB_URL = 'https://github.com/rizkiandrianto/wealth'
 
 export default function LandingFooter() {
   const t = useTranslations('landing.footer')
@@ -29,8 +32,23 @@ export default function LandingFooter() {
             >
               {t('registerLink')}
             </Link>
+            <Link
+              href="/terms"
+              className="text-muted-foreground hover:text-foreground transition-colors"
+            >
+              {t('termsLink')}
+            </Link>
           </div>
           <div className="flex items-center gap-1">
+            <a
+              href={GITHUB_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="GitHub repository"
+              className="inline-flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <Github className="w-4 h-4" />
+            </a>
             <LanguageSwitcher variant="compact" />
             <ThemeToggle />
           </div>

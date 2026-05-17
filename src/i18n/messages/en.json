@@ -63,7 +63,83 @@
       "tagline": "A focused tracker for stocks, crypto, gold, and cash — all in one place.",
       "loginLink": "Sign in",
       "registerLink": "Register",
+      "termsLink": "Terms & Conditions",
       "copyright": "© {year} Wealth. All rights reserved."
+    },
+    "terms": {
+      "title": "Terms & Conditions",
+      "subtitle": "Please read these terms carefully before using Wealth.",
+      "lastUpdated": "Last updated: {date}",
+      "backToHome": "Back to home",
+      "intro": {
+        "title": "Introduction",
+        "body": "Wealth is a personal portfolio tracker for stocks, crypto, gold, and cash accounts. By creating an account or using this service, you agree to the terms below. If you do not agree, please stop using the service."
+      },
+      "privacy": {
+        "title": "Data Privacy",
+        "intro": "Your data is yours. We treat it with the same care we want for our own.",
+        "points": {
+          "noSelling": "We will never sell, rent, or trade your data to any third party.",
+          "noAds": "We will not share your data with advertisers or data brokers.",
+          "ownership": "All assets, transactions, and account details you enter belong to you.",
+          "purpose": "Your data is used only to operate the app — calculating balances, P&L, portfolio history, and showing them back to you.",
+          "deletion": "You can delete your account at any time. Once deleted, your records are removed permanently from the active database."
+        }
+      },
+      "security": {
+        "title": "Data Security",
+        "intro": "Wealth is built on top of established platforms. Data security is handled end-to-end by these providers:",
+        "supabase": {
+          "title": "Supabase (Database & Authentication)",
+          "body": "All user data, accounts, transactions, holdings, and snapshots are stored in Supabase Postgres. Supabase provides at-rest encryption, automated backups, network isolation, and role-based access control. Authentication sessions are managed via NextAuth with credentials stored as hashed values."
+        },
+        "vercel": {
+          "title": "Vercel (Hosting & Functions)",
+          "body": "The web application, API routes, and scheduled jobs run on Vercel's infrastructure. Traffic is served over HTTPS with automatic TLS, and serverless functions run in isolated environments. Environment secrets are stored in Vercel's encrypted secret store."
+        },
+        "responsibility": "While Supabase and Vercel handle infrastructure security, you remain responsible for keeping your login credentials safe and signing out on shared devices."
+      },
+      "howItWorks": {
+        "title": "How It Works",
+        "intro": "Wealth updates your portfolio automatically using scheduled background jobs. You don't need to refresh prices or snapshots manually.",
+        "schedule": {
+          "title": "Automated Schedule (Asia/Jakarta time)",
+          "prices": {
+            "title": "Every 2 hours — Asset price refresh",
+            "body": "Stock and crypto prices are refreshed from market data providers every 2 hours so your portfolio value stays current throughout the day."
+          },
+          "goldAndSnapshot": {
+            "title": "12:00 (noon) & 00:00 (midnight) — Gold price + portfolio snapshot",
+            "body": "Twice a day at noon and midnight, the gold price is updated from the gold market API, and a portfolio snapshot is recorded — capturing your total value across cash, stocks, crypto, and gold for the historical chart."
+          },
+          "accountSnapshot": {
+            "title": "23:59 — Account snapshot",
+            "body": "Just before midnight, balances for each cash, bank, and deposit account are recorded so the per-account history chart can show daily balance trends."
+          }
+        },
+        "delays": "Scheduled jobs may run a few minutes earlier or later depending on third-party API availability and platform scheduling."
+      },
+      "userResponsibility": {
+        "title": "Your Responsibilities",
+        "points": {
+          "accuracy": "You are responsible for the accuracy of the asset and transaction data you enter. Wealth does not connect to brokerages or banks — all entries are manual.",
+          "decisions": "Wealth is a tracker, not financial advice. Investment decisions remain entirely yours.",
+          "credentials": "Keep your password safe. Do not share your login credentials with anyone.",
+          "lawfulUse": "Use the service only for personal portfolio tracking and in accordance with applicable law."
+        }
+      },
+      "service": {
+        "title": "Service Availability",
+        "body": "Wealth depends on third-party APIs for stock, crypto, and gold prices. Outages on those providers may cause stale prices or temporarily missed snapshots. We will make reasonable effort to restore service, but we provide no uptime guarantee."
+      },
+      "changes": {
+        "title": "Changes to These Terms",
+        "body": "These terms may be updated as the product evolves. Material changes will be reflected on this page with a new \"Last updated\" date. Continued use of the service after changes means you accept the updated terms."
+      },
+      "contact": {
+        "title": "Contact",
+        "body": "If you have questions about these terms or how your data is handled, please reach out via the support channel shown on the landing page."
+      }
     }
   },
   "auth": {
@@ -100,7 +176,9 @@
       "submitting": "Processing...",
       "haveAccount": "Already have an account?",
       "login": "Sign In",
-      "failed": "Registration failed, please try again"
+      "failed": "Registration failed, please try again",
+      "termsAgreement": "By signing up you agree to our",
+      "termsLink": "Terms & Conditions"
     }
   },
   "nav": {
