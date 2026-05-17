@@ -35,6 +35,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Switch } from '@/components/ui/switch'
 import LanguageSwitcher from '@/components/LanguageSwitcher'
+import Logo from '@/components/Logo'
 import { cn } from '@/lib/utils'
 
 interface DashboardLayoutProps {
@@ -109,11 +110,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
-            <Link href="/" className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-lg p-1 bg-white flex items-center justify-center overflow-hidden">
-                <img src="/mywealth.png" alt="app-logo" className='rounded-lg' />
-              </div>
-              <h1 className="text-xl font-bold text-foreground">Wealth</h1>
+            <Link href="/" className="flex items-center">
+              <Logo />
             </Link>
 
             {/* Desktop Navigation */}
