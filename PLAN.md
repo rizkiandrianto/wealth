@@ -438,6 +438,20 @@ Saat ini: chart hanya tampilkan total balance. `DailyBalance` di store sudah pun
 
 ---
 
+---
+
+## Phase 14 — Public Landing / Homepage Showcase
+
+> Tambah landing publik di `/`, pindahkan dashboard ke `/dashboard`. Detail: [`plan/homepage-landing.md`](plan/homepage-landing.md).
+
+- Public landing route di `/` (Hero, Features, How-it-works, CTA, Footer)
+- Dashboard root pindah dari `/` → `/dashboard`
+- Auth-aware: logged-in user yang hit `/` redirect ke `/dashboard`
+- Sidebar Home link, login/register redirects, dan proxy auth-page redirects update ke `/dashboard`
+- i18n `landing.*` namespace di `en.json` + `id.json`
+
+---
+
 ## Notes
 
 - `pnpm db:push` butuh `DATABASE_URL` valid di `.env.local`

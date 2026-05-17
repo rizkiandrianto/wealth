@@ -1,4 +1,71 @@
 {
+  "landing": {
+    "hero": {
+      "headline": "Lacak semua aset Anda dalam satu tempat",
+      "subheadline": "Saham, kripto, emas, dan rekening bank — tampilan portofolio terpadu yang selalu mutakhir.",
+      "ctaPrimary": "Mulai sekarang",
+      "ctaSecondary": "Masuk"
+    },
+    "screenshot": {
+      "alt": "Pratinjau dasbor Wealth",
+      "placeholder": "Pratinjau dasbor"
+    },
+    "features": {
+      "sectionTitle": "Semua yang Anda butuhkan untuk melacak kekayaan",
+      "sectionSubtitle": "Sekumpulan alat fokus untuk mencatat, menyinkronkan, dan memahami portofolio Anda.",
+      "multiAsset": {
+        "title": "Portofolio multi-aset",
+        "description": "Saham, kripto, emas, dan rekening tunai — lacak semua kepemilikan secara berdampingan."
+      },
+      "syncBalance": {
+        "title": "Sinkronisasi saldo",
+        "description": "Jurnal transaksi yang tidak dapat diubah menjaga saldo akun tetap akurat secara otomatis."
+      },
+      "history": {
+        "title": "Riwayat & analitik",
+        "description": "Snapshot portofolio harian dan grafik tren untuk melihat pertumbuhan kekayaan Anda."
+      },
+      "multiLanguage": {
+        "title": "Bahasa Indonesia & English",
+        "description": "Ganti bahasa kapan saja — seluruh antarmuka mengikuti preferensi Anda."
+      },
+      "darkTheme": {
+        "title": "Mode gelap bawaan",
+        "description": "Tema terang dan gelap yang rapi dengan default mengikuti sistem."
+      },
+      "privacy": {
+        "title": "Data Anda, kendali Anda",
+        "description": "Data tersimpan di akun pribadi Anda. Hanya Anda yang bisa mengaksesnya."
+      }
+    },
+    "howItWorks": {
+      "sectionTitle": "Tiga langkah untuk memulai",
+      "sectionSubtitle": "Atur portofolio Anda dalam hitungan menit — tanpa proses onboarding yang rumit.",
+      "step1": {
+        "title": "Buat akun",
+        "description": "Daftar dengan email atau Google. Data Anda terkait dengan akun ini."
+      },
+      "step2": {
+        "title": "Tambahkan aset",
+        "description": "Tambahkan rekening bank, saham, kripto, dan emas — hanya yang Anda miliki."
+      },
+      "step3": {
+        "title": "Lacak & sinkronkan",
+        "description": "Catat transaksi dan biarkan Wealth menjaga saldo, P&L, serta riwayat tetap sinkron."
+      }
+    },
+    "cta": {
+      "title": "Mulai lacak kekayaan Anda hari ini",
+      "subtitle": "Gratis digunakan. Daftar dan mulai tambahkan aset dalam hitungan menit.",
+      "button": "Buat akun gratis"
+    },
+    "footer": {
+      "tagline": "Pelacak fokus untuk saham, kripto, emas, dan tunai — semua dalam satu tempat.",
+      "loginLink": "Masuk",
+      "registerLink": "Daftar",
+      "copyright": "© {year} Wealth. Hak cipta dilindungi."
+    }
+  },
   "auth": {
     "tagline": "Lacak kekayaan Anda, bangun masa depan. Setiap rupiah tercatat.",
     "login": {

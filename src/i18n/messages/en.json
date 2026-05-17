@@ -1,4 +1,71 @@
 {
+  "landing": {
+    "hero": {
+      "headline": "Track every asset in one place",
+      "subheadline": "Stocks, crypto, gold, and bank accounts — a unified portfolio view that stays up to date.",
+      "ctaPrimary": "Get started",
+      "ctaSecondary": "Sign in"
+    },
+    "screenshot": {
+      "alt": "Wealth dashboard preview",
+      "placeholder": "Dashboard preview"
+    },
+    "features": {
+      "sectionTitle": "Everything you need to track your wealth",
+      "sectionSubtitle": "A focused set of tools to capture, sync, and understand your portfolio.",
+      "multiAsset": {
+        "title": "Multi-asset portfolio",
+        "description": "Stocks, crypto, gold, and cash accounts — track every holding side by side."
+      },
+      "syncBalance": {
+        "title": "Sync your balances",
+        "description": "An immutable transaction journal keeps account balances accurate automatically."
+      },
+      "history": {
+        "title": "History & analytics",
+        "description": "Daily portfolio snapshots and trend charts to see how your wealth grows over time."
+      },
+      "multiLanguage": {
+        "title": "Bahasa Indonesia & English",
+        "description": "Switch languages anytime — the entire interface follows your preference."
+      },
+      "darkTheme": {
+        "title": "Dark mode built-in",
+        "description": "A polished light and dark theme with system-aware defaults."
+      },
+      "privacy": {
+        "title": "Your data, your control",
+        "description": "Data stays in your private account. Sign in to access it; nobody else can."
+      }
+    },
+    "howItWorks": {
+      "sectionTitle": "Three steps to get started",
+      "sectionSubtitle": "Set up your portfolio in minutes — no complicated onboarding.",
+      "step1": {
+        "title": "Create an account",
+        "description": "Sign up with email or Google. Your data is tied to your account."
+      },
+      "step2": {
+        "title": "Add your assets",
+        "description": "Add bank accounts, stocks, crypto, and gold holdings — only the ones you own."
+      },
+      "step3": {
+        "title": "Track & sync",
+        "description": "Record transactions and let Wealth keep balances, P&L, and history in sync."
+      }
+    },
+    "cta": {
+      "title": "Start tracking your wealth today",
+      "subtitle": "Free to use. Sign up and start adding your assets in minutes.",
+      "button": "Create free account"
+    },
+    "footer": {
+      "tagline": "A focused tracker for stocks, crypto, gold, and cash — all in one place.",
+      "loginLink": "Sign in",
+      "registerLink": "Register",
+      "copyright": "© {year} Wealth. All rights reserved."
+    }
+  },
   "auth": {
     "tagline": "Track your wealth, build your future. Every rupiah accounted for.",
     "login": {
