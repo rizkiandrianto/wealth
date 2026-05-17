@@ -1,0 +1,58 @@
+# https://www.robotstxt.org/robotstxt.html
+
+# Allow well-behaved crawlers on public pages only.
+User-agent: *
+Allow: /$
+Allow: /terms
+Allow: /login
+Allow: /register
+Allow: /manifest.json
+Allow: /mywealth.png
+Allow: /landing-dashboard-en.png
+Allow: /landing-dashboard-id.png
+
+# Authenticated app surface — no value to index.
+Disallow: /dashboard
+Disallow: /portfolio
+Disallow: /accounts
+Disallow: /transactions
+Disallow: /stocks
+Disallow: /crypto
+Disallow: /gold
+Disallow: /history
+Disallow: /settings
+
+# Backend & auth surface.
+Disallow: /api/
+
+# Service worker scope artefacts.
+Disallow: /sw.js
+Disallow: /workbox-
+
+# Block known AI scraping crawlers (opt-in policy).
+User-agent: GPTBot
+Disallow: /
+
+User-agent: ChatGPT-User
+Disallow: /
+
+User-agent: anthropic-ai
+Disallow: /
+
+User-agent: ClaudeBot
+Disallow: /
+
+User-agent: Claude-Web
+Disallow: /
+
+User-agent: CCBot
+Disallow: /
+
+User-agent: Google-Extended
+Disallow: /
+
+User-agent: PerplexityBot
+Disallow: /
+
+User-agent: Bytespider
+Disallow: /

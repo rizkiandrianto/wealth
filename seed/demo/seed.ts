@@ -29,6 +29,7 @@ import {
   users,
   wealthAccounts,
 } from '../../src/db/schema'
+import { seedSnapshots } from './seedSnapshots'
 
 loadEnv({ path: '.env.local' })
 
@@ -328,6 +329,12 @@ async function main() {
           date: new Date('2025-03-15'),
         },
       ])
+
+      // ── Historical snapshots (365 days, random-walk prices) ────────
+      const snapshotCounts = await seedSnapshots(tx, userId)
+      console.log(
+        `Seeded snapshots: ${snapshotCounts.accountSnapshots} account rows, ${snapshotCounts.portfolioSnapshots} portfolio rows`,
+      )
     })
 
     console.log('Seeded demo portfolio:')
@@ -338,6 +345,7 @@ async function main() {
     console.log('  • Gold: 2× Nanovest, 2× Pegadaian')
     console.log('  • Sales: 2 stock, 2 crypto, 2 gold')
     console.log('  • Transactions: 2 deposits, 1 transfer, 1 withdrawal')
+    console.log('  • Historical snapshots: 365 days back, random-walk prices')
     console.log(`Login: ${DEMO_EMAIL} / ${DEMO_PASSWORD}`)
   } finally {
     await pool.end()
