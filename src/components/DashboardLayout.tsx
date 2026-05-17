@@ -69,7 +69,7 @@ const PORTFOLIO_ITEMS: readonly NavItem[] = [
 
 // Bottom nav: 4 items — Finance goes to /accounts, Portfolio goes to /stocks
 const BOTTOM_NAV = [
-  { href: '/', labelKey: 'dashboard', icon: LayoutDashboard },
+  { href: '/dashboard', labelKey: 'dashboard', icon: LayoutDashboard },
   { href: '/crypto', labelKey: 'crypto', icon: Bitcoin },
   { href: '/stocks', labelKey: 'stocks', icon: TrendingUp },
   { href: '/history', labelKey: 'history', icon: Calendar },
@@ -110,15 +110,15 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
-            <Link href="/" className="flex items-center">
+            <Link href="/dashboard" className="flex items-center">
               <Logo />
             </Link>
 
             {/* Desktop Navigation */}
             <nav className="hidden md:flex items-center gap-1">
               {/* Dashboard */}
-              <Link href="/">
-                <Button variant={currentPath === '/' ? 'default' : 'ghost'} size="sm" className="gap-2">
+              <Link href="/dashboard">
+                <Button variant={currentPath === '/dashboard' ? 'default' : 'ghost'} size="sm" className="gap-2">
                   <LayoutDashboard className="w-4 h-4" />
                   <span>{t('dashboard')}</span>
                 </Button>
@@ -240,9 +240,9 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           {/* Mobile Hamburger Navigation */}
           {mobileMenuOpen && (
             <nav className="md:hidden pb-4 space-y-1 border-t border-border pt-2">
-              <Link href="/">
+              <Link href="/dashboard">
                 <Button
-                  variant={currentPath === '/' ? 'default' : 'ghost'}
+                  variant={currentPath === '/dashboard' ? 'default' : 'ghost'}
                   className="w-full justify-start gap-3"
                   onClick={() => setMobileMenuOpen(false)}
                 >

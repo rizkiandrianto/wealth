@@ -1,4 +1,5 @@
 import { cn } from '@/lib/utils'
+import Link from 'next/link'
 
 type LogoSize = 'sm' | 'md' | 'lg'
 
@@ -17,22 +18,24 @@ const SIZE_STYLES: Record<LogoSize, { box: string; text: string }> = {
 export default function Logo({ size = 'md', showWordmark = true, className }: LogoProps) {
   const styles = SIZE_STYLES[size]
   return (
-    <span className={cn('inline-flex items-center gap-3', className)}>
-      <span
-        className={cn(
-          'rounded-lg p-1 bg-white flex items-center justify-center overflow-hidden shrink-0',
-          styles.box,
+    <Link href="/">
+      <span className={cn('inline-flex items-center gap-3', className)}>
+        <span
+          className={cn(
+            'rounded-lg p-1 bg-white flex items-center justify-center overflow-hidden shrink-0',
+            styles.box,
+          )}
+        >
+          <img
+            src="/mywealth.png"
+            alt="Wealth logo"
+            className="rounded-lg w-full h-full object-contain"
+          />
+        </span>
+        {showWordmark && (
+          <span className={cn('font-bold', styles.text)}>Wealth</span>
         )}
-      >
-        <img
-          src="/mywealth.png"
-          alt="Wealth logo"
-          className="rounded-lg w-full h-full object-contain"
-        />
       </span>
-      {showWordmark && (
-        <span className={cn('font-bold', styles.text)}>Wealth</span>
-      )}
-    </span>
+    </Link>
   )
 }
