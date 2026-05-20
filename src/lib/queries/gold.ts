@@ -135,14 +135,16 @@ export function useSellGold() {
       goldId,
       weight,
       salePrice,
+      saleDate,
     }: {
       goldId: string
       weight: number
       salePrice: number
+      saleDate?: string
     }) => {
       const row = await apiFetch(`/api/gold/${goldId}/sell`, {
         method: 'POST',
-        body: JSON.stringify({ weight, salePrice }),
+        body: JSON.stringify({ weight, salePrice, saleDate }),
       })
       return toGoldSale(row)
     },

@@ -140,8 +140,8 @@ export default function GoldList({ golds, locations, onEdit }: GoldListProps) {
       {sellingGold && (
         <GoldSellDialog
           gold={sellingGold}
-          onSell={(weight, salePrice) => {
-            sellGold.mutate({ goldId: sellingGold.id, weight, salePrice })
+          onSell={(weight, salePrice, saleDate) => {
+            sellGold.mutate({ goldId: sellingGold.id, weight, salePrice, saleDate })
             setSellingGoldId(null)
           }}
           onClose={() => setSellingGoldId(null)}
