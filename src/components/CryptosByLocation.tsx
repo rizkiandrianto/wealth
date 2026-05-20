@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { CryptoHolding, CryptoLocation } from '@/lib/types'
-import { useFormatCurrency } from '@/lib/format'
+import { useFormatCurrency, useFormatDate } from '@/lib/format'
 import { useDeleteCrypto, useSellCrypto, useSellCryptoBatch } from '@/lib/queries/crypto'
 import { useAssetPricesQuery } from '@/lib/queries/prices'
 import { Card } from '@/components/ui/card'
@@ -33,6 +33,7 @@ export default function CryptosByLocation({ cryptos, locations, onEdit }: Crypto
   const sellCrypto = useSellCrypto()
   const sellCryptoBatch = useSellCryptoBatch()
   const formatCurrency = useFormatCurrency()
+  const formatDate = useFormatDate()
   const getPrice = (symbol: string) =>
     assetPrices.find((p) => p.ticker === symbol)?.price ?? 0
 
@@ -121,7 +122,7 @@ export default function CryptosByLocation({ cryptos, locations, onEdit }: Crypto
                             <div className="flex-1">
                               <h4 className="font-semibold text-lg">{symbol}</h4>
                               <p className="text-sm text-muted-foreground">{lots[0].name}</p>
-                              <div className="mt-2 grid grid-cols-3 gap-2 text-sm">
+                              <div className="mt-2 grid grid-cols-1 md:grid-cols-3 gap-2 text-sm">
                                 <div>
                                   <p className="text-muted-foreground text-xs">{t('quantity')}</p>
                                   <p className="font-semibold">{totalQty.toFixed(8)}{lots.length > 1 ? ` • ${lots.length} lots` : ''}</p>
@@ -150,6 +151,12 @@ export default function CryptosByLocation({ cryptos, locations, onEdit }: Crypto
                             </div>
                           </div>
 
+                          {lots.length === 1 && (
+                            <p className="mt-2 text-xs text-muted-foreground">
+                              {t('purchaseDate')}: {formatDate(lots[0].purchaseDate)}
+                            </p>
+                          )}
+
                           {lots.length > 1 && (
                             <div className="mt-3 space-y-1">
                               {lots.map((lot) => {
@@ -164,7 +171,7 @@ export default function CryptosByLocation({ cryptos, locations, onEdit }: Crypto
                                     className="flex items-center justify-between text-xs p-2 bg-muted rounded border border-border"
                                   >
                                     <p className="flex-1 text-muted-foreground">
-                                      {lot.quantity.toFixed(8)} @ {formatCurrency(lot.averagePrice)}
+                                      {lot.quantity.toFixed(8)} @ {formatCurrency(lot.averagePrice)} · {formatDate(lot.purchaseDate)}
                                     </p>
                                     {price > 0 && (
                                       <p className={`mr-2 font-medium ${lotPositive ? 'text-green-600' : 'text-red-600'}`}>
@@ -259,8 +266,8 @@ export default function CryptosByLocation({ cryptos, locations, onEdit }: Crypto
       {sellingCrypto && (
         <CryptoSellDialog
           crypto={sellingCrypto}
-          onSell={(quantity, salePrice) => {
-            sellCrypto.mutate({ cryptoId: sellingCrypto.id, quantity, salePrice })
+          onSell={(quantity, salePrice, saleDate) => {
+            sellCrypto.mutate({ cryptoId: sellingCrypto.id, quantity, salePrice, saleDate })
             setSellingCryptoId(null)
           }}
           onClose={() => setSellingCryptoId(null)}
@@ -273,12 +280,13 @@ export default function CryptosByLocation({ cryptos, locations, onEdit }: Crypto
           locationId={sellingLocation.locationId}
           locationName={sellingLocationName}
           lots={sellingLocationLots}
-          onSell={({ quantity, salePrice }) => {
+          onSell={({ quantity, salePrice, saleDate }) => {
             sellCryptoBatch.mutate({
               symbol: sellingLocation.symbol,
               locationId: sellingLocation.locationId,
               quantity,
               salePrice,
+              saleDate,
             })
             setSellingLocation(null)
           }}

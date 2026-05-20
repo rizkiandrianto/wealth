@@ -12,7 +12,7 @@ import { X } from 'lucide-react'
 
 interface GoldSellDialogProps {
   gold: GoldHolding
-  onSell: (weight: number, salePrice: number) => void
+  onSell: (weight: number, salePrice: number, saleDate: string) => void
   onClose: () => void
 }
 
@@ -26,6 +26,7 @@ export default function GoldSellDialog({ gold, onSell, onClose }: GoldSellDialog
   const currentPrice = assetPrices.find((p) => p.ticker === 'XAU')?.price ?? 0
   const [weight, setWeight] = useState('')
   const [salePrice, setSalePrice] = useState(currentPrice > 0 ? currentPrice.toString() : '')
+  const [saleDate, setSaleDate] = useState(new Date().toISOString().split('T')[0])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -33,12 +34,12 @@ export default function GoldSellDialog({ gold, onSell, onClose }: GoldSellDialog
     const w = parseFloat(weight)
     const price = parseFloat(salePrice)
 
-    if (!w || w <= 0 || w > gold.weight || !price || price <= 0) {
+    if (!w || w <= 0 || w > gold.weight || !price || price <= 0 || !saleDate) {
       alert(t('invalidWeightOrPrice'))
       return
     }
 
-    onSell(w, price)
+    onSell(w, price, saleDate)
     onClose()
   }
 
@@ -83,6 +84,15 @@ export default function GoldSellDialog({ gold, onSell, onClose }: GoldSellDialog
               value={salePrice}
               onChange={(e) => setSalePrice(e.target.value)}
               placeholder="0.00"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-2">{t('saleDate')}</label>
+            <Input
+              type="date"
+              value={saleDate}
+              onChange={(e) => setSaleDate(e.target.value)}
             />
           </div>
 

@@ -37,6 +37,7 @@ export default function CryptoForm({ editingId, onClose }: CryptoFormProps) {
     locationId: cryptoLocations[0]?.id || '',
     quantity: '',
     averagePrice: '',
+    purchaseDate: new Date().toISOString().split('T')[0],
   })
   const [nameLookupLoading, setNameLookupLoading] = useState(false)
 
@@ -48,6 +49,7 @@ export default function CryptoForm({ editingId, onClose }: CryptoFormProps) {
         locationId: editingCrypto.locationId,
         quantity: editingCrypto.quantity.toString(),
         averagePrice: editingCrypto.averagePrice.toString(),
+        purchaseDate: new Date(editingCrypto.purchaseDate).toISOString().split('T')[0],
       })
       return
     }
@@ -84,7 +86,8 @@ export default function CryptoForm({ editingId, onClose }: CryptoFormProps) {
       !formData.name ||
       !formData.locationId ||
       !formData.quantity ||
-      !formData.averagePrice
+      !formData.averagePrice ||
+      !formData.purchaseDate
     ) {
       alert(tError('allFieldsRequired'))
       return
@@ -96,7 +99,7 @@ export default function CryptoForm({ editingId, onClose }: CryptoFormProps) {
       locationId: formData.locationId,
       quantity: parseFloat(formData.quantity),
       averagePrice: parseFloat(formData.averagePrice),
-      purchaseDate: editingCrypto?.purchaseDate || Date.now(),
+      purchaseDate: new Date(formData.purchaseDate).getTime(),
     }
 
     if (editingId) {
@@ -111,6 +114,7 @@ export default function CryptoForm({ editingId, onClose }: CryptoFormProps) {
       locationId: cryptoLocations[0]?.id || '',
       quantity: '',
       averagePrice: '',
+      purchaseDate: new Date().toISOString().split('T')[0],
     })
     onClose()
   }
@@ -186,6 +190,16 @@ export default function CryptoForm({ editingId, onClose }: CryptoFormProps) {
               className="mt-1"
             />
           </div>
+        </div>
+
+        <div>
+          <label className="text-sm font-medium">{t('purchaseDate')}</label>
+          <Input
+            type="date"
+            value={formData.purchaseDate}
+            onChange={(e) => setFormData({ ...formData, purchaseDate: e.target.value })}
+            className="mt-1"
+          />
         </div>
 
         <div className="md:flex gap-2 md:justify-end grid grid-cols-2 pt-2">

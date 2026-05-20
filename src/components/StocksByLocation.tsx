@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { StockHolding, StockLocation } from '@/lib/types'
-import { useFormatCurrency } from '@/lib/format'
+import { useFormatCurrency, useFormatDate } from '@/lib/format'
 import { stockShares } from '@/lib/stock'
 import { useDeleteStock, useSellStock, useSellStockBatch } from '@/lib/queries/stocks'
 import { useAssetPricesQuery } from '@/lib/queries/prices'
@@ -33,6 +33,7 @@ export default function StocksByLocation({ stocks, locations, onEdit }: StocksBy
   const sellStock = useSellStock()
   const sellStockBatch = useSellStockBatch()
   const formatCurrency = useFormatCurrency()
+  const formatDate = useFormatDate()
   const getPrice = (ticker: string) =>
     assetPrices.find((p) => p.ticker === ticker)?.price ?? 0
   const getName = (ticker: string) =>
@@ -120,7 +121,7 @@ export default function StocksByLocation({ stocks, locations, onEdit }: StocksBy
                             <div className="flex-1">
                               <h4 className="font-semibold">{ticker}</h4>
                               <p className="text-sm text-muted-foreground">{getName(ticker)}</p>
-                              <div className="mt-2 grid grid-cols-2 gap-2 text-xs">
+                              <div className="mt-2 grid grid-cols-1 md:grid-cols-2 gap-2 text-xs">
                                 <div>
                                   <p className="text-muted-foreground">{t('quantityShares')}</p>
                                   <p className="font-medium">{totalQty.toFixed(2)} lot{lots.length > 1 ? ` • ${lots.length} lots` : ''}</p>
@@ -157,6 +158,12 @@ export default function StocksByLocation({ stocks, locations, onEdit }: StocksBy
                             </div>
                           </div>
 
+                          {lots.length === 1 && (
+                            <p className="mt-2 text-xs text-muted-foreground">
+                              {t('purchaseDate')}: {formatDate(lots[0].purchaseDate)}
+                            </p>
+                          )}
+
                           {lots.length > 1 && (
                             <div className="mt-3 space-y-1">
                               {lots.map((lot) => {
@@ -172,7 +179,7 @@ export default function StocksByLocation({ stocks, locations, onEdit }: StocksBy
                                     className="flex items-center justify-between text-xs p-2 bg-muted rounded border border-border"
                                   >
                                     <p className="flex-1 text-muted-foreground">
-                                      {lot.quantity} lot @ {formatCurrency(lot.averagePrice)}
+                                      {lot.quantity} lot @ {formatCurrency(lot.averagePrice)} · {formatDate(lot.purchaseDate)}
                                     </p>
                                     {price > 0 && (
                                       <p className={`mr-2 font-medium ${lotPositive ? 'text-green-600' : 'text-red-600'}`}>
@@ -259,8 +266,8 @@ export default function StocksByLocation({ stocks, locations, onEdit }: StocksBy
       {sellingStock && (
         <StockSellDialog
           stock={sellingStock}
-          onSell={(quantity, salePrice) => {
-            sellStock.mutate({ stockId: sellingStock.id, quantity, salePrice })
+          onSell={(quantity, salePrice, saleDate) => {
+            sellStock.mutate({ stockId: sellingStock.id, quantity, salePrice, saleDate })
             setSellingStockId(null)
           }}
           onClose={() => setSellingStockId(null)}
@@ -273,12 +280,13 @@ export default function StocksByLocation({ stocks, locations, onEdit }: StocksBy
           locationId={sellingLocation.locationId}
           locationName={sellingLocationName}
           lots={sellingLocationLots}
-          onSell={({ quantity, salePrice }) => {
+          onSell={({ quantity, salePrice, saleDate }) => {
             sellStockBatch.mutate({
               ticker: sellingLocation.ticker,
               locationId: sellingLocation.locationId,
               quantity,
               salePrice,
+              saleDate,
             })
             setSellingLocation(null)
           }}
