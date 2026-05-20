@@ -158,36 +158,49 @@ export default function StocksList({ stocks, onEdit }: StocksListProps) {
 
                       {locLots.length > 1 && (
                         <div className="space-y-1">
-                          {locLots.map((stock) => (
-                            <div
-                              key={stock.id}
-                              className="flex items-center justify-between text-xs p-2 bg-background rounded border border-border"
-                            >
-                              <div className="flex-1">
-                                <p className="text-muted-foreground">
-                                  {stock.quantity} lot @ {formatCurrency(stock.averagePrice)}
-                                </p>
+                          {locLots.map((stock) => {
+                            const lotShares = stockShares(stock)
+                            const lotCost = lotShares * stock.averagePrice
+                            const lotValue = lotShares * price
+                            const lotPnl = lotValue - lotCost
+                            const lotPnlPercent = lotCost > 0 ? (lotPnl / lotCost) * 100 : 0
+                            const lotPositive = lotPnl >= 0
+                            return (
+                              <div
+                                key={stock.id}
+                                className="flex items-center justify-between text-xs p-2 bg-background rounded border border-border"
+                              >
+                                <div className="flex-1">
+                                  <p className="text-muted-foreground">
+                                    {stock.quantity} lot @ {formatCurrency(stock.averagePrice)}
+                                  </p>
+                                </div>
+                                {price > 0 && (
+                                  <p className={`mr-2 font-medium ${lotPositive ? 'text-green-600' : 'text-red-600'}`}>
+                                    {formatCurrency(lotPnl)} ({lotPnlPercent.toFixed(2)}%)
+                                  </p>
+                                )}
+                                <div className="flex gap-1">
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    onClick={() => onEdit(stock.id)}
+                                    className="h-6 w-6 p-0"
+                                  >
+                                    <Edit2 className="w-3 h-3" />
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    onClick={() => deleteStock.mutate(stock.id)}
+                                    className="h-6 w-6 p-0 text-red-600 hover:text-red-700"
+                                  >
+                                    <Trash2 className="w-3 h-3" />
+                                  </Button>
+                                </div>
                               </div>
-                              <div className="flex gap-1">
-                                <Button
-                                  size="sm"
-                                  variant="ghost"
-                                  onClick={() => onEdit(stock.id)}
-                                  className="h-6 w-6 p-0"
-                                >
-                                  <Edit2 className="w-3 h-3" />
-                                </Button>
-                                <Button
-                                  size="sm"
-                                  variant="ghost"
-                                  onClick={() => deleteStock.mutate(stock.id)}
-                                  className="h-6 w-6 p-0 text-red-600 hover:text-red-700"
-                                >
-                                  <Trash2 className="w-3 h-3" />
-                                </Button>
-                              </div>
-                            </div>
-                          ))}
+                            )
+                          })}
                         </div>
                       )}
 
