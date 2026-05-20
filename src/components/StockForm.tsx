@@ -45,12 +45,14 @@ export default function StockForm({ editingId, onClose }: StockFormProps) {
     locationId: string
     quantity: string
     averagePrice: string
+    purchaseDate: string
   }>({
     ticker: '',
     market: 'IDX',
     locationId: stockLocations[0]?.id || '',
     quantity: '',
     averagePrice: '',
+    purchaseDate: new Date().toISOString().split('T')[0],
   })
 
   useEffect(() => {
@@ -61,6 +63,7 @@ export default function StockForm({ editingId, onClose }: StockFormProps) {
         locationId: editingStock.locationId,
         quantity: editingStock.quantity.toString(),
         averagePrice: editingStock.averagePrice.toString(),
+        purchaseDate: new Date(editingStock.purchaseDate).toISOString().split('T')[0],
       })
       return
     }
@@ -76,7 +79,7 @@ export default function StockForm({ editingId, onClose }: StockFormProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (!formData.ticker || !formData.locationId || !formData.quantity || !formData.averagePrice) {
+    if (!formData.ticker || !formData.locationId || !formData.quantity || !formData.averagePrice || !formData.purchaseDate) {
       alert(tError('allFieldsRequired'))
       return
     }
@@ -87,7 +90,7 @@ export default function StockForm({ editingId, onClose }: StockFormProps) {
       locationId: formData.locationId,
       quantity: parseFloat(formData.quantity),
       averagePrice: parseFloat(formData.averagePrice),
-      purchaseDate: editingStock?.purchaseDate || Date.now(),
+      purchaseDate: new Date(formData.purchaseDate).getTime(),
     }
 
     if (editingId) {
@@ -102,6 +105,7 @@ export default function StockForm({ editingId, onClose }: StockFormProps) {
       locationId: stockLocations[0]?.id || '',
       quantity: '',
       averagePrice: '',
+      purchaseDate: new Date().toISOString().split('T')[0],
     })
     onClose()
   }
@@ -179,6 +183,16 @@ export default function StockForm({ editingId, onClose }: StockFormProps) {
               min="0"
             />
           </div>
+        </div>
+
+        <div>
+          <label className="text-sm font-medium">{t('purchaseDate')}</label>
+          <Input
+            type="date"
+            value={formData.purchaseDate}
+            onChange={(e) => setFormData({ ...formData, purchaseDate: e.target.value })}
+            className="mt-1"
+          />
         </div>
 
         <div className="md:flex gap-2 md:justify-end grid grid-cols-2 pt-2">

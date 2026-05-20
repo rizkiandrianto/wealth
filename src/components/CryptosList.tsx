@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { CryptoHolding } from '@/lib/types'
-import { useFormatCurrency } from '@/lib/format'
+import { useFormatCurrency, useFormatDate } from '@/lib/format'
 import { useDeleteCrypto, useSellCrypto, useSellCryptoBatch } from '@/lib/queries/crypto'
 import { useCryptoLocationsQuery } from '@/lib/queries/cryptoLocations'
 import { useAssetPricesQuery } from '@/lib/queries/prices'
@@ -33,6 +33,7 @@ export default function CryptosList({ cryptos, onEdit }: CryptosListProps) {
   const sellCrypto = useSellCrypto()
   const sellCryptoBatch = useSellCryptoBatch()
   const formatCurrency = useFormatCurrency()
+  const formatDate = useFormatDate()
   const getPrice = (symbol: string) =>
     assetPrices.find((p) => p.ticker === symbol)?.price ?? 0
   const getLocationName = (locationId: string) =>
@@ -144,6 +145,7 @@ export default function CryptosList({ cryptos, onEdit }: CryptosListProps) {
                             <p className="font-semibold text-sm">{getLocationName(locationId)}</p>
                             <p className="text-xs text-muted-foreground">
                               {locQty.toFixed(8)} • avg {formatCurrency(locWeightedAvg)}
+                              {locLots.length === 1 && ` · ${formatDate(locLots[0].purchaseDate)}`}
                             </p>
                           </div>
                           {price > 0 && (
@@ -167,7 +169,7 @@ export default function CryptosList({ cryptos, onEdit }: CryptosListProps) {
                                   className="flex items-center justify-between text-xs p-2 bg-background rounded border border-border"
                                 >
                                   <p className="flex-1 text-muted-foreground">
-                                    {lot.quantity.toFixed(8)} @ {formatCurrency(lot.averagePrice)}
+                                    {lot.quantity.toFixed(8)} @ {formatCurrency(lot.averagePrice)} · {formatDate(lot.purchaseDate)}
                                   </p>
                                   {price > 0 && (
                                     <p className={`mr-2 font-medium ${lotPositive ? 'text-green-600' : 'text-red-600'}`}>
@@ -262,8 +264,8 @@ export default function CryptosList({ cryptos, onEdit }: CryptosListProps) {
       {sellingCrypto && (
         <CryptoSellDialog
           crypto={sellingCrypto}
-          onSell={(quantity, salePrice) => {
-            sellCrypto.mutate({ cryptoId: sellingCrypto.id, quantity, salePrice })
+          onSell={(quantity, salePrice, saleDate) => {
+            sellCrypto.mutate({ cryptoId: sellingCrypto.id, quantity, salePrice, saleDate })
             setSellingCryptoId(null)
           }}
           onClose={() => setSellingCryptoId(null)}
@@ -276,12 +278,13 @@ export default function CryptosList({ cryptos, onEdit }: CryptosListProps) {
           locationId={sellingLocation.locationId}
           locationName={getLocationName(sellingLocation.locationId)}
           lots={sellingLocationLots}
-          onSell={({ quantity, salePrice }) => {
+          onSell={({ quantity, salePrice, saleDate }) => {
             sellCryptoBatch.mutate({
               symbol: sellingLocation.symbol,
               locationId: sellingLocation.locationId,
               quantity,
               salePrice,
+              saleDate,
             })
             setSellingLocation(null)
           }}

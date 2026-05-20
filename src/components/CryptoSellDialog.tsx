@@ -12,7 +12,7 @@ import { X } from 'lucide-react'
 
 interface CryptoSellDialogProps {
   crypto: CryptoHolding
-  onSell: (quantity: number, salePrice: number) => void
+  onSell: (quantity: number, salePrice: number, saleDate: string) => void
   onClose: () => void
 }
 
@@ -27,6 +27,7 @@ export default function CryptoSellDialog({ crypto, onSell, onClose }: CryptoSell
   const currentPrice = assetPrices.find((p) => p.ticker === crypto.symbol)?.price ?? 0
   const [quantity, setQuantity] = useState('')
   const [salePrice, setSalePrice] = useState(currentPrice > 0 ? currentPrice.toString() : '')
+  const [saleDate, setSaleDate] = useState(new Date().toISOString().split('T')[0])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -34,12 +35,12 @@ export default function CryptoSellDialog({ crypto, onSell, onClose }: CryptoSell
     const qty = parseFloat(quantity)
     const price = parseFloat(salePrice)
 
-    if (!qty || qty <= 0 || qty > crypto.quantity || !price || price <= 0) {
+    if (!qty || qty <= 0 || qty > crypto.quantity || !price || price <= 0 || !saleDate) {
       alert(t('invalidQuantityOrPrice'))
       return
     }
 
-    onSell(qty, price)
+    onSell(qty, price, saleDate)
     onClose()
   }
 
@@ -84,6 +85,15 @@ export default function CryptoSellDialog({ crypto, onSell, onClose }: CryptoSell
               value={salePrice}
               onChange={(e) => setSalePrice(e.target.value)}
               placeholder="0.00"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-2">{t('saleDate')}</label>
+            <Input
+              type="date"
+              value={saleDate}
+              onChange={(e) => setSaleDate(e.target.value)}
             />
           </div>
 

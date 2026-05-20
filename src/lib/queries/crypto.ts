@@ -130,14 +130,16 @@ export function useSellCrypto() {
       cryptoId,
       quantity,
       salePrice,
+      saleDate,
     }: {
       cryptoId: string
       quantity: number
       salePrice: number
+      saleDate?: string
     }) => {
       const row = await apiFetch(`/api/crypto/${cryptoId}/sell`, {
         method: 'POST',
-        body: JSON.stringify({ quantity, salePrice }),
+        body: JSON.stringify({ quantity, salePrice, saleDate }),
       })
       return toCryptoSale(row)
     },

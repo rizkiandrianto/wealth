@@ -16,7 +16,7 @@ interface StockSellLocationDialogProps {
   locationId: string
   locationName: string
   lots: StockHolding[]
-  onSell: (input: { quantity: number; salePrice: number }) => void
+  onSell: (input: { quantity: number; salePrice: number; saleDate: string }) => void
   onClose: () => void
 }
 
@@ -56,6 +56,7 @@ export default function StockSellLocationDialog({
 
   const [quantity, setQuantity] = useState('')
   const [salePrice, setSalePrice] = useState(currentPrice > 0 ? currentPrice.toString() : '')
+  const [saleDate, setSaleDate] = useState(new Date().toISOString().split('T')[0])
 
   const qtyNum = parseFloat(quantity) || 0
   const priceNum = parseFloat(salePrice) || 0
@@ -87,11 +88,11 @@ export default function StockSellLocationDialog({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    if (qtyNum <= 0 || qtyNum > totalQty + 1e-9 || priceNum <= 0) {
+    if (qtyNum <= 0 || qtyNum > totalQty + 1e-9 || priceNum <= 0 || !saleDate) {
       alert(t('invalidQuantityOrPrice'))
       return
     }
-    onSell({ quantity: qtyNum, salePrice: priceNum })
+    onSell({ quantity: qtyNum, salePrice: priceNum, saleDate })
     onClose()
   }
 
@@ -136,6 +137,15 @@ export default function StockSellLocationDialog({
                 placeholder="0"
               />
             </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-2">{t('saleDate')}</label>
+            <Input
+              type="date"
+              value={saleDate}
+              onChange={(e) => setSaleDate(e.target.value)}
+            />
           </div>
 
           {fifoPreview.length > 0 && (

@@ -131,14 +131,16 @@ export function useSellStock() {
       stockId,
       quantity,
       salePrice,
+      saleDate,
     }: {
       stockId: string
       quantity: number
       salePrice: number
+      saleDate?: string
     }) => {
       const row = await apiFetch(`/api/stocks/${stockId}/sell`, {
         method: 'POST',
-        body: JSON.stringify({ quantity, salePrice }),
+        body: JSON.stringify({ quantity, salePrice, saleDate }),
       })
       return toStockSale(row)
     },

@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { StockHolding } from '@/lib/types'
-import { useFormatCurrency } from '@/lib/format'
+import { useFormatCurrency, useFormatDate } from '@/lib/format'
 import { stockShares } from '@/lib/stock'
 import { useDeleteStock, useSellStock, useSellStockBatch } from '@/lib/queries/stocks'
 import { useStockLocationsQuery } from '@/lib/queries/stockLocations'
@@ -33,6 +33,7 @@ export default function StocksList({ stocks, onEdit }: StocksListProps) {
   const sellStock = useSellStock()
   const sellStockBatch = useSellStockBatch()
   const formatCurrency = useFormatCurrency()
+  const formatDate = useFormatDate()
   const getLocationName = (locationId: string) =>
     stockLocations.find((l) => l.id === locationId)?.name ?? locationId
   const getPrice = (ticker: string) =>
@@ -147,6 +148,7 @@ export default function StocksList({ stocks, onEdit }: StocksListProps) {
                           <p className="font-semibold text-sm">{getLocationName(locationId)}</p>
                           <p className="text-xs text-muted-foreground">
                             {locTotalQty} lot • avg {formatCurrency(locWeightedAvg)}
+                            {locLots.length === 1 && ` · ${formatDate(locLots[0].purchaseDate)}`}
                           </p>
                         </div>
                         {price > 0 && (
@@ -172,7 +174,7 @@ export default function StocksList({ stocks, onEdit }: StocksListProps) {
                               >
                                 <div className="flex-1">
                                   <p className="text-muted-foreground">
-                                    {stock.quantity} lot @ {formatCurrency(stock.averagePrice)}
+                                    {stock.quantity} lot @ {formatCurrency(stock.averagePrice)} · {formatDate(stock.purchaseDate)}
                                   </p>
                                 </div>
                                 {price > 0 && (
@@ -260,8 +262,8 @@ export default function StocksList({ stocks, onEdit }: StocksListProps) {
       {sellingStock && (
         <StockSellDialog
           stock={sellingStock}
-          onSell={(quantity, salePrice) => {
-            sellStock.mutate({ stockId: sellingStock.id, quantity, salePrice })
+          onSell={(quantity, salePrice, saleDate) => {
+            sellStock.mutate({ stockId: sellingStock.id, quantity, salePrice, saleDate })
             setSellingStockId(null)
           }}
           onClose={() => setSellingStockId(null)}
@@ -274,12 +276,13 @@ export default function StocksList({ stocks, onEdit }: StocksListProps) {
           locationId={sellingLocation.locationId}
           locationName={getLocationName(sellingLocation.locationId)}
           lots={sellingLocationLots}
-          onSell={({ quantity, salePrice }) => {
+          onSell={({ quantity, salePrice, saleDate }) => {
             sellStockBatch.mutate({
               ticker: sellingLocation.ticker,
               locationId: sellingLocation.locationId,
               quantity,
               salePrice,
+              saleDate,
             })
             setSellingLocation(null)
           }}

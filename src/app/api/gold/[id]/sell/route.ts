@@ -10,11 +10,13 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const { id: goldId } = await params
-  const { weight, salePrice } = await req.json()
+  const { weight, salePrice, saleDate } = await req.json()
 
   if (!weight || !salePrice || weight <= 0 || salePrice <= 0) {
     return NextResponse.json({ error: 'Invalid weight or price' }, { status: 400 })
   }
+
+  const saleTimestamp = saleDate ? new Date(saleDate) : new Date()
 
   const [holding] = await db
     .select()
@@ -56,7 +58,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
         averageCostPrice: String(avgPrice),
         realizedPnl: String(realizedPnl),
         realizedPnlPercent: String(realizedPnlPercent),
-        saleDate: new Date(),
+        saleDate: saleTimestamp,
       })
       .returning()
 
