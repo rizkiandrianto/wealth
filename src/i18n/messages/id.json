@@ -17,9 +17,9 @@
         "title": "Portofolio multi-aset",
         "description": "Saham, kripto, emas, dan rekening tunai — lacak semua kepemilikan secara berdampingan."
       },
-      "syncBalance": {
-        "title": "Sinkronisasi saldo",
-        "description": "Jurnal transaksi yang tidak dapat diubah menjaga saldo akun tetap akurat secara otomatis."
+      "installable": {
+        "title": "Pasang di ponsel Anda",
+        "description": "PWA yang ramah seluler — tambahkan ke layar utama dan gunakan seperti aplikasi native."
       },
       "history": {
         "title": "Riwayat & analitik",
