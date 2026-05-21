@@ -1,6 +1,6 @@
 import {
   Layers,
-  RefreshCw,
+  Smartphone,
   LineChart,
   Languages,
   Moon,
@@ -25,19 +25,27 @@ export const LANDING_FEATURES: readonly LandingFeature[] = [
     accentColor: 'text-blue-500',
   },
   {
-    key: 'syncBalance',
-    icon: RefreshCw,
-    titleKey: 'features.syncBalance.title',
-    descriptionKey: 'features.syncBalance.description',
-    accentColor: 'text-emerald-500',
-  },
-  {
     key: 'history',
     icon: LineChart,
     titleKey: 'features.history.title',
     descriptionKey: 'features.history.description',
     accentColor: 'text-violet-500',
   },
+  {
+    key: 'privacy',
+    icon: ShieldCheck,
+    titleKey: 'features.privacy.title',
+    descriptionKey: 'features.privacy.description',
+    accentColor: 'text-rose-500',
+  },
+  {
+    key: 'installable',
+    icon: Smartphone,
+    titleKey: 'features.installable.title',
+    descriptionKey: 'features.installable.description',
+    accentColor: 'text-emerald-500',
+  },
+  
   {
     key: 'multiLanguage',
     icon: Languages,
@@ -51,12 +59,5 @@ export const LANDING_FEATURES: readonly LandingFeature[] = [
     titleKey: 'features.darkTheme.title',
     descriptionKey: 'features.darkTheme.description',
     accentColor: 'text-indigo-500',
-  },
-  {
-    key: 'privacy',
-    icon: ShieldCheck,
-    titleKey: 'features.privacy.title',
-    descriptionKey: 'features.privacy.description',
-    accentColor: 'text-rose-500',
   },
 ] as const
