@@ -26,6 +26,7 @@ export const queryKeys = {
   goldSales: ['goldSales'] as const,
   goldSalesSummary: ['goldSales', 'summary'] as const,
   assetPrices: ['assetPrices'] as const,
+  fxUsdIdr: ['fx', 'usd-idr'] as const,
   portfolioSnapshots: {
     all: ['portfolioSnapshots'] as const,
     range: (range: SnapshotRange) => ['portfolioSnapshots', range] as const,
