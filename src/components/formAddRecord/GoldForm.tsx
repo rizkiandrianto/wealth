@@ -103,7 +103,7 @@ export default function GoldForm({ editingId, onClose }: GoldFormProps) {
           />
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid md:grid-cols-2 gap-4">
           <div>
             <label className="text-sm font-medium">{t('weight')}</label>
             <Input
@@ -143,7 +143,7 @@ export default function GoldForm({ editingId, onClose }: GoldFormProps) {
           <Button type="button" variant="outline" onClick={onClose}>
             {tCommon('cancel')}
           </Button>
-          <Button type="submit" className="bg-yellow-600 hover:bg-yellow-700">
+          <Button type="submit" className="bg-yellow-600 hover:bg-yellow-700 text-white">
             {editingId ? t('updateGold') : t('addGold')}
           </Button>
         </div>

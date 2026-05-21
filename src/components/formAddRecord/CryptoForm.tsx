@@ -206,7 +206,7 @@ export default function CryptoForm({ editingId, onClose }: CryptoFormProps) {
           <Button type="button" variant="outline" onClick={onClose}>
             {tCommon('cancel')}
           </Button>
-          <Button type="submit" className="bg-purple-600 hover:bg-purple-700">
+          <Button type="submit" className="bg-purple-600 hover:bg-purple-700 text-white">
             {editingId ? t('updateCrypto') : t('addCrypto')}
           </Button>
         </div>
