@@ -6,6 +6,7 @@ import { TrendingDown, TrendingUp, Minus } from 'lucide-react'
 import { useStocksTickersQuery } from '@/lib/queries/stocks'
 import { useCryptosTickersQuery } from '@/lib/queries/crypto'
 import { useGoldsTickerQuery } from '@/lib/queries/gold'
+import { useUsdIdrQuery } from '@/lib/queries/fx'
 import { formatCurrency, useFormatCurrency } from '@/lib/format'
 
 type TickerItem = {
@@ -34,11 +35,52 @@ export default function PriceTicker() {
   const { data: stocks = [] } = useStocksTickersQuery()
   const { data: cryptos = [] } = useCryptosTickersQuery()
   const { data: gold } = useGoldsTickerQuery()
+  const { data: usdIdr } = useUsdIdrQuery()
 
   const items: TickerItem[] = useMemo(() => {
     const result: TickerItem[] = []
 
-    for (const s of stocks) {
+    if (usdIdr?.rate) {
+      result.push({
+        key: 'fx-USDIDR',
+        href: '/dashboard',
+        label: 'USD/IDR',
+        badge: 'FX',
+        price: usdIdr.rate,
+        changePercentage: null,
+        currency: 'IDR',
+      })
+    }
+
+    if (gold?.price) {
+      result.push({
+        key: 'gold-XAU',
+        href: '/gold',
+        label: 'XAU',
+        badge: 'GOLD',
+        price: gold.price,
+        changePercentage: gold.changePercentage,
+        currency: gold.currency,
+      })
+    }
+
+    const idxStocks = stocks.filter(stock => stock.market === 'IDX');
+    const usStocks = stocks.filter(stock => stock.market === 'US');
+
+    for (const s of idxStocks) {
+      if (!s.price) continue
+      result.push({
+        key: `stock-${s.ticker}`,
+        href: '/stocks',
+        label: s.ticker,
+        badge: s.market,
+        price: s.price,
+        changePercentage: s.changePercentage,
+        currency: s.currency,
+      })
+    }
+
+    for (const s of usStocks) {
       if (!s.price) continue
       result.push({
         key: `stock-${s.ticker}`,
@@ -64,20 +106,8 @@ export default function PriceTicker() {
       })
     }
 
-    if (gold && gold.price) {
-      result.push({
-        key: 'gold-XAU',
-        href: '/gold',
-        label: 'XAU',
-        badge: 'GOLD',
-        price: gold.price,
-        changePercentage: gold.changePercentage,
-        currency: gold.currency,
-      })
-    }
-
     return result
-  }, [stocks, cryptos, gold])
+  }, [stocks, cryptos, gold, usdIdr])
 
   if (items.length === 0) return null
 
@@ -117,10 +147,10 @@ export default function PriceTicker() {
                 <span className="font-medium text-white">
                   {formatPrice(item.price, item.currency, (val, cur) => formatCurrency(val, cur, false))}
                 </span>
-                <span className={`flex items-center gap-0.5 text-xs font-medium ${color}`}>
+                {pct !== null && <span className={`flex items-center gap-0.5 text-xs font-medium ${color}`}>
                   <Trend className="w-3 h-3" />
-                  {pct !== null ? `${pct >= 0 ? '+' : ''}${pct.toFixed(2)}%` : '—'}
-                </span>
+                  {pct >= 0 ? '+' : ''} {pct.toFixed(2)}%
+                </span>}
               </Link>
             )
           })}

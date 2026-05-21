@@ -12,6 +12,7 @@
 //   GET /api/gold/summary          (Portfolio + Gold card)
 //   GET /api/gold/tickers          (PriceTicker)
 //   GET /api/gold/sales/summary    (RealizedPnLCard)
+//   GET /api/market/fx/usd-idr     (PriceTicker)
 
 import { useEffect } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
@@ -39,6 +40,7 @@ import {
   goldsTickerQueryOptions,
   goldSalesSummaryQueryOptions,
 } from '@/lib/queries/gold'
+import { usdIdrQueryOptions } from '@/lib/queries/fx'
 import { Skeleton } from '@/components/ui/skeleton'
 
 const RECENT_TX_LIMIT = 5
@@ -57,6 +59,7 @@ export default function Home() {
     qc.prefetchQuery(goldsSummaryQueryOptions())
     qc.prefetchQuery(goldsTickerQueryOptions())
     qc.prefetchQuery(goldSalesSummaryQueryOptions())
+    qc.prefetchQuery(usdIdrQueryOptions())
   }, [qc])
 
   const { data: transactions = [], isLoading: txLoading } = useTransactionsQuery({

@@ -199,7 +199,7 @@ export default function StockForm({ editingId, onClose }: StockFormProps) {
           <Button type="button" variant="outline" onClick={onClose}>
             {tCommon('cancel')}
           </Button>
-          <Button type="submit" className="bg-blue-600 hover:bg-blue-700">
+          <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white">
             {editingId ? t('updateStock') : t('addStock')}
           </Button>
         </div>
