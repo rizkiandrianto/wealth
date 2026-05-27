@@ -517,5 +517,25 @@
     "insufficientQuantity": "Jumlah tidak cukup — tersedia: {available}",
     "networkError": "Terjadi kesalahan jaringan",
     "unknownError": "Terjadi kesalahan, coba lagi"
+  },
+  "sales": {
+    "tabHoldings": "Kepemilikan",
+    "tabSales": "Penjualan",
+    "ticker": "Ticker",
+    "symbol": "Simbol",
+    "asset": "Aset",
+    "goldLabel": "Emas",
+    "quantity": "Jumlah",
+    "weight": "Berat",
+    "avgCost": "Avg Cost",
+    "avgCostPerGram": "Avg Cost / g",
+    "salePrice": "Harga Jual",
+    "salePricePerGram": "Harga Jual / g",
+    "purchaseDate": "Tanggal Beli",
+    "saleDate": "Tanggal Jual",
+    "realizedPnL": "Realized PnL",
+    "realizedPnLPercent": "Return %",
+    "empty": "Belum ada penjualan",
+    "emptyDesc": "Riwayat penjualan aset akan muncul di sini setelah Anda menjual."
   }
 }

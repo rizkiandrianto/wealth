@@ -76,7 +76,7 @@ export const toStockSale = (r: Row): StockSale => ({
   quantity: num(r.quantity), salePrice: num(r.salePrice),
   averageCostPrice: num(r.averageCostPrice),
   realizedPnL: num(r.realizedPnl), realizedPnLPercent: num(r.realizedPnlPercent),
-  saleDate: ts(r.saleDate), createdAt: ts(r.createdAt),
+  saleDate: ts(r.saleDate), purchaseDate: ts(r.purchaseDate), createdAt: ts(r.createdAt),
 })
 
 export const toCryptoSale = (r: Row): CryptoSale => ({
@@ -84,7 +84,7 @@ export const toCryptoSale = (r: Row): CryptoSale => ({
   quantity: num(r.quantity), salePrice: num(r.salePrice),
   averageCostPrice: num(r.averageCostPrice),
   realizedPnL: num(r.realizedPnl), realizedPnLPercent: num(r.realizedPnlPercent),
-  saleDate: ts(r.saleDate), createdAt: ts(r.createdAt),
+  saleDate: ts(r.saleDate), purchaseDate: ts(r.purchaseDate), createdAt: ts(r.createdAt),
 })
 
 export const toGoldSale = (r: Row): GoldSale => ({
@@ -92,7 +92,7 @@ export const toGoldSale = (r: Row): GoldSale => ({
   weight: num(r.weight), salePrice: num(r.salePrice),
   averageCostPrice: num(r.averageCostPrice),
   realizedPnL: num(r.realizedPnl), realizedPnLPercent: num(r.realizedPnlPercent),
-  saleDate: ts(r.saleDate), createdAt: ts(r.createdAt),
+  saleDate: ts(r.saleDate), purchaseDate: ts(r.purchaseDate), createdAt: ts(r.createdAt),
 })
 
 export const toAssetPrice = (r: Row): AssetPrice => ({

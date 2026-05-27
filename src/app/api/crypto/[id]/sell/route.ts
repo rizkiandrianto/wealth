@@ -60,6 +60,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
         realizedPnl: String(realizedPnl),
         realizedPnlPercent: String(realizedPnlPercent),
         saleDate: saleTimestamp,
+        purchaseDate: holding.purchaseDate,
       })
       .returning()
 

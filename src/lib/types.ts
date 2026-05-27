@@ -65,6 +65,7 @@ export interface GoldSale {
   realizedPnL: number;
   realizedPnLPercent: number;
   saleDate: number; // timestamp
+  purchaseDate: number; // timestamp
   createdAt: number;
 }
 
@@ -108,6 +109,7 @@ export interface StockSale {
   realizedPnL: number; // in IDR
   realizedPnLPercent: number; // percentage
   saleDate: number; // timestamp
+  purchaseDate: number; // timestamp
   createdAt: number;
 }
 
@@ -121,6 +123,7 @@ export interface CryptoSale {
   realizedPnL: number; // in IDR
   realizedPnLPercent: number; // percentage
   saleDate: number; // timestamp
+  purchaseDate: number; // timestamp
   createdAt: number;
 }
 

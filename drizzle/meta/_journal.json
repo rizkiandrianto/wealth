@@ -5,29 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1778400945644,
-      "tag": "0000_violet_shooting_star",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1778572800000,
-      "tag": "0001_fix_daily_history",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1778627246928,
-      "tag": "0002_purple_hellion",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "7",
-      "when": 1779148800000,
-      "tag": "0003_add_is_demo_to_users",
+      "when": 1779852647330,
+      "tag": "0000_lyrical_makkari",
       "breakpoints": true
     }
   ]
