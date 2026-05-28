@@ -1,0 +1,41 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1779852647330,
+      "tag": "0000_lyrical_makkari",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1778935584282,
+      "tag": "0004_unusual_sauron",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1778935724002,
+      "tag": "0005_seed_sync_settings",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1778937495949,
+      "tag": "0006_seed_register_settings",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1779925691238,
+      "tag": "0007_calm_wallop",
+      "breakpoints": true
+    }
+  ]
+}
