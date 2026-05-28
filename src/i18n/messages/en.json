@@ -573,5 +573,25 @@
     "insufficientQuantity": "Insufficient quantity — available: {available}",
     "networkError": "Network error",
     "unknownError": "An error occurred, please try again"
+  },
+  "sales": {
+    "tabHoldings": "Holdings",
+    "tabSales": "Sales",
+    "ticker": "Ticker",
+    "symbol": "Symbol",
+    "asset": "Asset",
+    "goldLabel": "Gold",
+    "quantity": "Qty",
+    "weight": "Weight",
+    "avgCost": "Avg Cost",
+    "avgCostPerGram": "Avg Cost / g",
+    "salePrice": "Sale Price",
+    "salePricePerGram": "Sale Price / g",
+    "purchaseDate": "Purchase Date",
+    "saleDate": "Sale Date",
+    "realizedPnL": "Realized PnL",
+    "realizedPnLPercent": "Return %",
+    "empty": "No sales yet",
+    "emptyDesc": "Your sales history will appear here once you sell an asset."
   }
 }

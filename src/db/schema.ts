@@ -129,6 +129,7 @@ export const stockSales = pgTable("stock_sales", {
   realizedPnl: numeric("realized_pnl", { precision: 20, scale: 4 }).notNull(),
   realizedPnlPercent: numeric("realized_pnl_percent", { precision: 10, scale: 4 }).notNull(),
   saleDate: timestamp("sale_date", { mode: "date" }).notNull(),
+  purchaseDate: timestamp("purchase_date", { mode: "date" }).notNull(),
   createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
 });
 
@@ -180,6 +181,7 @@ export const cryptoSales = pgTable("crypto_sales", {
   realizedPnl: numeric("realized_pnl", { precision: 20, scale: 4 }).notNull(),
   realizedPnlPercent: numeric("realized_pnl_percent", { precision: 10, scale: 4 }).notNull(),
   saleDate: timestamp("sale_date", { mode: "date" }).notNull(),
+  purchaseDate: timestamp("purchase_date", { mode: "date" }).notNull(),
   createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
 });
 
@@ -218,6 +220,7 @@ export const goldSales = pgTable("gold_sales", {
   realizedPnl: numeric("realized_pnl", { precision: 20, scale: 4 }).notNull(),
   realizedPnlPercent: numeric("realized_pnl_percent", { precision: 10, scale: 4 }).notNull(),
   saleDate: timestamp("sale_date", { mode: "date" }).notNull(),
+  purchaseDate: timestamp("purchase_date", { mode: "date" }).notNull(),
   createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
 });
 

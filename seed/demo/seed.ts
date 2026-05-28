@@ -230,6 +230,7 @@ async function main() {
           realizedPnl: '100000',
           realizedPnlPercent: '10.5263',
           saleDate: new Date('2025-06-15'),
+          purchaseDate: new Date('2025-01-15'),
         },
         {
           userId,
@@ -241,6 +242,7 @@ async function main() {
           realizedPnl: '30000',
           realizedPnlPercent: '6.6667',
           saleDate: new Date('2025-07-10'),
+          purchaseDate: new Date('2025-03-01'),
         },
       ])
 
@@ -256,6 +258,7 @@ async function main() {
           realizedPnl: '3000000',
           realizedPnlPercent: '20',
           saleDate: new Date('2025-08-05'),
+          purchaseDate: new Date('2025-01-25'),
         },
         {
           userId,
@@ -267,6 +270,7 @@ async function main() {
           realizedPnl: '500000',
           realizedPnlPercent: '9.0909',
           saleDate: new Date('2025-08-20'),
+          purchaseDate: new Date('2025-02-12'),
         },
       ])
 
@@ -281,6 +285,7 @@ async function main() {
           realizedPnl: '300000',
           realizedPnlPercent: '12.5',
           saleDate: new Date('2025-09-15'),
+          purchaseDate: new Date('2025-01-30'),
         },
         {
           userId,
@@ -291,6 +296,7 @@ async function main() {
           realizedPnl: '660000',
           realizedPnlPercent: '18.6441',
           saleDate: new Date('2025-10-22'),
+          purchaseDate: new Date('2025-02-18'),
         },
       ])
 

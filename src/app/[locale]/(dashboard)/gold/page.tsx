@@ -4,6 +4,7 @@
 //   GET    /api/gold
 //   GET    /api/gold-locations
 //   GET    /api/market/prices
+//   GET    /api/gold/sales          (Sales tab)
 //   (POST/PATCH/DELETE /api/gold/* via GoldForm / dialog)
 
 import { useEffect, useState } from 'react'
@@ -13,20 +14,24 @@ import { Plus } from 'lucide-react'
 import DashboardLayout from '@/components/DashboardLayout'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import AssetFormSheet from '@/components/AssetFormSheet'
 import GoldList from '@/components/GoldList'
 import GoldSummary from '@/components/GoldSummary'
-import { goldsQueryOptions, useGoldsQuery } from '@/lib/queries/gold'
+import GoldSalesList from '@/components/sales/GoldSalesList'
+import { goldsQueryOptions, goldSalesQueryOptions, useGoldsQuery } from '@/lib/queries/gold'
 import { goldLocationsQueryOptions, useGoldLocationsQuery } from '@/lib/queries/goldLocations'
 import { assetPricesQueryOptions } from '@/lib/queries/prices'
 
 export default function GoldPage() {
   const t = useTranslations('holdings.gold')
+  const tTabs = useTranslations('sales')
   const qc = useQueryClient()
   useEffect(() => {
     qc.prefetchQuery(goldsQueryOptions())
     qc.prefetchQuery(goldLocationsQueryOptions())
     qc.prefetchQuery(assetPricesQueryOptions())
+    qc.prefetchQuery(goldSalesQueryOptions())
   }, [qc])
 
   const { data: golds = [], isLoading: goldsLoading } = useGoldsQuery()
@@ -66,52 +71,65 @@ export default function GoldPage() {
           editingId={editingId}
         />
 
-        {goldsLoading ? (
-          <>
-            <div className="grid gap-4 md:grid-cols-4">
-              <Skeleton className="h-28 rounded-xl" />
-              <Skeleton className="h-28 rounded-xl" />
-              <Skeleton className="h-28 rounded-xl" />
-              <Skeleton className="h-28 rounded-xl" />
-            </div>
-            <div className="space-y-3">
-              <Skeleton className="h-20 w-full rounded-lg" />
-              <Skeleton className="h-20 w-full rounded-lg" />
-            </div>
-          </>
-        ) : (
-          <>
-            {golds.length > 0 && <GoldSummary />}
+        <Tabs defaultValue="holdings" className="w-full">
+          <TabsList className="grid grid-cols-2 mb-6 w-fit">
+            <TabsTrigger value="holdings">{tTabs('tabHoldings')}</TabsTrigger>
+            <TabsTrigger value="sales">{tTabs('tabSales')}</TabsTrigger>
+          </TabsList>
 
-            {golds.length > 0 && (
-              <GoldList
-                golds={golds}
-                locations={goldLocations}
-                onEdit={(id) => {
-                  setEditingId(id)
-                  setShowForm(true)
-                }}
-              />
-            )}
+          <TabsContent value="holdings" className="space-y-6">
+            {goldsLoading ? (
+              <>
+                <div className="grid gap-4 md:grid-cols-4">
+                  <Skeleton className="h-28 rounded-xl" />
+                  <Skeleton className="h-28 rounded-xl" />
+                  <Skeleton className="h-28 rounded-xl" />
+                  <Skeleton className="h-28 rounded-xl" />
+                </div>
+                <div className="space-y-3">
+                  <Skeleton className="h-20 w-full rounded-lg" />
+                  <Skeleton className="h-20 w-full rounded-lg" />
+                </div>
+              </>
+            ) : (
+              <>
+                {golds.length > 0 && <GoldSummary />}
 
-            {golds.length === 0 && (
-              <div className="text-center py-12 border border-dashed rounded-lg">
-                <p className="text-muted-foreground mb-4">{t('noGold')}</p>
-                <Button
-                  onClick={() => {
-                    setEditingId(null)
-                    setShowForm(true)
-                  }}
-                  variant="outline"
-                  className="gap-2"
-                >
-                  <Plus className="w-4 h-4" />
-                  {t('addFirst')}
-                </Button>
-              </div>
+                {golds.length > 0 && (
+                  <GoldList
+                    golds={golds}
+                    locations={goldLocations}
+                    onEdit={(id) => {
+                      setEditingId(id)
+                      setShowForm(true)
+                    }}
+                  />
+                )}
+
+                {golds.length === 0 && (
+                  <div className="text-center py-12 border border-dashed rounded-lg">
+                    <p className="text-muted-foreground mb-4">{t('noGold')}</p>
+                    <Button
+                      onClick={() => {
+                        setEditingId(null)
+                        setShowForm(true)
+                      }}
+                      variant="outline"
+                      className="gap-2"
+                    >
+                      <Plus className="w-4 h-4" />
+                      {t('addFirst')}
+                    </Button>
+                  </div>
+                )}
+              </>
             )}
-          </>
-        )}
+          </TabsContent>
+
+          <TabsContent value="sales" className="space-y-4">
+            <GoldSalesList />
+          </TabsContent>
+        </Tabs>
       </div>
     </DashboardLayout>
   )

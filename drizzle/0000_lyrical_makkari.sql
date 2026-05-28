@@ -1,3 +1,13 @@
+CREATE TABLE "account_balance_snapshots" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"user_id" uuid NOT NULL,
+	"account_id" uuid NOT NULL,
+	"date" text NOT NULL,
+	"balance" numeric(20, 4) NOT NULL,
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"updated_at" timestamp DEFAULT now() NOT NULL
+);
+--> statement-breakpoint
 CREATE TABLE "accounts" (
 	"user_id" uuid NOT NULL,
 	"type" text NOT NULL,
@@ -53,14 +63,7 @@ CREATE TABLE "crypto_sales" (
 	"realized_pnl" numeric(20, 4) NOT NULL,
 	"realized_pnl_percent" numeric(10, 4) NOT NULL,
 	"sale_date" timestamp NOT NULL,
-	"created_at" timestamp DEFAULT now() NOT NULL
-);
---> statement-breakpoint
-CREATE TABLE "daily_balances" (
-	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-	"user_id" uuid NOT NULL,
-	"date" text NOT NULL,
-	"total_balance" numeric(20, 4) NOT NULL,
+	"purchase_date" timestamp NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
@@ -91,7 +94,21 @@ CREATE TABLE "gold_sales" (
 	"realized_pnl" numeric(20, 4) NOT NULL,
 	"realized_pnl_percent" numeric(10, 4) NOT NULL,
 	"sale_date" timestamp NOT NULL,
+	"purchase_date" timestamp NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE "portfolio_value_snapshots" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"user_id" uuid NOT NULL,
+	"date" text NOT NULL,
+	"cash_value" numeric(20, 4) DEFAULT '0' NOT NULL,
+	"stock_value" numeric(20, 4) DEFAULT '0' NOT NULL,
+	"crypto_value" numeric(20, 4) DEFAULT '0' NOT NULL,
+	"gold_value" numeric(20, 4) DEFAULT '0' NOT NULL,
+	"total_value" numeric(20, 4) NOT NULL,
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"updated_at" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "sessions" (
@@ -130,6 +147,7 @@ CREATE TABLE "stock_sales" (
 	"realized_pnl" numeric(20, 4) NOT NULL,
 	"realized_pnl_percent" numeric(10, 4) NOT NULL,
 	"sale_date" timestamp NOT NULL,
+	"purchase_date" timestamp NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
@@ -151,6 +169,7 @@ CREATE TABLE "users" (
 	"password" text,
 	"email_verified" timestamp,
 	"image" text,
+	"is_demo" boolean DEFAULT false,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	CONSTRAINT "users_email_unique" UNIQUE("email")
 );
@@ -168,23 +187,28 @@ CREATE TABLE "wealth_accounts" (
 	"name" text NOT NULL,
 	"type" text NOT NULL,
 	"currency" text DEFAULT 'IDR' NOT NULL,
+	"balance" numeric(20, 4) DEFAULT '0' NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
+ALTER TABLE "account_balance_snapshots" ADD CONSTRAINT "account_balance_snapshots_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "account_balance_snapshots" ADD CONSTRAINT "account_balance_snapshots_account_id_wealth_accounts_id_fk" FOREIGN KEY ("account_id") REFERENCES "public"."wealth_accounts"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "accounts" ADD CONSTRAINT "accounts_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "crypto_holdings" ADD CONSTRAINT "crypto_holdings_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "crypto_holdings" ADD CONSTRAINT "crypto_holdings_location_id_crypto_locations_id_fk" FOREIGN KEY ("location_id") REFERENCES "public"."crypto_locations"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "crypto_locations" ADD CONSTRAINT "crypto_locations_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "crypto_sales" ADD CONSTRAINT "crypto_sales_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "daily_balances" ADD CONSTRAINT "daily_balances_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "gold_holdings" ADD CONSTRAINT "gold_holdings_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "gold_holdings" ADD CONSTRAINT "gold_holdings_location_id_gold_locations_id_fk" FOREIGN KEY ("location_id") REFERENCES "public"."gold_locations"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "gold_locations" ADD CONSTRAINT "gold_locations_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "gold_sales" ADD CONSTRAINT "gold_sales_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "portfolio_value_snapshots" ADD CONSTRAINT "portfolio_value_snapshots_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "sessions" ADD CONSTRAINT "sessions_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "stock_holdings" ADD CONSTRAINT "stock_holdings_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "stock_holdings" ADD CONSTRAINT "stock_holdings_location_id_stock_locations_id_fk" FOREIGN KEY ("location_id") REFERENCES "public"."stock_locations"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "stock_locations" ADD CONSTRAINT "stock_locations_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "stock_sales" ADD CONSTRAINT "stock_sales_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "transactions" ADD CONSTRAINT "transactions_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "wealth_accounts" ADD CONSTRAINT "wealth_accounts_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;
+ALTER TABLE "wealth_accounts" ADD CONSTRAINT "wealth_accounts_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+CREATE UNIQUE INDEX "uq_snapshot_user_account_date" ON "account_balance_snapshots" USING btree ("user_id","account_id","date");--> statement-breakpoint
+CREATE UNIQUE INDEX "uq_portfolio_snapshot_user_date" ON "portfolio_value_snapshots" USING btree ("user_id","date");

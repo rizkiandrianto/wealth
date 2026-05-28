@@ -83,6 +83,7 @@ export async function POST(req: NextRequest) {
           realizedPnl: String(realizedPnl),
           realizedPnlPercent: String(realizedPnlPercent),
           saleDate: saleTimestamp,
+          purchaseDate: lot.purchaseDate,
         })
         .returning()
 
