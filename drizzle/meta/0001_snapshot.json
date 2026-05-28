@@ -1,6 +1,6 @@
 {
-  "id": "1e8d4ae4-6b2c-4640-9378-0a8f1a1f3488",
-  "prevId": "01e7036a-3886-43e0-8f52-58641f7c58ee",
+  "id": "402ae92c-d3d4-4bb5-a8e1-513eb23c47a0",
+  "prevId": "e370435f-e5d8-4ccb-b82c-f6a96dea0eaa",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -572,6 +572,12 @@
           "primaryKey": false,
           "notNull": true
         },
+        "purchase_date": {
+          "name": "purchase_date",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true
+        },
         "created_at": {
           "name": "created_at",
           "type": "timestamp",
@@ -794,6 +800,12 @@
         },
         "sale_date": {
           "name": "sale_date",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "purchase_date": {
+          "name": "purchase_date",
           "type": "timestamp",
           "primaryKey": false,
           "notNull": true
@@ -1200,6 +1212,12 @@
         },
         "sale_date": {
           "name": "sale_date",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "purchase_date": {
+          "name": "purchase_date",
           "type": "timestamp",
           "primaryKey": false,
           "notNull": true

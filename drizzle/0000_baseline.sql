@@ -23,6 +23,17 @@ CREATE TABLE "accounts" (
 	CONSTRAINT "accounts_provider_provider_account_id_pk" PRIMARY KEY("provider","provider_account_id")
 );
 --> statement-breakpoint
+CREATE TABLE "app_settings" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"user_id" uuid NOT NULL,
+	"key" text NOT NULL,
+	"value" text DEFAULT '' NOT NULL,
+	"description" text,
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"updated_at" timestamp DEFAULT now() NOT NULL,
+	CONSTRAINT "uq_app_settings_user_key" UNIQUE("user_id","key")
+);
+--> statement-breakpoint
 CREATE TABLE "asset_prices" (
 	"ticker" text PRIMARY KEY NOT NULL,
 	"asset_type" text NOT NULL,
@@ -170,6 +181,7 @@ CREATE TABLE "users" (
 	"email_verified" timestamp,
 	"image" text,
 	"is_demo" boolean DEFAULT false,
+	"is_owner" boolean DEFAULT false NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	CONSTRAINT "users_email_unique" UNIQUE("email")
 );
@@ -194,6 +206,7 @@ CREATE TABLE "wealth_accounts" (
 ALTER TABLE "account_balance_snapshots" ADD CONSTRAINT "account_balance_snapshots_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "account_balance_snapshots" ADD CONSTRAINT "account_balance_snapshots_account_id_wealth_accounts_id_fk" FOREIGN KEY ("account_id") REFERENCES "public"."wealth_accounts"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "accounts" ADD CONSTRAINT "accounts_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "app_settings" ADD CONSTRAINT "app_settings_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "crypto_holdings" ADD CONSTRAINT "crypto_holdings_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "crypto_holdings" ADD CONSTRAINT "crypto_holdings_location_id_crypto_locations_id_fk" FOREIGN KEY ("location_id") REFERENCES "public"."crypto_locations"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "crypto_locations" ADD CONSTRAINT "crypto_locations_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
