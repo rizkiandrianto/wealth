@@ -1,47 +1,37 @@
 'use client'
 
+import { useState } from 'react'
+
 import { Card } from '@/components/ui/card'
-import { Skeleton } from '@/components/ui/skeleton'
-import { useTranslations } from 'next-intl'
-import { useFormatCurrency } from '@/lib/format'
 import { useUIStore, type PortfolioKey } from '@/lib/store/useUIStore'
 import { useAccountsQuery } from '@/lib/queries/accounts'
 import { useStocksSummaryQuery } from '@/lib/queries/stocks'
 import { useCryptosSummaryQuery } from '@/lib/queries/crypto'
 import { useGoldsSummaryQuery } from '@/lib/queries/gold'
-import { Eye, EyeOff, TrendingDown, TrendingUp } from 'lucide-react'
+import type { SnapshotRange } from '@/lib/snapshot'
+import type { PortfolioSlice } from '@/lib/portfolioMeta'
+
+import PortfolioInfo from './portfolio-total/PortfolioInfo'
+import PortfolioTrend from './portfolio-total/PortfolioTrend'
+import AllocationDonut from './portfolio-total/AllocationDonut'
+import PortfolioTotalSkeleton from './portfolio-total/PortfolioTotalSkeleton'
 
 export default function PortfolioTotalCard() {
-  const t = useTranslations('dashboard')
-  const formatCurrency = useFormatCurrency()
-  const hideValues = useUIStore((s) => s.hideValues)
-  const toggleHideValues = useUIStore((s) => s.toggleHideValues)
   const excludedPortfolios = useUIStore((s) => s.excludedPortfolios)
-  const togglePortfolioExclusion = useUIStore((s) => s.togglePortfolioExclusion)
   const isExcluded = (key: PortfolioKey) => excludedPortfolios.includes(key)
+
+  const [range, setRange] = useState<SnapshotRange>('1m')
 
   const { data: accounts = [], isLoading: accountsLoading } = useAccountsQuery()
   const { data: stockSummary, isLoading: stocksLoading } = useStocksSummaryQuery()
   const { data: cryptoSummary, isLoading: cryptosLoading } = useCryptosSummaryQuery()
   const { data: goldSummary, isLoading: goldsLoading } = useGoldsSummaryQuery()
 
-  const anyLoading = accountsLoading || stocksLoading || cryptosLoading || goldsLoading
-
-  if (anyLoading) {
-    return (
-      <Card className="p-6">
-        <Skeleton className="h-4 w-32 mb-2" />
-        <Skeleton className="h-9 w-48 mb-4" />
-        <div className="space-y-2">
-          <Skeleton className="h-5 w-40" />
-          <Skeleton className="h-5 w-44" />
-          <Skeleton className="h-5 w-36" />
-        </div>
-      </Card>
-    )
+  if (accountsLoading || stocksLoading || cryptosLoading || goldsLoading) {
+    return <PortfolioTotalSkeleton />
   }
 
-  const totalBalance = accounts.reduce((s, a) => s + a.balance, 0)
+  const totalCash = accounts.reduce((s, a) => s + a.balance, 0)
   const totalStockValue = stockSummary?.totalValue ?? 0
   const totalStockCost = stockSummary?.totalCost ?? 0
   const totalCryptoValue = cryptoSummary?.totalValue ?? 0
@@ -49,114 +39,41 @@ export default function PortfolioTotalCard() {
   const totalGoldValue = goldSummary?.totalValue ?? 0
   const totalGoldCost = goldSummary?.totalCost ?? 0
 
-  const totalPortfolio =
-    (isExcluded('cash') ? 0 : totalBalance) +
+  const slices: ReadonlyArray<PortfolioSlice> = [
+    { key: 'cash', labelKey: 'cash', value: totalCash },
+    { key: 'stock', labelKey: 'stocks', value: totalStockValue },
+    { key: 'crypto', labelKey: 'crypto', value: totalCryptoValue },
+    { key: 'gold', labelKey: 'gold', value: totalGoldValue },
+  ]
+
+  const includedTotal = slices.reduce(
+    (sum, s) => (isExcluded(s.key) ? sum : sum + s.value),
+    0,
+  )
+
+  const investedValue =
     (isExcluded('stock') ? 0 : totalStockValue) +
     (isExcluded('crypto') ? 0 : totalCryptoValue) +
     (isExcluded('gold') ? 0 : totalGoldValue)
-  const totalInvestedValue =
-    (isExcluded('stock') ? 0 : totalStockValue) +
-    (isExcluded('crypto') ? 0 : totalCryptoValue) +
-    (isExcluded('gold') ? 0 : totalGoldValue)
-  const totalInvestedCost =
+  const investedCost =
     (isExcluded('stock') ? 0 : totalStockCost) +
     (isExcluded('crypto') ? 0 : totalCryptoCost) +
     (isExcluded('gold') ? 0 : totalGoldCost)
-  const totalInvestedProfit = totalInvestedValue - totalInvestedCost
-  const totalInvestedProfitPercent =
-    totalInvestedCost > 0 ? (totalInvestedProfit / totalInvestedCost) * 100 : 0
-  const isTotalPositive = totalInvestedProfit >= 0
+  const investedProfit = investedValue - investedCost
+  const investedProfitPercent = investedCost > 0 ? (investedProfit / investedCost) * 100 : 0
 
   return (
     <Card className="p-6 bg-linear-to-br from-transparent to-emerald-100 border-emerald-200 dark:to-emerald-950/60 dark:border-emerald-900/70">
-      <div className="flex items-start justify-between">
-        <div>
-          <p className="text-sm text-muted-foreground mb-2 flex items-center gap-1.5 font-bold">
-            {t('portfolioTotal')}
-          </p>
-          <p className="text-3xl font-bold text-foreground">{formatCurrency(totalPortfolio)}</p>
-          <div className="mt-3 text-sm text-muted-foreground space-y-1.5 font-bold">
-            <button
-              type="button"
-              onClick={() => togglePortfolioExclusion('cash')}
-              aria-pressed={!isExcluded('cash')}
-              className={`flex items-center gap-2 px-2 py-1 -mx-2 rounded-md hover:bg-emerald-200/40 dark:hover:bg-emerald-900/40 transition-colors w-full text-left ${
-                isExcluded('cash') ? 'line-through opacity-50' : ''
-              }`}
-            >
-              <span className="w-2 h-2 rounded-full bg-purple-500 shrink-0" />
-              <span>{t('cash')}: {formatCurrency(totalBalance)}</span>
-            </button>
-            {totalStockValue > 0 && (
-              <button
-                type="button"
-                onClick={() => togglePortfolioExclusion('stock')}
-                aria-pressed={!isExcluded('stock')}
-                className={`flex items-center gap-2 px-2 py-1 -mx-2 rounded-md hover:bg-emerald-200/40 dark:hover:bg-emerald-900/40 transition-colors w-full text-left ${
-                  isExcluded('stock') ? 'line-through opacity-50' : ''
-                }`}
-              >
-                <span className="w-2 h-2 rounded-full bg-blue-500 shrink-0" />
-                <span>{t('stocks')}: {formatCurrency(totalStockValue)}</span>
-              </button>
-            )}
-            {totalCryptoValue > 0 && (
-              <button
-                type="button"
-                onClick={() => togglePortfolioExclusion('crypto')}
-                aria-pressed={!isExcluded('crypto')}
-                className={`flex items-center gap-2 px-2 py-1 -mx-2 rounded-md hover:bg-emerald-200/40 dark:hover:bg-emerald-900/40 transition-colors w-full text-left ${
-                  isExcluded('crypto') ? 'line-through opacity-50' : ''
-                }`}
-              >
-                <span className="w-2 h-2 rounded-full bg-orange-500 shrink-0" />
-                <span>{t('crypto')}: {formatCurrency(totalCryptoValue)}</span>
-              </button>
-            )}
-            {totalGoldValue > 0 && (
-              <button
-                type="button"
-                onClick={() => togglePortfolioExclusion('gold')}
-                aria-pressed={!isExcluded('gold')}
-                className={`flex items-center gap-2 px-2 py-1 -mx-2 rounded-md hover:bg-emerald-200/40 dark:hover:bg-emerald-900/40 transition-colors w-full text-left ${
-                  isExcluded('gold') ? 'line-through opacity-50' : ''
-                }`}
-              >
-                <span className="w-2 h-2 rounded-full bg-yellow-500 shrink-0" />
-                <span>{t('gold')}: {formatCurrency(totalGoldValue)}</span>
-              </button>
-            )}
-          </div>
-          {totalInvestedCost > 0 && (
-            <p
-              className={`text-sm font-medium flex items-center gap-1 mt-2 ${
-                isTotalPositive ? 'text-green-600' : 'text-red-600'
-              }`}
-            >
-              {isTotalPositive ? (
-                <TrendingUp className="w-4 h-4" />
-              ) : (
-                <TrendingDown className="w-4 h-4" />
-              )}
-              {formatCurrency(totalInvestedProfit)} ({totalInvestedProfitPercent.toFixed(2)}%)
-            </p>
-          )}
-        </div>
-        <div className="w-12 h-12 rounded-lg bg-emerald-500 flex items-center justify-center shrink-0">
-          <button
-            type="button"
-            onClick={toggleHideValues}
-            aria-label={hideValues ? t('showValues') : t('hideValues')}
-            title={hideValues ? t('showValues') : t('hideValues')}
-            className="w-12 h-12 rounded-lg bg-emerald-700 hover:bg-emerald-600 flex items-center justify-center transition-colors"
-          >
-            {hideValues ? (
-              <EyeOff className="w-6 h-6 text-white" />
-            ) : (
-              <Eye className="w-6 h-6 text-white" />
-            )}
-          </button>
-        </div>
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <PortfolioInfo
+          total={includedTotal}
+          slices={slices}
+          investedCost={investedCost}
+          investedProfit={investedProfit}
+          investedProfitPercent={investedProfitPercent}
+        />
+        <PortfolioTrend range={range} onRangeChange={setRange} />
+        <AllocationDonut slices={slices} />
       </div>
     </Card>
   )
