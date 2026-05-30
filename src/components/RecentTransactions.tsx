@@ -30,12 +30,12 @@ export default function RecentTransactions({ transactions }: RecentTransactionsP
     const destinationName = getAccountName(toAccount);
     
     if (!fromAccount) {
-      return `Topup to ${destinationName}`;
+      return `${tTx('topup')} ${tTx('toAccount')} ${destinationName}`;
     }
 
     const sourceName = getAccountName(fromAccount)
     if (!toAccount) {
-      return `Witdrawal from ${sourceName}`;
+      return `${tTx('withdrawal')} ${tTx('fromAccount')} ${sourceName}`;
     }
 
 
