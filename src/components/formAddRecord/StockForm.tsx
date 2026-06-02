@@ -166,7 +166,7 @@ export default function StockForm({ editingId, onClose }: StockFormProps) {
               value={formData.quantity}
               onChange={(e) => setFormData({ ...formData, quantity: e.target.value })}
               className="mt-1"
-              step="0.01"
+              step="0.00000001"
               min="0"
             />
           </div>

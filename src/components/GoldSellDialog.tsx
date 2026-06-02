@@ -69,7 +69,7 @@ export default function GoldSellDialog({ gold, onSell, onClose }: GoldSellDialog
             <label className="block text-sm font-medium mb-2">{t('weightSold')}</label>
             <Input
               type="number"
-              step="0.0001"
+              step="0.00000001"
               value={weight}
               onChange={(e) => setWeight(e.target.value)}
               placeholder="0.0000"
