@@ -108,7 +108,7 @@ export default function GoldForm({ editingId, onClose }: GoldFormProps) {
             <label className="text-sm font-medium">{t('weight')}</label>
             <Input
               type="number"
-              step="0.0001"
+              step="0.00000001"
               value={formData.weight}
               onChange={(e) => setFormData({ ...formData, weight: e.target.value })}
               placeholder="0.0000"

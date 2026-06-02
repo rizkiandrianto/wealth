@@ -71,7 +71,7 @@ export default function StockSellDialog({ stock, onSell, onClose }: StockSellDia
             <label className="block text-sm font-medium mb-2">{t('quantityToSell')}</label>
             <Input
               type="number"
-              step="0.01"
+              step="0.00000001"
               value={quantity}
               onChange={(e) => setQuantity(e.target.value)}
               placeholder="0.00"
